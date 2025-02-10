@@ -1,11 +1,85 @@
 import React from "react"
 import MonthPager from "../../components/month-pager"
-import { Button } from "../../components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../components/ui/collapsible"
+import WorkDayCollapsible from "../../components/month/WorkDayCollapsible"
+import { toDate } from "date-fns/toDate"
+import WorkDaySimple from "../../components/month/WorkDaySimple"
 
+const tempData = [
+  {
+    startTime: toDate(new Date(2025, 1, 1, 7, 30, 0)),
+    endTime: toDate(new Date(2025, 1, 1, 15, 30, 0)),
+    lunchTime: 0.5,
+    compensatoryLeave: 0,
+    doctorsLeave: 0,
+    doctorsLeaveFamily: 0,
+    sickLeaveFamily: 0,
+    dayWorked: 7.5,
+    workFromHome: 0,
+    sickLeave: 0,
+  },
+  {
+    startTime: toDate(new Date(2025, 1, 2, 7, 30, 0)),
+    endTime: toDate(new Date(2025, 1, 2, 14, 30, 0)),
+    lunchTime: 0.5,
+    compensatoryLeave: 0,
+    doctorsLeave: 0,
+    doctorsLeaveFamily: 0,
+    sickLeaveFamily: 0,
+    dayWorked: 7.5,
+    workFromHome: 0,
+    sickLeave: 0,
+  },
+  {
+    startTime: toDate(new Date(2025, 1, 3, 7, 30, 0)),
+    endTime: toDate(new Date(2025, 1, 3, 15, 30, 0)),
+    lunchTime: 0.5,
+    compensatoryLeave: 0,
+    doctorsLeave: 0,
+    doctorsLeaveFamily: 0,
+    sickLeaveFamily: 0,
+    dayWorked: 7.5,
+    workFromHome: 0,
+    sickLeave: 0,
+  },
+  {
+    startTime: toDate(new Date(2025, 1, 4, 7, 30, 0)),
+    endTime: toDate(new Date(2025, 1, 4, 15, 30, 0)),
+    lunchTime: 0.5,
+    compensatoryLeave: 0,
+    doctorsLeave: 0,
+    doctorsLeaveFamily: 0,
+    sickLeaveFamily: 0,
+    dayWorked: 7.5,
+    workFromHome: 0,
+    sickLeave: 0,
+  },
+  {
+    startTime: toDate(new Date(2025, 1, 5, 7, 30, 0)),
+    endTime: toDate(new Date(2025, 1, 5, 15, 30, 0)),
+    lunchTime: 0.5,
+    compensatoryLeave: 0,
+    doctorsLeave: 0,
+    doctorsLeaveFamily: 0,
+    sickLeaveFamily: 0,
+    dayWorked: 7.5,
+    workFromHome: 0,
+    sickLeave: 0,
+  },
+  {
+    startTime: toDate(new Date(2025, 1, 6, 7, 30, 0)),
+    endTime: toDate(new Date(2025, 1, 6, 15, 30, 0)),
+    lunchTime: 0.5,
+    compensatoryLeave: 0,
+    doctorsLeave: 0,
+    doctorsLeaveFamily: 0,
+    sickLeaveFamily: 0,
+    dayWorked: 7.5,
+    workFromHome: 0,
+    sickLeave: 0,
+  }
+]
 
 const Sheet = () => {
-  const [open, setOpen] = React.useState(false)
   const currentMonth = new Date().getMonth() + 1
   return (
     <div className="flex flex-col w-full min-h-svh justify-top border-2 border-black p-4 rounded-lg">
@@ -23,82 +97,27 @@ const Sheet = () => {
         </div>
       </div>
       <div>
-        <Collapsible className="rounded-md border" open={open} onOpenChange={setOpen}>
-          <div className="flex flex-row gap-5 items-center p-2">
-            <span className="text-sm font-semibold">1.</span>
-            <div className="flex flex-col">
-              <span className="text-sm">7:30 - 15:30</span>
-              <span className="text-sm">obed: 0,5h</span>
-            </div>
-            <div className="flex flex-col grow">
-              <span className="text-sm">NV: 0h</span>
-              <span className="text-sm">P-cko: 0h</span>
-            </div>
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="default">
-                {/* <ChevronsUpDown className="h-4 w-4" /> */}
-                <span className="text-lg font-semibold">7,5</span>
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-
-          <CollapsibleContent className="space-y-2">
-            <div className="rounded-md border p-2 text-sm shadow-sm">
-              <div className="flex flex-row gap-5 items-center p-2">
-                <div className="flex flex-col">
-                  <span className="text-sm">7:30 - 15:30</span>
-                  <span className="text-sm">obed: 0,5h</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm">NV: 0h</span>
-                  <span className="text-sm">P-cko: 0h</span>
-                </div>
-                <div className="flex flex-col grow">
-                  <span className="text-sm">Praca doma: 0h</span>
-                  <span className="text-sm">OCR: 0h</span>
-                </div>
-              </div>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-        <Collapsible className="rounded-md border" open={false}>
-          <div className="flex flex-row gap-5 items-center p-2">
-            <span className="text-sm font-semibold">2.</span>
-            <div className="flex flex-col">
-              <span className="text-sm">7:30 - 15:30</span>
-              <span className="text-sm">obed: 0,5h</span>
-            </div>
-            <div className="flex flex-col grow">
-              <span className="text-sm">NV: 0h</span>
-              <span className="text-sm">P-cko: 0h</span>
-            </div>
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="default">
-                {/* <ChevronsUpDown className="h-4 w-4" /> */}
-                <span className="text-lg font-semibold">7,5</span>
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-
-          <CollapsibleContent className="space-y-2">
-            <div className="rounded-md border p-2 text-sm shadow-sm">
-              <div className="flex flex-row gap-5 items-center p-2">
-                <div className="flex flex-col">
-                  <span className="text-sm">7:30 - 15:30</span>
-                  <span className="text-sm">obed: 0,5h</span>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm">NV: 0h</span>
-                  <span className="text-sm">P-cko: 0h</span>
-                </div>
-                <div className="flex flex-col grow">
-                  <span className="text-sm">Praca doma: 0h</span>
-                  <span className="text-sm">OCR: 0h</span>
-                </div>
-              </div>
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+        {tempData.map((data) => (
+          <WorkDayCollapsible key={data.startTime.toISOString()} {...data} />
+        ))}
+        <WorkDayCollapsible 
+          startTime={new Date()}
+          endTime={new Date()}
+          lunchTime={0.5}
+          compensatoryLeave={0}
+          doctorsLeave={0}
+          doctorsLeaveFamily={0}
+          sickLeaveFamily={0}
+          dayWorked={7.5}
+          workFromHome={0}
+          sickLeave={0}
+        />
+        <WorkDaySimple startTime={new Date()} title="Náhradné voľno" dayWorked={7.5} />
+        <WorkDaySimple startTime={new Date()} title="Štátny sviatok" dayWorked={7.5} />
+        <WorkDaySimple startTime={new Date()} title="PN"/>
+        <WorkDaySimple startTime={new Date()} title="OČR"/>
+        <WorkDaySimple startTime={new Date()} title="P-čko celý deň"/>
+        <WorkDaySimple startTime={new Date()} title="dovolenka"/>
       </div>
     </div>
   )

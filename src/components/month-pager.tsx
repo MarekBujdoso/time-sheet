@@ -1,4 +1,4 @@
-import React from "react"
+import React, { SetStateAction } from "react"
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination"
 
 
@@ -18,21 +18,28 @@ const monthsMap: { [key: number]: string } = {
 }
 
 interface MonthPagerProps {
-  month: number
+  month: number,
+  setMonth: (month: SetStateAction<number>) => void
+  year: number,
+  setYear: (year: SetStateAction<number>) => void
 }
 
-const MonthPager = ({ month }: MonthPagerProps) => {
-  const [activeMonth, setActiveMonth] = React.useState(month)
-  
+const MonthPager = ({ month, setMonth, year, setYear }: MonthPagerProps) => {
   const switchToPrevMonth = React.useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    setActiveMonth((prev) => prev > 1 ? prev - 1 : 12)
-  }, [])
+    if (month === 1) {
+      setYear((prev: number) => prev - 1)
+    }
+    setMonth((prev: number) => prev > 1 ? prev - 1 : 12)
+  }, [month, setMonth, setYear])
 
   const switchToNextMonth = React.useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    setActiveMonth((prev) => prev < 12 ? prev + 1 : 1)
-  }, [])
+    if (month === 12) {
+      setYear((prev: number) => prev + 1)
+    }
+    setMonth((prev: number) => prev < 12 ? prev + 1 : 1)
+  }, [month, setMonth, setYear])
 
   return (
 //   <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -47,7 +54,7 @@ const MonthPager = ({ month }: MonthPagerProps) => {
             <PaginationLink className="w-40 select-none" onClick={handleMonth} isActive>{monthsMap[activeMonth]}</PaginationLink>
           </PaginationItem> */}
           <div className="w-40 select-none">
-            {monthsMap[activeMonth]}
+            {`${monthsMap[month]} ${year}`}
           </div>
           {/* <PaginationItem>
             <PaginationLink href="#">3</PaginationLink>

@@ -3,6 +3,7 @@ import { format } from "date-fns"
 import { Button } from "../../components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../components/ui/collapsible"
 import { type WorkDay } from "../../app/sheet/types"
+import { isWeekend } from "date-fns/fp/isWeekend"
 
 const getTitle = (
   compensatoryLeave?: number,
@@ -12,6 +13,7 @@ const getTitle = (
   sickLeaveFamily?: number,
   vacation?: number,
   holiday?: boolean,
+  isWeekEnd?: boolean,
 ): string => {
   if (compensatoryLeave) return "Náhradné voľno"
   if (doctorsLeave) return "P-čko celý deň"
@@ -20,6 +22,7 @@ const getTitle = (
   if (sickLeaveFamily) return "OČR"
   if (vacation) return "Dovolenka"
   if (holiday) return "Štátny sviatok"
+  if (isWeekEnd) return "Víkend"
   return ""
 }
 
@@ -42,9 +45,9 @@ const WorkDayCollapsible = ({
   holiday,
 }: WorkDay) => {
   const [open, setOpen] = React.useState(false)
-  const showTitle = isFullDay(compensatoryLeave) || isFullDay(doctorsLeave) || isFullDay(doctorsLeaveFamily) || sickLeave || sickLeaveFamily || isFullDay(vacation) || holiday ? true : false
-
-  const title = getTitle(compensatoryLeave, doctorsLeave, doctorsLeaveFamily, sickLeave, sickLeaveFamily, vacation, holiday)
+  const isWeekEnd = isWeekend(startTime)
+  const showTitle = isWeekEnd || isFullDay(compensatoryLeave) || isFullDay(doctorsLeave) || isFullDay(doctorsLeaveFamily) || sickLeave || sickLeaveFamily || isFullDay(vacation) || holiday ? true : false
+  const title = getTitle(compensatoryLeave, doctorsLeave, doctorsLeaveFamily, sickLeave, sickLeaveFamily, vacation, holiday, isWeekEnd)
 
   return (
     <Collapsible className="rounded-md" open={open} onOpenChange={setOpen}>

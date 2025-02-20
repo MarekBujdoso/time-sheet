@@ -1,9 +1,10 @@
+import { getDaysInMonth } from "date-fns/getDaysInMonth"
+import { toDate } from "date-fns/toDate"
 import React from "react"
 import MonthPager from "../../components/month-pager"
+import WorkDayBox from "../../components/month/WorkDayBox"
 import WorkDayCollapsible from "../../components/month/WorkDayCollapsible"
-import { toDate } from "date-fns/toDate"
 import { WorkDay } from "./types"
-import { getDaysInMonth } from "date-fns/getDaysInMonth"
 
 const config = {
   dailyWorkTime: 7.5,
@@ -32,7 +33,7 @@ const tempData: WorkDay[] = [
     year: 2025,
     startTime: toDate(new Date(2025, 0, 3, 7, 30, 0)),
     endTime: toDate(new Date(2025, 0, 3, 15, 30, 0)),
-    sickLeaveFamily: 7.5,
+    sickLeaveFamily: true,
     dayWorked: 0,
   },
   {
@@ -41,7 +42,7 @@ const tempData: WorkDay[] = [
     startTime: toDate(new Date(2025, 0, 4, 7, 30, 0)),
     endTime: toDate(new Date(2025, 0, 4, 15, 30, 0)),
     dayWorked: 0,
-    sickLeave: 7.5,
+    sickLeave: true,
   },
   {
     month: 1,
@@ -68,10 +69,10 @@ const tempData: WorkDay[] = [
     compensatoryLeave: 0,
     doctorsLeave: 0,
     doctorsLeaveFamily: 0,
-    sickLeaveFamily: 0,
+    sickLeaveFamily: false,
     dayWorked: 0,
     workFromHome: 0,
-    sickLeave: 0,
+    sickLeave: false,
   },
   {
     month: 2,
@@ -87,13 +88,12 @@ const tempData: WorkDay[] = [
     startTime: toDate(new Date(2025, 1, 3, 7, 30, 0)),
     endTime: toDate(new Date(2025, 1, 3, 15, 30, 0)),
     lunchTime: 0.5,
-    compensatoryLeave: 0,
-    doctorsLeave: 3,
-    doctorsLeaveFamily: 0,
-    sickLeaveFamily: 0,
+    compensatoryLeave: 0.5,
+    doctorsLeave: 0.5,
+    doctorsLeaveFamily: 0.5,
     dayWorked: 4.5,
     workFromHome: 0,
-    sickLeave: 0,
+    vacation: 0.5,
   },
   {
     month: 2,
@@ -104,10 +104,8 @@ const tempData: WorkDay[] = [
     compensatoryLeave: 0,
     doctorsLeave: 0,
     doctorsLeaveFamily: 0,
-    sickLeaveFamily: 0,
     dayWorked: 7.5,
     workFromHome: 0,
-    sickLeave: 0,
   },
   {
     month: 2,
@@ -118,10 +116,8 @@ const tempData: WorkDay[] = [
     compensatoryLeave: 0,
     doctorsLeave: 0,
     doctorsLeaveFamily: 0,
-    sickLeaveFamily: 0,
     dayWorked: 7.5,
     workFromHome: 0,
-    sickLeave: 0,
   },
   {
     month: 2,
@@ -132,17 +128,15 @@ const tempData: WorkDay[] = [
     compensatoryLeave: 0,
     doctorsLeave: 0,
     doctorsLeaveFamily: 0,
-    sickLeaveFamily: 0,
     dayWorked: 7.5,
     workFromHome: 0,
-    sickLeave: 0,
   },
   {
     month: 2,
     year: 2025,
     startTime: toDate(new Date(2025, 1, 7, 7, 30, 0)),
     endTime: toDate(new Date(2025, 1, 7, 15, 30, 0)),
-    sickLeave: 7.5,
+    sickLeave: true,
     dayWorked: 0,
   },
   {
@@ -150,7 +144,7 @@ const tempData: WorkDay[] = [
     year: 2025,
     startTime: toDate(new Date(2025, 2, 4, 7, 30, 0)),
     endTime: toDate(new Date(2025, 2, 4, 15, 30, 0)),
-    sickLeave: 7.5,
+    sickLeave: true,
     dayWorked: 0,
   }
 ]
@@ -169,10 +163,10 @@ const addMissingDays = (data: WorkDay[], activeYear: number, activeMonth: number
         compensatoryLeave: 0,
         doctorsLeave: 0,
         doctorsLeaveFamily: 0,
-        sickLeaveFamily: 0,
+        sickLeaveFamily: false,
         dayWorked: 0,
         workFromHome: 0,
-        sickLeave: 0,
+        sickLeave: false,
       })
     }
   }
@@ -187,7 +181,7 @@ const Sheet = () => {
   const data = tempData.filter((data) => data.month === activeMonth && data.year === activeYear)
   const monthData = addMissingDays(data, activeYear, activeMonth-1)
 
-  const sickLeave = monthData.filter((data) => data.sickLeave).reduce((acc, data) => acc + (data.sickLeave ?? 0), 0)
+  const sickLeave = monthData.filter((data) => data.sickLeave).reduce((acc, data) => acc + (data.sickLeave ? config.dailyWorkTime : 0), 0)
   const sickLeaveDays = (sickLeave / config.dailyWorkTime).toFixed(1)
   const doctorsLeave = monthData.filter((data) => data.doctorsLeave).reduce((acc, data) => acc + (data.doctorsLeave ?? 0), 0)
   const doctorsLeaveDays = (doctorsLeave / config.dailyWorkTime).toFixed(1)
@@ -197,11 +191,11 @@ const Sheet = () => {
   const workedDays = (worked / config.dailyWorkTime).toFixed(1)
   const compensatoryLeave = monthData.filter((data) => data.compensatoryLeave).reduce((acc, data) => acc + (data.compensatoryLeave ?? 0), 0)
   const compensatoryLeaveDays = (compensatoryLeave / config.dailyWorkTime).toFixed(1)
-  const sickLeaveFamily = monthData.filter((data) => data.sickLeaveFamily).reduce((acc, data) => acc + (data.sickLeaveFamily ?? 0), 0)
+  const sickLeaveFamily = monthData.filter((data) => data.sickLeaveFamily).reduce((acc, data) => acc + (data.sickLeaveFamily ? config.dailyWorkTime : 0), 0)
   const sickLeaveFamilyDays = (sickLeaveFamily / config.dailyWorkTime).toFixed(1)
   
   return (
-    <div className="flex flex-col w-full min-w-[350px] min-h-svh justify-top border-2 border-black p-2 rounded-lg ">
+    <div className="flex flex-col w-full min-w-[400px] min-h-svh justify-top border-2 border-black p-2 rounded-lg ">
       <MonthPager month={activeMonth} setMonth={setActiveMonth} year={activeYear} setYear={setActiveYear}/>
       <div className="grid auto-rows-min gap-2 md:grid-cols-3 grid-cols-2">
         {/* <div className="flex flex-col"> */}
@@ -216,7 +210,7 @@ const Sheet = () => {
       <div>
         <div className="grid auto-rows-min gap-1 md:grid-cols-3">
           {data.map((data) => (
-            <WorkDayCollapsible key={data.startTime.toISOString()} {...data} />
+            <WorkDayBox key={data.startTime.toISOString()} {...data} />
           ))}
           <WorkDayCollapsible
             month={1}
@@ -227,10 +221,10 @@ const Sheet = () => {
             compensatoryLeave={0}
             doctorsLeave={7.5}
             doctorsLeaveFamily={0}
-            sickLeaveFamily={0}
+            sickLeaveFamily={false}
             dayWorked={0}
             workFromHome={0}
-            sickLeave={0}
+            sickLeave={false}
           />
         </div>
       </div>

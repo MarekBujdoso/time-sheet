@@ -53,7 +53,7 @@ const MonthPager = ({ month, setMonth, year, setYear }: MonthPagerProps) => {
           {/* <PaginationItem>
             <PaginationLink className="w-40 select-none" onClick={handleMonth} isActive>{monthsMap[activeMonth]}</PaginationLink>
           </PaginationItem> */}
-          <div className="w-40 select-none">
+          <div className="w-40 select-none font-semibold">
             {`${monthsMap[month]} ${year}`}
           </div>
           {/* <PaginationItem>

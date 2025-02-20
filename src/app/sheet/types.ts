@@ -5,8 +5,8 @@ export interface WorkDay {
     endTime: Date, // Koniec
     lunchTime?: number, // Obed
     workFromHome?: number, // Praca doma
-    sickLeave?: number, // PN
-    sickLeaveFamily?: number, // OCR
+    sickLeave?: boolean, // PN
+    sickLeaveFamily?: boolean, // OCR
     compensatoryLeave?: number, // NV
     doctorsLeave?: number, // P-cko
     doctorsLeaveFamily?: number, // P-doprovod

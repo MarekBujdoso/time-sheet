@@ -9,8 +9,8 @@ const getTitle = (
   compensatoryLeave?: number,
   doctorsLeave?: number,
   doctorsLeaveFamily?: number,
-  sickLeave?: number,
-  sickLeaveFamily?: number,
+  sickLeave?: boolean,
+  sickLeaveFamily?: boolean,
   vacation?: number,
   holiday?: boolean,
   isWeekEnd?: boolean,
@@ -51,7 +51,7 @@ const WorkDayCollapsible = ({
 
   return (
     <Collapsible className="rounded-md" open={open} onOpenChange={setOpen}>
-      <div className="flex flex-row gap-5 items-center p-2 rounded-md border text-sm shadow-sm">
+      <div className="flex flex-row gap-5 items-center p-2 rounded-md border text-sm shadow-sm md:min-h-[150px]">
         <div className="flex flex-col">
           <span className="text-xs font-semibold">{format(startTime, 'dd.MM.')}</span>
           <span className="text-xs font-semibold">{format(startTime, 'EEEEEE')}</span>

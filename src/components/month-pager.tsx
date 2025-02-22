@@ -1,4 +1,4 @@
-import React, { SetStateAction } from "react"
+import React from "react"
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination"
 
 
@@ -18,28 +18,29 @@ const monthsMap: { [key: number]: string } = {
 }
 
 interface MonthPagerProps {
-  month: number,
-  setMonth: (month: SetStateAction<number>) => void
-  year: number,
-  setYear: (year: SetStateAction<number>) => void
+  update: (month: number, year: number) => void
 }
 
-const MonthPager = ({ month, setMonth, year, setYear }: MonthPagerProps) => {
+const MonthPager = ({ update }: MonthPagerProps) => {
+  const [activeMonth, setActiveMonth] = React.useState(new Date().getMonth() + 1)
+  const [activeYear, setActiveYear] = React.useState(new Date().getFullYear())
   const switchToPrevMonth = React.useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    if (month === 1) {
-      setYear((prev: number) => prev - 1)
-    }
-    setMonth((prev: number) => prev > 1 ? prev - 1 : 12)
-  }, [month, setMonth, setYear])
+    const month = activeMonth === 1 ? 12 : activeMonth - 1
+    const year = activeMonth === 1 ? activeYear - 1 : activeYear
+    setActiveMonth(month)
+    setActiveYear(year)
+    update(month, year)
+  }, [activeMonth, setActiveMonth, setActiveYear, update, activeYear])
 
   const switchToNextMonth = React.useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    if (month === 12) {
-      setYear((prev: number) => prev + 1)
-    }
-    setMonth((prev: number) => prev < 12 ? prev + 1 : 1)
-  }, [month, setMonth, setYear])
+    const month = activeMonth === 12 ? 1 : activeMonth + 1
+    const year = activeMonth === 12 ? activeYear + 1 : activeYear
+    setActiveMonth(month)
+    setActiveYear(year)
+    update(month, year)
+  }, [activeMonth, setActiveMonth, setActiveYear, update, activeYear])
 
   return (
 //   <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -54,7 +55,7 @@ const MonthPager = ({ month, setMonth, year, setYear }: MonthPagerProps) => {
             <PaginationLink className="w-40 select-none" onClick={handleMonth} isActive>{monthsMap[activeMonth]}</PaginationLink>
           </PaginationItem> */}
           <div className="w-40 select-none font-semibold">
-            {`${monthsMap[month]} ${year}`}
+            {`${monthsMap[activeMonth]} ${activeYear}`}
           </div>
           {/* <PaginationItem>
             <PaginationLink href="#">3</PaginationLink>

@@ -149,16 +149,17 @@ const tempData: WorkDay[] = [
   }
 ]
 
-const addMissingDays = (data: WorkDay[], activeYear: number, activeMonth: number): WorkDay[] => {
-  const daysInMonth = getDaysInMonth(new Date(activeYear, activeMonth))
+const addMissingDays = (activeYear: number, activeMonth: number): WorkDay[] => {
+  const data = tempData.filter((data) => data.month === activeMonth && data.year === activeYear)
+  const daysInMonth = getDaysInMonth(new Date(activeYear, activeMonth-1))
   const days = data.map((data) => data.startTime.getDate())
   for (let i = 1; i <= daysInMonth; i++) {
     if (!days.includes(i)) {
       data.push({
-        month: 1,
-        year: 2025,
-        startTime: toDate(new Date(2025, activeMonth, i, 0, 0, 0)),
-        endTime: toDate(new Date(2025, activeMonth, i, 0, 0, 0)),
+        month: activeMonth,
+        year: activeYear,
+        startTime: toDate(new Date(2025, activeMonth-1, i, 0, 0, 0)),
+        endTime: toDate(new Date(2025, activeMonth-1, i, 0, 0, 0)),
         lunch: false,
         compensatoryLeave: new Decimal(0),
         doctorsLeave: new Decimal(0),
@@ -167,6 +168,7 @@ const addMissingDays = (data: WorkDay[], activeYear: number, activeMonth: number
         dayWorked: new Decimal(0),
         workFromHome: new Decimal(0),
         sickLeave: false,
+        holiday: false,
       })
     }
   }
@@ -175,13 +177,7 @@ const addMissingDays = (data: WorkDay[], activeYear: number, activeMonth: number
 
 const Sheet = () => {
   // const currentMonth = new Date().getMonth() + 1
-  const [activeMonth, setActiveMonth] = React.useState(new Date().getMonth() + 1)
-  const [activeYear, setActiveYear] = React.useState(new Date().getFullYear())
-  
-  const data = React.useMemo(() => (
-    tempData.filter((data) => data.month === activeMonth && data.year === activeYear)
-  ), [activeMonth, activeYear])
-  const [monthData, setMonthData] = React.useState(addMissingDays(data, activeYear, activeMonth-1)) // mothData or data ???
+  const [monthData, setMonthData] = React.useState(addMissingDays(new Date().getFullYear(), new Date().getMonth() + 1))
 
   const sickLeave = monthData.filter((data) => data.sickLeave).reduce((acc, data) => acc + (data.sickLeave ? config.dailyWorkTime : 0), 0)
   const sickLeaveDays = (sickLeave / config.dailyWorkTime).toFixed(1)
@@ -206,10 +202,14 @@ const Sheet = () => {
     })
   }, [])
 
+  const updateMonthData = React.useCallback((activeMonth: number, activeYear: number) => {
+    setMonthData(addMissingDays(activeYear, activeMonth))
+  }, [])
+
 
   return (
     <div className="flex flex-col w-full min-w-[400px] min-h-svh justify-top border-2 border-black p-2 rounded-lg ">
-      <MonthPager month={activeMonth} setMonth={setActiveMonth} year={activeYear} setYear={setActiveYear}/>
+      <MonthPager update={updateMonthData} />
       <div className="grid auto-rows-min gap-2 md:grid-cols-3 grid-cols-2">
         {/* <div className="flex flex-col"> */}
           <span>odpr.: {worked}h / {workedDays}d</span>
@@ -225,20 +225,6 @@ const Sheet = () => {
           {monthData.map((data) => (
             <WorkDayBox key={data.startTime.toISOString()} {...data} saveWorkDay={saveWorkDay} />
           ))}
-          {/* <WorkDayCollapsible
-            month={1}
-            year={2025}
-            startTime={new Date()}
-            endTime={new Date()}
-            lunch={true}
-            compensatoryLeave={new Decimal(0)}
-            doctorsLeave={new Decimal(7.5)}
-            doctorsLeaveFamily={new Decimal(0)}
-            sickLeaveFamily={false}
-            dayWorked={new Decimal(0)}
-            workFromHome={new Decimal(0)}
-            sickLeave={false}
-          /> */}
         </div>
       </div>
     </div>

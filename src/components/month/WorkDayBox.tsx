@@ -51,10 +51,12 @@ const WorkDayBox = ({
   dayWorked,
   workFromHome = new Decimal(0),
   vacation = new Decimal(0),
-  holiday,
+  holiday = false,
   saveWorkDay,
 }: WorkDayBoxProps) => {
 //   const [open, setOpen] = React.useState(false)
+  const month = startTime.getMonth()
+  const year = startTime.getFullYear()
   const isWeekEnd = isWeekend(startTime)
   // const showTitle = isWeekEnd || isFullDay(compensatoryLeave) || isFullDay(doctorsLeave) || isFullDay(doctorsLeaveFamily) || sickLeave || sickLeaveFamily || isFullDay(vacation) || holiday ? true : false
   const isWorkingDay = !isWeekEnd && !isFullDay(compensatoryLeave) && !isFullDay(doctorsLeave) && !isFullDay(doctorsLeaveFamily) && !sickLeave && !sickLeaveFamily && !isFullDay(vacation) && !holiday && dayWorked.greaterThan(0)
@@ -95,7 +97,7 @@ const WorkDayBox = ({
                 <DrawerTitle>Denný súhrn</DrawerTitle>
                 <DrawerDescription>Nastav si svoj deň.</DrawerDescription>
               </DrawerHeader>
-              <WorkDayForm {...{startTime, endTime, lunch, compensatoryLeave, doctorsLeave, doctorsLeaveFamily, sickLeave, sickLeaveFamily, dayWorked, workFromHome, vacation, holiday}} saveWorkDay={saveWorkDay} />
+              <WorkDayForm workDay={{month, year, startTime, endTime, lunch, compensatoryLeave, doctorsLeave, doctorsLeaveFamily, sickLeave, sickLeaveFamily, dayWorked, workFromHome, vacation, holiday}} saveWorkDay={saveWorkDay} />
               
             </div>
           </DrawerContent>

@@ -11,11 +11,12 @@ export const workType: WorkDayFull = {
     sickLeave: false,
     sickLeaveFamily: false,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
+    doctorsLeave: false,
+    doctorsLeaveFamily: false,
     dayWorked: new Decimal(7.5),
     holiday: false,
     vacation: new Decimal(0),
+    interruptions: [],
 }
 
 export const holiday: WorkDayFull = {
@@ -28,11 +29,12 @@ export const holiday: WorkDayFull = {
     sickLeave: false,
     sickLeaveFamily: false,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
+    doctorsLeave: false,
+    doctorsLeaveFamily: false,
     dayWorked: new Decimal(7.5),
     holiday: true,
     vacation: new Decimal(0),
+    interruptions: [],
 }
 
 export const vacation: WorkDayFull = {
@@ -45,11 +47,12 @@ export const vacation: WorkDayFull = {
     sickLeave: false,
     sickLeaveFamily: false,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
+    doctorsLeave: false,
+    doctorsLeaveFamily: false,
     dayWorked: new Decimal(7.5),
     holiday: false,
     vacation: new Decimal(7.5),
+    interruptions: [],
 }
 
 export const sickLeave: WorkDayFull = {
@@ -62,11 +65,12 @@ export const sickLeave: WorkDayFull = {
     sickLeave: true,
     sickLeaveFamily: false,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
+    doctorsLeave: false,
+    doctorsLeaveFamily: false,
     dayWorked: new Decimal(0),
     holiday: false,
     vacation: new Decimal(0),
+    interruptions: [],
 }
 
 export const sickLeaveFamily: WorkDayFull = {
@@ -79,11 +83,12 @@ export const sickLeaveFamily: WorkDayFull = {
     sickLeave: false,
     sickLeaveFamily: true,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
+    doctorsLeave: false,
+    doctorsLeaveFamily: false,
     dayWorked: new Decimal(0),
     holiday: false,
     vacation: new Decimal(0),
+    interruptions: [],
 }
 
 export const doctorsLeave: WorkDayFull = {
@@ -96,11 +101,12 @@ export const doctorsLeave: WorkDayFull = {
     sickLeave: false,
     sickLeaveFamily: false,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(7.5),
-    doctorsLeaveFamily: new Decimal(0),
+    doctorsLeave: true,
+    doctorsLeaveFamily: false,
     dayWorked: new Decimal(0),
     holiday: false,
     vacation: new Decimal(0),
+    interruptions: [],
 }
 
 export const doctorsLeaveFamily: WorkDayFull = {
@@ -113,11 +119,12 @@ export const doctorsLeaveFamily: WorkDayFull = {
     sickLeave: false,
     sickLeaveFamily: false,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(7.5),
+    doctorsLeave: false,
+    doctorsLeaveFamily: true,
     dayWorked: new Decimal(0),
     holiday: false,
     vacation: new Decimal(0),
+    interruptions: [],
 }
 
 export const compensatoryLeave: WorkDayFull = {
@@ -130,11 +137,12 @@ export const compensatoryLeave: WorkDayFull = {
     sickLeave: false,
     sickLeaveFamily: false,
     compensatoryLeave: new Decimal(7.5),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
+    doctorsLeave: false,
+    doctorsLeaveFamily: false,
     dayWorked: new Decimal(0),
     holiday: false,
     vacation: new Decimal(0),
+    interruptions: [],
 }
 
 export const DAY_TYPES = {
@@ -153,8 +161,8 @@ export const identifyDayType = (day: WorkDayFull, dailyTime: Decimal): keyof typ
     if (day.vacation.equals(dailyTime)) return 'vacation'
     if (day.sickLeave) return 'sickLeave'
     if (day.sickLeaveFamily) return 'sickLeaveFamily'
-    if (day.doctorsLeave.equals(dailyTime)) return 'doctorsLeave'
-    if (day.doctorsLeaveFamily.equals(dailyTime)) return 'doctorsLeaveFamily'
+    if (day.doctorsLeave) return 'doctorsLeave'
+    if (day.doctorsLeaveFamily) return 'doctorsLeaveFamily'
     if (day.compensatoryLeave.equals(dailyTime)) return 'compensatoryLeave'
     return 'workType'
 }

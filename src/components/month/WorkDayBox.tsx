@@ -7,6 +7,7 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, Dr
 import { Button } from "../ui/button"
 import WorkDayForm from "./WorkDayForm"
 import Decimal from "decimal.js"
+import { Soup } from "lucide-react"
 
 const getTitle = (
   workingDay?: boolean,
@@ -44,14 +45,15 @@ const WorkDayBox = ({
   endTime,
   lunch = false,
   compensatoryLeave = new Decimal(0),
-  doctorsLeave = new Decimal(0),
-  doctorsLeaveFamily = new Decimal(0),
+  doctorsLeave = false,
+  doctorsLeaveFamily = false,
   sickLeave = false,
   sickLeaveFamily = false,
   dayWorked,
   workFromHome = new Decimal(0),
   vacation = new Decimal(0),
   holiday = false,
+  interruptions = [],
   saveWorkDay,
 }: WorkDayBoxProps) => {
 //   const [open, setOpen] = React.useState(false)
@@ -59,9 +61,11 @@ const WorkDayBox = ({
   const year = startTime.getFullYear()
   const isWeekEnd = isWeekend(startTime)
   // const showTitle = isWeekEnd || isFullDay(compensatoryLeave) || isFullDay(doctorsLeave) || isFullDay(doctorsLeaveFamily) || sickLeave || sickLeaveFamily || isFullDay(vacation) || holiday ? true : false
-  const isWorkingDay = !isWeekEnd && !isFullDay(compensatoryLeave) && !isFullDay(doctorsLeave) && !isFullDay(doctorsLeaveFamily) && !sickLeave && !sickLeaveFamily && !isFullDay(vacation) && !holiday && dayWorked.greaterThan(0)
-  const title = getTitle(isWorkingDay, isFullDay(compensatoryLeave), isFullDay(doctorsLeave), isFullDay(doctorsLeaveFamily), sickLeave, sickLeaveFamily, isFullDay(vacation), holiday, isWeekEnd)
-  const hasDisturbance = !isFullDay(compensatoryLeave) && !isFullDay(doctorsLeave) && !isFullDay(doctorsLeaveFamily) && !isFullDay(vacation) && (compensatoryLeave.greaterThan(0) || doctorsLeave.greaterThan(0) || doctorsLeaveFamily.greaterThan(0) || vacation.greaterThan(0))
+  const isWorkingDay = !isWeekEnd && !isFullDay(compensatoryLeave) && !doctorsLeave && !doctorsLeaveFamily && !sickLeave && !sickLeaveFamily && !isFullDay(vacation) && !holiday && dayWorked.greaterThan(0)
+  const title = getTitle(isWorkingDay, isFullDay(compensatoryLeave), doctorsLeave, doctorsLeaveFamily, sickLeave, sickLeaveFamily, isFullDay(vacation), holiday, isWeekEnd)
+  const hasDisturbance = !isFullDay(compensatoryLeave) && !doctorsLeave && !doctorsLeaveFamily && !isFullDay(vacation) && (compensatoryLeave.greaterThan(0) || interruptions.length > 0 || vacation.greaterThan(0))
+  const doctorsLeaveTime = interruptions.filter((interruption) => interruption.type === 'doctorsLeave').reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
+  const doctorsLeaveFamilyTime = interruptions.filter((interruption) => interruption.type === 'doctorsLeaveFamily').reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
 
   return (
     <>
@@ -73,6 +77,7 @@ const WorkDayBox = ({
         <div className="flex flex-col grow">
           <span className="text-lg font-semibold self-start">{title}</span>
         </div>
+        {lunch && (<Soup />)}
         {dayWorked.greaterThan(0) && (
           <div className="flex flex-col w-14">
               <span className="text-lg font-semibold">{dayWorked.toDecimalPlaces(3).toNumber()}</span>
@@ -82,8 +87,8 @@ const WorkDayBox = ({
           <div className="grid gap-1 text-end">
             {compensatoryLeave.greaterThan(0) && (<span className="text-xs font-semibold">NV: {compensatoryLeave.toNumber()}h</span>)}
             {vacation.greaterThan(0) && (<span className="text-xs font-semibold">Dovolenka: {vacation.toNumber()}h</span>)}
-            {doctorsLeave.greaterThan(0) && (<span className="text-xs font-semibold">P-čko: {doctorsLeave.toNumber()}h</span>)}
-            {doctorsLeaveFamily.greaterThan(0) && (<span className="text-xs font-semibold">Doprovod: {doctorsLeaveFamily.toNumber()}h</span>)}
+            {doctorsLeaveTime.greaterThan(0) && (<span className="text-xs font-semibold">P-čko: {doctorsLeaveTime.toNumber()}h</span>)}
+            {doctorsLeaveFamilyTime.greaterThan(0) && (<span className="text-xs font-semibold">Doprovod: {doctorsLeaveFamilyTime.toNumber()}h</span>)}
           </div>
         )}
         {!isWeekEnd && (
@@ -94,11 +99,10 @@ const WorkDayBox = ({
           <DrawerContent>
             <div className="mx-auto w-full max-w-sm">
               <DrawerHeader>
-                <DrawerTitle>Denný súhrn</DrawerTitle>
+                <DrawerTitle>Denný súhrn ({format(startTime, 'dd.MM.')})</DrawerTitle>
                 <DrawerDescription>Nastav si svoj deň.</DrawerDescription>
               </DrawerHeader>
-              <WorkDayForm workDay={{month, year, startTime, endTime, lunch, compensatoryLeave, doctorsLeave, doctorsLeaveFamily, sickLeave, sickLeaveFamily, dayWorked, workFromHome, vacation, holiday}} saveWorkDay={saveWorkDay} />
-              
+              <WorkDayForm workDay={{month, year, startTime, endTime, lunch, compensatoryLeave, doctorsLeave, doctorsLeaveFamily, sickLeave, sickLeaveFamily, dayWorked, workFromHome, vacation, interruptions, holiday}} saveWorkDay={saveWorkDay} />
             </div>
           </DrawerContent>
         </Drawer>

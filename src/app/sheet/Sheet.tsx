@@ -3,8 +3,9 @@ import { toDate } from "date-fns/toDate"
 import React from "react"
 import MonthPager from "../../components/month-pager"
 import WorkDayBox from "../../components/month/WorkDayBox"
-import { WorkDay } from "./types"
+import { InterruptionWithTimeType, WorkDay } from "./types"
 import Decimal from "decimal.js"
+import { v4 as uuidv4 } from 'uuid'
 
 const config = {
   dailyWorkTime: 7.5,
@@ -25,7 +26,7 @@ const tempData: WorkDay[] = [
     year: 2025,
     startTime: toDate(new Date(2025, 0, 2, 7, 30, 0)),
     endTime: toDate(new Date(2025, 0, 2, 14, 30, 0)),
-    doctorsLeaveFamily: new Decimal(7.5),
+    doctorsLeaveFamily: true,
     dayWorked: new Decimal(0),
   },
   {
@@ -67,8 +68,8 @@ const tempData: WorkDay[] = [
     endTime: toDate(new Date(2025, 1, 1, 0, 0, 0)),
     lunch: false,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
+    // doctorsLeave: false,
+    // doctorsLeaveFamily: new Decimal(0),
     sickLeaveFamily: false,
     dayWorked: new Decimal(0),
     workFromHome: new Decimal(0),
@@ -79,7 +80,7 @@ const tempData: WorkDay[] = [
     year: 2025,
     startTime: toDate(new Date(2025, 1, 2, 7, 30, 0)),
     endTime: toDate(new Date(2025, 1, 2, 14, 30, 0)),
-    doctorsLeave: new Decimal(7.5),
+    doctorsLeave: true,
     dayWorked: new Decimal(0),
   },
   {
@@ -89,11 +90,27 @@ const tempData: WorkDay[] = [
     endTime: toDate(new Date(2025, 1, 3, 15, 30, 0)),
     lunch: true,
     compensatoryLeave: new Decimal(0.5),
-    doctorsLeave: new Decimal(0.5),
-    doctorsLeaveFamily: new Decimal(0.5),
+    // doctorsLeave: new Decimal(0.5),
+    // doctorsLeaveFamily: new Decimal(0.5),
     dayWorked: new Decimal(4.5),
     workFromHome: new Decimal(0),
     vacation: new Decimal(0.5),
+    interruptions: [
+      {
+        id: uuidv4(),
+        type: InterruptionWithTimeType.DOCTORS_LEAVE,
+        startTime: toDate(new Date(2025, 1, 3, 8, 0, 0)),
+        endTime: toDate(new Date(2025, 1, 3, 8, 30, 0)),
+        time: new Decimal(0.5),
+      },
+      {
+        id: uuidv4(),
+        type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY,
+        startTime: toDate(new Date(2025, 1, 3, 9, 0, 0)),
+        endTime: toDate(new Date(2025, 1, 3, 9, 30, 0)),
+        time: new Decimal(0.5),
+      },
+    ],
   },
   {
     month: 2,
@@ -102,8 +119,8 @@ const tempData: WorkDay[] = [
     endTime: toDate(new Date(2025, 1, 4, 15, 30, 0)),
     lunch: true,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
+    // doctorsLeave: new Decimal(0),
+    // doctorsLeaveFamily: new Decimal(0),
     dayWorked: new Decimal(7.5),
     workFromHome: new Decimal(0),
   },
@@ -114,8 +131,6 @@ const tempData: WorkDay[] = [
     endTime: toDate(new Date(2025, 1, 5, 15, 30, 0)),
     lunch: false,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
     dayWorked: new Decimal(7.5),
     workFromHome: new Decimal(0),
   },
@@ -126,8 +141,6 @@ const tempData: WorkDay[] = [
     endTime: toDate(new Date(2025, 1, 6, 15, 30, 0)),
     lunch: true,
     compensatoryLeave: new Decimal(0),
-    doctorsLeave: new Decimal(0),
-    doctorsLeaveFamily: new Decimal(0),
     dayWorked: new Decimal(7.5),
     workFromHome: new Decimal(0),
   },
@@ -162,8 +175,8 @@ const addMissingDays = (activeYear: number, activeMonth: number): WorkDay[] => {
         endTime: toDate(new Date(2025, activeMonth-1, i, 0, 0, 0)),
         lunch: false,
         compensatoryLeave: new Decimal(0),
-        doctorsLeave: new Decimal(0),
-        doctorsLeaveFamily: new Decimal(0),
+        doctorsLeave: false,
+        doctorsLeaveFamily: false,
         sickLeaveFamily: false,
         dayWorked: new Decimal(0),
         workFromHome: new Decimal(0),
@@ -181,9 +194,9 @@ const Sheet = () => {
 
   const sickLeave = monthData.filter((data) => data.sickLeave).reduce((acc, data) => acc + (data.sickLeave ? config.dailyWorkTime : 0), 0)
   const sickLeaveDays = (sickLeave / config.dailyWorkTime).toFixed(1)
-  const doctorsLeave = monthData.filter((data) => data.doctorsLeave).reduce((acc, data) => acc + (data.doctorsLeave?.toNumber() ?? 0), 0)
+  const doctorsLeave = monthData.filter((data) => data.doctorsLeave).reduce((acc, data) => acc + (data.doctorsLeave ? config.dailyWorkTime : 0), 0) // add time from interruptions
   const doctorsLeaveDays = (doctorsLeave / config.dailyWorkTime).toFixed(1)
-  const doctorsLeaveFamily = monthData.filter((data) => data.doctorsLeaveFamily).reduce((acc, data) => acc + (data.doctorsLeaveFamily?.toNumber() ?? 0), 0)
+  const doctorsLeaveFamily = monthData.filter((data) => data.doctorsLeaveFamily).reduce((acc, data) => acc + (data.doctorsLeaveFamily ? config.dailyWorkTime : 0), 0)
   const doctorsLeaveFamilyDays = (doctorsLeaveFamily / config.dailyWorkTime).toFixed(1)
   const worked = monthData.filter((data) => data.dayWorked).reduce((acc, data) => acc + (data.dayWorked.toNumber()), 0)
   const workedDays = (worked / config.dailyWorkTime).toFixed(1)

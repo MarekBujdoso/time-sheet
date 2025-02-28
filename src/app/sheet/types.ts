@@ -9,11 +9,12 @@ export interface WorkDay {
     sickLeave?: boolean, // PN
     sickLeaveFamily?: boolean, // OCR
     compensatoryLeave?: Decimal, // NV
-    doctorsLeave?: Decimal, // P-cko
-    doctorsLeaveFamily?: Decimal, // P-doprovod
+    doctorsLeave?: boolean, // P-cko cely den
+    doctorsLeaveFamily?: boolean, // P-doprovod cely den
     dayWorked: Decimal, // Odpracovane za den
     holiday?: boolean, // Sviatok
     vacation?: Decimal, // Dovolenka
+    interruptions?: InterruptionTimeProps[], // Prerusenia
 }
 
 export interface WorkDayFull extends WorkDay {
@@ -22,8 +23,22 @@ export interface WorkDayFull extends WorkDay {
     sickLeave: boolean, // PN
     sickLeaveFamily: boolean, // OCR
     compensatoryLeave: Decimal, // NV
-    doctorsLeave: Decimal, // P-cko
-    doctorsLeaveFamily: Decimal, // P-doprovod
+    doctorsLeave: boolean, // P-cko cely den
+    doctorsLeaveFamily: boolean, // P-doprovod cely den
     holiday: boolean, // Sviatok
     vacation: Decimal, // Dovolenka
+    interruptions: InterruptionTimeProps[], // Prerusenia
+}
+
+export enum InterruptionWithTimeType {
+    DOCTORS_LEAVE = 'doctorsLeave',
+    DOCTORS_LEAVE_FAMILY = 'doctorsLeaveFamily',
+}
+
+export interface InterruptionTimeProps {
+    id: string
+    type: InterruptionWithTimeType
+    startTime: Date
+    endTime: Date
+    time: Decimal
 }

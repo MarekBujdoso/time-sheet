@@ -14,21 +14,17 @@ import InterruptionTime from "./InterruptionTime";
 import { v4 as uuidv4 } from 'uuid'
 import { set } from "date-fns/set";
 
-const calculateInterruptions = (newDay: WorkDay) => {
-  const { interruptions = [] } = newDay
-  // console.log('interruptions', interruptions)
-  return interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0))
+const calculateWorked = (workedHours: Decimal, interruptions: InterruptionTimeProps[] = [], vacation: Decimal, compensatoryLeave: Decimal) => {
+  const interruptionsTime = interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0))
+  const lunchTime = new Decimal(workedHours.minus(interruptionsTime).greaterThanOrEqualTo(6) ? 0.5 : 0)
+  // const maxWorkTime = Math.min(workedHours, (dailyWorkTime.toNumber() * 60 + 30))
+  console.log(workedHours.toNumber(), lunchTime.toNumber(), interruptionsTime.toNumber())
+  return {dayWorked: workedHours.minus(interruptionsTime).minus(lunchTime).plus(vacation).plus(compensatoryLeave),lunch: lunchTime.greaterThan(0)}
 }
 
-const calculateDayWorked = (newDay: WorkDay, dailyWorkTime: Decimal) => {
-  const { startTime, endTime } = newDay
-  const startToEndTime = new Decimal(differenceInMinutes(endTime, startTime)).dividedBy(60)
-  console.log('startToEndTime',dailyWorkTime.toNumber(), startTime, endTime, startToEndTime.toNumber())
-  const interruptions = calculateInterruptions(newDay)
-  const lunchTime = new Decimal(startToEndTime.minus(interruptions).greaterThanOrEqualTo(6) ? 0.5 : 0)
-  // const maxWorkTime = Math.min(startToEndTime, (dailyWorkTime.toNumber() * 60 + 30))
-  console.log(startToEndTime.toNumber(), lunchTime.toNumber(), interruptions.toNumber())
-  return {dayWorked: startToEndTime.minus(interruptions).minus(lunchTime),lunch: lunchTime.greaterThan(0)}
+const calculateOfficialWork = (workedHours: Decimal, interruptions: InterruptionTimeProps[] = []) => {
+  const interruptionsTime = interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0))
+  return workedHours.minus(interruptionsTime)
 }
 
 interface WorkDayFormProps {
@@ -42,7 +38,7 @@ const WorkDayForm = ({
 }: WorkDayFormProps) => {  
   const [oneDay, setOneDay] = React.useState<WorkDayFull>({
     ...workDay,
-    ...calculateDayWorked(workDay, new Decimal(5.5)),
+    ...calculateWorked(new Decimal(differenceInMinutes(workDay.endTime, workDay.startTime)).dividedBy(60), workDay.interruptions,workDay.vacation, workDay.compensatoryLeave),
   })
   const [dayType, setDayType] = React.useState<keyof typeof DAY_TYPES>(identifyDayType(oneDay, new Decimal(7.5)))
 
@@ -51,21 +47,21 @@ const WorkDayForm = ({
       value = new Date(oneDay[key].setHours(Number(value.split(':')[0]), Number(value.split(':')[1])))
     }
 
-    
     setOneDay((day) => {
-      const {dayWorked, lunch } = calculateDayWorked({...day, [key]: value}, new Decimal(7.5))
+      const newDay = {...day, [key]: value}
+      const workedTime = new Decimal(differenceInMinutes(newDay.endTime, newDay.startTime)).dividedBy(60)
+      const {dayWorked, lunch } = calculateWorked(workedTime, newDay.interruptions, newDay.vacation, newDay.compensatoryLeave)
+      const officialWork = calculateOfficialWork(new Decimal(7.5), newDay.interruptions)
+      console.log('officialWork', officialWork.toNumber())
       console.log('dayWorked', dayWorked.toNumber(), lunch)
-      // const interruptions = calculateInterruptions({...day, [key]: value})
-      // const lunch = dayWorked.toNumber() >= 6
-      // console.log('worked', dayWorked.toNumber())
-      // const worked = 7.5 - dayWorked.toNumber() - interruptions + (lunch ? 0.5 : 0)
-      // const workFromHome = new Decimal(worked > 0 ? worked : 0)
+      const worked = officialWork.minus(dayWorked)
+      const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
       return {
       ...day,
       [key]: value,
       lunch,
       dayWorked,
-      // workFromHome
+      workFromHome
     }})
   }, [oneDay])
 

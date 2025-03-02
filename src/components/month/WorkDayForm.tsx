@@ -14,17 +14,17 @@ import InterruptionTime from "./InterruptionTime";
 import { v4 as uuidv4 } from 'uuid'
 import { set } from "date-fns/set";
 
-const calculateWorked = (workedHours: Decimal, interruptions: InterruptionTimeProps[] = [], vacation: Decimal, compensatoryLeave: Decimal) => {
+const calculateWorked = (workedHours: Decimal, interruptions: InterruptionTimeProps[] = [], compensatoryLeave: Decimal) => {
   const interruptionsTime = interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0))
   const lunchTime = new Decimal(workedHours.minus(interruptionsTime).greaterThanOrEqualTo(6) ? 0.5 : 0)
   // const maxWorkTime = Math.min(workedHours, (dailyWorkTime.toNumber() * 60 + 30))
   console.log(workedHours.toNumber(), lunchTime.toNumber(), interruptionsTime.toNumber())
-  return {dayWorked: workedHours.minus(interruptionsTime).minus(lunchTime).plus(vacation).plus(compensatoryLeave),lunch: lunchTime.greaterThan(0)}
+  return {dayWorked: workedHours.minus(interruptionsTime).minus(lunchTime).plus(compensatoryLeave),lunch: lunchTime.greaterThan(0)}
 }
 
-const calculateOfficialWork = (workedHours: Decimal, interruptions: InterruptionTimeProps[] = []) => {
+const calculateOfficialWork = (workedHours: Decimal, interruptions: InterruptionTimeProps[] = [], vacation: Decimal) => {
   const interruptionsTime = interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0))
-  return workedHours.minus(interruptionsTime)
+  return workedHours.minus(interruptionsTime).minus(vacation)
 }
 
 interface WorkDayFormProps {
@@ -38,7 +38,7 @@ const WorkDayForm = ({
 }: WorkDayFormProps) => {  
   const [oneDay, setOneDay] = React.useState<WorkDayFull>({
     ...workDay,
-    ...calculateWorked(new Decimal(differenceInMinutes(workDay.endTime, workDay.startTime)).dividedBy(60), workDay.interruptions,workDay.vacation, workDay.compensatoryLeave),
+    ...calculateWorked(new Decimal(differenceInMinutes(workDay.endTime, workDay.startTime)).dividedBy(60), workDay.interruptions, workDay.compensatoryLeave),
   })
   const [dayType, setDayType] = React.useState<keyof typeof DAY_TYPES>(identifyDayType(oneDay, new Decimal(7.5)))
 
@@ -50,8 +50,8 @@ const WorkDayForm = ({
     setOneDay((day) => {
       const newDay = {...day, [key]: value}
       const workedTime = new Decimal(differenceInMinutes(newDay.endTime, newDay.startTime)).dividedBy(60)
-      const {dayWorked, lunch } = calculateWorked(workedTime, newDay.interruptions, newDay.vacation, newDay.compensatoryLeave)
-      const officialWork = calculateOfficialWork(new Decimal(7.5), newDay.interruptions)
+      const {dayWorked, lunch } = calculateWorked(workedTime, newDay.interruptions, newDay.compensatoryLeave)
+      const officialWork = calculateOfficialWork(new Decimal(7.5), newDay.interruptions, newDay.vacation)
       console.log('officialWork', officialWork.toNumber())
       console.log('dayWorked', dayWorked.toNumber(), lunch)
       const worked = officialWork.minus(dayWorked)

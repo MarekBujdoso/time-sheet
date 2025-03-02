@@ -9,10 +9,11 @@ import { DrawerClose, DrawerFooter } from "../ui/drawer";
 import { Button } from "../ui/button";
 import { differenceInMinutes } from "date-fns/differenceInMinutes";
 import Decimal from "decimal.js";
-import { DAY_TYPES, identifyDayType } from "../../app/sheet/dayTypes";
+import { DAY_TYPES, DAY_TYPES_KEYS, identifyDayType } from "../../app/sheet/dayTypes";
 import InterruptionTime from "./InterruptionTime";
 import { v4 as uuidv4 } from 'uuid'
 import { set } from "date-fns/set";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 const calculateWorked = (workedHours: Decimal, interruptions: InterruptionTimeProps[] = [], compensatoryLeave: Decimal) => {
   const interruptionsTime = interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0))
@@ -98,8 +99,18 @@ const WorkDayForm = ({
           <div className="col-span-2">
             <Label>Typ dňa</Label>
             <div className="flex gap-2 flex-wrap justify-between">
+              <Select name="dayType" value={dayType} onValueChange={(value) => changeDayType(value as keyof typeof DAY_TYPES)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Vyber si deň" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(DAY_TYPES_KEYS).map(([key, value]) => (
+                    <SelectItem key={key} value={key}>{value}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <DrawerClose asChild>
-                <div className="flex flex-wrap justify-between">
+                {/* <div className="flex flex-wrap justify-between">
                   <Button variant={dayType === 'vacation' ? 'default' : 'outline'} onClick={() => changeDayType('vacation')}>Dovolenka</Button>
                   <Button variant={dayType === 'holiday' ? 'default' : 'outline'} onClick={() => changeDayType('holiday')}>Štátny sviatok</Button>
                   <Button variant={dayType === 'doctorsLeave' ? 'default' : 'outline'} onClick={() => changeDayType('doctorsLeave')}>P-čko deň</Button>
@@ -107,9 +118,9 @@ const WorkDayForm = ({
                   <Button variant={dayType === 'compensatoryLeave' ? 'default' : 'outline'} onClick={() => changeDayType('compensatoryLeave')}>NV - deň</Button>
                   <Button variant={dayType === 'sickLeave' ? 'default' : 'outline'} onClick={() => changeDayType('sickLeave')}>PN</Button>
                   <Button variant={dayType === 'sickLeaveFamily' ? 'default' : 'outline'} onClick={() => changeDayType('sickLeaveFamily')}>OČR</Button>
-                </div>
+                </div> */}
               </DrawerClose>
-              <Button variant={dayType === 'workType' ? 'default' : 'outline'} type="button" onClick={() => changeDayType('workType')}>Práca</Button>
+              {/* <Button variant={dayType === 'workType' ? 'default' : 'outline'} type="button" onClick={() => changeDayType('workType')}>Práca</Button> */}
             </div>
           </div>
           <div className="flex items-center space-x-2 col-span-2 justify-between">

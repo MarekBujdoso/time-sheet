@@ -139,7 +139,7 @@ export const compensatoryLeave: WorkDayFull = {
     compensatoryLeave: new Decimal(7.5),
     doctorsLeave: false,
     doctorsLeaveFamily: false,
-    dayWorked: new Decimal(0),
+    dayWorked: new Decimal(7.5),
     holiday: false,
     vacation: new Decimal(0),
     interruptions: [],
@@ -154,6 +154,17 @@ export const DAY_TYPES = {
     doctorsLeave,
     doctorsLeaveFamily,
     compensatoryLeave,
+}
+
+export enum DAY_TYPES_KEYS {
+    workType = 'Práca',
+    holiday = 'Štátny sviatok',
+    vacation = 'Dovolenka',
+    sickLeave = 'PN',
+    sickLeaveFamily = 'OČR',
+    doctorsLeave = 'P-čko celý deň',
+    doctorsLeaveFamily = 'Doprovod celý deň',
+    compensatoryLeave = 'Náhradné voľno',
 }
 
 export const identifyDayType = (day: WorkDayFull, dailyTime: Decimal): keyof typeof DAY_TYPES => {

@@ -14,19 +14,9 @@ import InterruptionTime from "./InterruptionTime";
 import { v4 as uuidv4 } from 'uuid'
 import { set } from "date-fns/set";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { calculateWorked, recalculateWorkDay } from "../utils/calculations";
 
-const calculateWorked = (workedHours: Decimal, interruptions: InterruptionTimeProps[] = [], compensatoryLeave: Decimal) => {
-  const interruptionsTime = interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0))
-  const lunchTime = new Decimal(workedHours.minus(interruptionsTime).greaterThanOrEqualTo(6) ? 0.5 : 0)
-  // const maxWorkTime = Math.min(workedHours, (dailyWorkTime.toNumber() * 60 + 30))
-  console.log(workedHours.toNumber(), lunchTime.toNumber(), interruptionsTime.toNumber())
-  return {dayWorked: workedHours.minus(interruptionsTime).minus(lunchTime).plus(compensatoryLeave),lunch: lunchTime.greaterThan(0)}
-}
 
-const calculateOfficialWork = (workedHours: Decimal, interruptions: InterruptionTimeProps[] = [], vacation: Decimal) => {
-  const interruptionsTime = interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0))
-  return workedHours.minus(interruptionsTime).minus(vacation)
-}
 
 interface WorkDayFormProps {
   workDay: WorkDayFull
@@ -48,22 +38,7 @@ const WorkDayForm = ({
       value = new Date(oneDay[key].setHours(Number(value.split(':')[0]), Number(value.split(':')[1])))
     }
 
-    setOneDay((day) => {
-      const newDay = {...day, [key]: value}
-      const workedTime = new Decimal(differenceInMinutes(newDay.endTime, newDay.startTime)).dividedBy(60)
-      const {dayWorked, lunch } = calculateWorked(workedTime, newDay.interruptions, newDay.compensatoryLeave)
-      const officialWork = calculateOfficialWork(new Decimal(7.5), newDay.interruptions, newDay.vacation)
-      console.log('officialWork', officialWork.toNumber())
-      console.log('dayWorked', dayWorked.toNumber(), lunch)
-      const worked = officialWork.minus(dayWorked)
-      const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
-      return {
-      ...day,
-      [key]: value,
-      lunch,
-      dayWorked,
-      workFromHome
-    }})
+    setOneDay((day) => recalculateWorkDay({...day, [key]: value}, new Decimal(7.5)))
   }, [oneDay])
 
   const handleSubmit = (formData: FormData) => {
@@ -92,6 +67,8 @@ const WorkDayForm = ({
     setOneDay((day) => ({...DAY_TYPES[type], startTime: set(day.startTime, { hours: 7, minutes: 30 }), endTime: set(day.endTime, {hours: 15, minutes: 30}), month: day.month, year: day.year}))
   }
 
+  const isDisabled = dayType !== 'workType'
+
   return (
     <form action={handleSubmit}>
       <div className="rounded-md border p-2 text-sm shadow-sm">
@@ -109,7 +86,7 @@ const WorkDayForm = ({
                   ))}
                 </SelectContent>
               </Select>
-              <DrawerClose asChild>
+              {/* <DrawerClose asChild> */}
                 {/* <div className="flex flex-wrap justify-between">
                   <Button variant={dayType === 'vacation' ? 'default' : 'outline'} onClick={() => changeDayType('vacation')}>Dovolenka</Button>
                   <Button variant={dayType === 'holiday' ? 'default' : 'outline'} onClick={() => changeDayType('holiday')}>Štátny sviatok</Button>
@@ -119,7 +96,7 @@ const WorkDayForm = ({
                   <Button variant={dayType === 'sickLeave' ? 'default' : 'outline'} onClick={() => changeDayType('sickLeave')}>PN</Button>
                   <Button variant={dayType === 'sickLeaveFamily' ? 'default' : 'outline'} onClick={() => changeDayType('sickLeaveFamily')}>OČR</Button>
                 </div> */}
-              </DrawerClose>
+              {/* </DrawerClose> */}
               {/* <Button variant={dayType === 'workType' ? 'default' : 'outline'} type="button" onClick={() => changeDayType('workType')}>Práca</Button> */}
             </div>
           </div>
@@ -155,6 +132,7 @@ const WorkDayForm = ({
               step="900"
               value={format(oneDay.startTime, 'HH:mm')}
               onChange={(e) => changeDay('startTime', e.target.value)}
+              disabled={isDisabled}
             />
           </div>
           <div>
@@ -166,44 +144,31 @@ const WorkDayForm = ({
               name="endTime"
               value={format(oneDay.endTime, 'HH:mm')}
               onChange={(e) => changeDay('endTime', e.target.value)}
+              disabled={isDisabled}
               />
           </div>
           <div>
             <Label htmlFor="vacation">Dovolenka</Label>
-            <Input id="vacation" type="number" name="vacation" value={oneDay.vacation?.toNumber()}
+            <Input disabled={isDisabled} id="vacation" type="number" name="vacation" value={oneDay.vacation?.toNumber()}
               min={0} max={7.5} step={0.5}
               onChange={(e) => changeDay('vacation', new Decimal(e.target.value))}
             />
           </div>
           <div>
             <Label htmlFor="compensatoryLeave">Náhradé voľno</Label>
-            <Input id="compensatoryLeave" name="compensatoryLeave" type="number" value={oneDay.compensatoryLeave?.toNumber()}
+            <Input disabled={isDisabled} id="compensatoryLeave" name="compensatoryLeave" type="number" value={oneDay.compensatoryLeave?.toNumber()}
               min={0} max={7.5} step={0.5}
               onChange={(e) => changeDay('compensatoryLeave', new Decimal(e.target.value))}
             />
           </div>
-          {/* <div>
-            <Label htmlFor="doctorsLeave">P-čko</Label>
-            <Input id="doctorsLeave" name="doctorsLeave" type="number" value={oneDay.doctorsLeave?.toNumber()}
-              min={0} max={7.5} step={0.5}
-              onChange={(e) => changeDay('doctorsLeave', new Decimal(e.target.value))}
-            />
-          </div>
-          <div>
-            <Label htmlFor="doctorsLeaveFamily">Doprovod</Label>
-            <Input id="doctorsLeaveFamily" name="doctorsLeaveFamily" type="number" value={oneDay.doctorsLeaveFamily?.toNumber()}
-              onChange={(e) => changeDay('doctorsLeaveFamily', new Decimal(e.target.value))}
-            />
-            up arrow symbol 
-          </div> */}
           {oneDay.interruptions.map((interruption) => (
             <InterruptionTime key={interruption.id} {...interruption} remove={removeInterruption} update={updateInterruption} />
           ))}
           <div>
-            <Button variant={'outline'} type="button" onClick={(e) => addInterruption(e, InterruptionWithTimeType.DOCTORS_LEAVE)}><Cross /> P-cko</Button>
+            <Button disabled={isDisabled} variant={'outline'} type="button" onClick={(e) => addInterruption(e, InterruptionWithTimeType.DOCTORS_LEAVE)}><Cross /> P-cko</Button>
           </div>
           <div className="flex items-center justify-end">
-            <Button variant={'outline'} type="button" onClick={(e) => addInterruption(e, InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY)}><UserRoundPlus /> Doprovod</Button>
+            <Button disabled={isDisabled} variant={'outline'} type="button" onClick={(e) => addInterruption(e, InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY)}><UserRoundPlus /> Doprovod</Button>
           </div>
         </div>
       </div>

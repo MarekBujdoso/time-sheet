@@ -1,7 +1,7 @@
 import Decimal from "decimal.js"
 import React from "react"
 
-interface ConfigContextType {
+export interface ConfigContextType {
   officialWorkTime: Decimal
   lunchBreak: number
   officialStartTime: {hours: number, minutes: number}

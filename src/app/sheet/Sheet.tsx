@@ -6,7 +6,11 @@ import WorkDayBox from "../../components/month/WorkDayBox"
 import { InterruptionWithTimeType, WorkDay } from "./types"
 import Decimal from "decimal.js"
 import { v4 as uuidv4 } from 'uuid'
-import ConfigContext from "./ConfigContext"
+import ConfigContext, { ConfigContextType } from "./ConfigContext"
+import { DAY_TYPES } from "./dayTypes"
+import { isBefore } from "date-fns/isBefore"
+import { set } from "date-fns/set"
+import { isWeekend } from "date-fns/isWeekend"
 
 const tempData: WorkDay[] = [
   {
@@ -158,27 +162,39 @@ const tempData: WorkDay[] = [
   }
 ]
 
-const addMissingDays = (activeYear: number, activeMonth: number): WorkDay[] => {
+const addMissingDays = (activeYear: number, activeMonth: number, config: ConfigContextType): WorkDay[] => {
   const data = tempData.filter((data) => data.month === activeMonth && data.year === activeYear)
-  const daysInMonth = getDaysInMonth(new Date(activeYear, activeMonth-1))
+  const dateInActiveMonth = new Date(activeYear, activeMonth-1)
+  const daysInMonth = getDaysInMonth(dateInActiveMonth)
   const days = data.map((data) => data.startTime.getDate())
   for (let i = 1; i <= daysInMonth; i++) {
     if (!days.includes(i)) {
-      data.push({
-        month: activeMonth,
-        year: activeYear,
-        startTime: toDate(new Date(2025, activeMonth-1, i, 0, 0, 0)),
-        endTime: toDate(new Date(2025, activeMonth-1, i, 0, 0, 0)),
-        lunch: false,
-        compensatoryLeave: new Decimal(0),
-        doctorsLeave: false,
-        doctorsLeaveFamily: false,
-        sickLeaveFamily: false,
-        dayWorked: new Decimal(0),
-        workFromHome: new Decimal(0),
-        sickLeave: false,
-        holiday: false,
-      })
+      const currentDay = new Date(activeYear, activeMonth-1, i)
+      if (isBefore(currentDay, new Date()) && !isWeekend(currentDay)) {
+        data.push({
+          ...DAY_TYPES.workType(config.officialWorkTime),
+          startTime: set(currentDay, config.officialStartTime),
+          endTime: set(currentDay, config.officialEndTime),
+          month: activeMonth,
+          year: activeYear,
+        })
+      } else {
+        data.push({
+          month: activeMonth,
+          year: activeYear,
+          startTime: currentDay,
+          endTime: currentDay,
+          lunch: false,
+          compensatoryLeave: new Decimal(0),
+          doctorsLeave: false,
+          doctorsLeaveFamily: false,
+          sickLeaveFamily: false,
+          dayWorked: new Decimal(0),
+          workFromHome: new Decimal(0),
+          sickLeave: false,
+          holiday: false,
+        })
+      }
     }
   }
   return data.sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
@@ -187,7 +203,7 @@ const addMissingDays = (activeYear: number, activeMonth: number): WorkDay[] => {
 const Sheet = () => {
   const config = useContext(ConfigContext)
   // const currentMonth = new Date().getMonth() + 1
-  const [monthData, setMonthData] = React.useState(addMissingDays(new Date().getFullYear(), new Date().getMonth() + 1))
+  const [monthData, setMonthData] = React.useState(addMissingDays(new Date().getFullYear(), new Date().getMonth() + 1, config))
 
   const sickLeave = monthData.filter((data) => data.sickLeave).reduce((acc, data) => acc.plus(data.sickLeave ? config.officialWorkTime : new Decimal(0)), new Decimal(0))
   const sickLeaveDays = sickLeave.dividedBy(config.officialWorkTime).toFixed(1)
@@ -213,8 +229,8 @@ const Sheet = () => {
   }, [])
 
   const updateMonthData = React.useCallback((activeMonth: number, activeYear: number) => {
-    setMonthData(addMissingDays(activeYear, activeMonth))
-  }, [])
+    setMonthData(addMissingDays(activeYear, activeMonth, config))
+  }, [config])
 
 
   return (

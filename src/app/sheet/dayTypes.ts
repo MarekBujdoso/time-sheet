@@ -167,13 +167,14 @@ export enum DAY_TYPES_KEYS {
     compensatoryLeave = 'Náhradné voľno',
 }
 
-export const identifyDayType = (day: WorkDayFull, dailyTime: Decimal): keyof typeof DAY_TYPES => {
+export const identifyDayType = (day: WorkDayFull, officialWorkTime: Decimal): keyof typeof DAY_TYPES | undefined => {
     if (day.holiday) return 'holiday'
-    if (day.vacation.equals(dailyTime)) return 'vacation'
+    if (day.vacation.equals(officialWorkTime)) return 'vacation'
     if (day.sickLeave) return 'sickLeave'
     if (day.sickLeaveFamily) return 'sickLeaveFamily'
     if (day.doctorsLeave) return 'doctorsLeave'
     if (day.doctorsLeaveFamily) return 'doctorsLeaveFamily'
-    if (day.compensatoryLeave.equals(dailyTime)) return 'compensatoryLeave'
-    return 'workType'
+    if (day.compensatoryLeave.equals(officialWorkTime)) return 'compensatoryLeave'
+    if (day.dayWorked.greaterThan(0)) return 'workType'
+    return undefined
 }

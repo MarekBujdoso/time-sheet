@@ -34,7 +34,7 @@ const WorkDayForm = ({
     ...workDay,
     ...calculateWorked(new Decimal(differenceInMinutes(workDay.endTime, workDay.startTime)).dividedBy(60), workDay.interruptions, workDay.compensatoryLeave),
   })
-  const [dayType, setDayType] = React.useState<keyof typeof DAY_TYPES>(identifyDayType(oneDay, officialWorkTime))
+  const [dayType, setDayType] = React.useState<keyof typeof DAY_TYPES | undefined>(identifyDayType(oneDay, officialWorkTime))
 
   const changeDay = React.useCallback((key: string, value: string | Decimal | boolean | Date | InterruptionTimeProps[]) => {
     if ((key === 'startTime' || key === 'endTime') && typeof value === 'string') {

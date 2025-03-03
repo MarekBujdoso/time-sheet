@@ -1,16 +1,12 @@
 import { getDaysInMonth } from "date-fns/getDaysInMonth"
 import { toDate } from "date-fns/toDate"
-import React from "react"
+import React, { useContext } from "react"
 import MonthPager from "../../components/month-pager"
 import WorkDayBox from "../../components/month/WorkDayBox"
 import { InterruptionWithTimeType, WorkDay } from "./types"
 import Decimal from "decimal.js"
 import { v4 as uuidv4 } from 'uuid'
-
-const config = {
-  dailyWorkTime: 7.5,
-  lunchBreak: 0.5,
-}
+import ConfigContext from "./ConfigContext"
 
 const tempData: WorkDay[] = [
   {
@@ -189,21 +185,22 @@ const addMissingDays = (activeYear: number, activeMonth: number): WorkDay[] => {
 }
 
 const Sheet = () => {
+  const config = useContext(ConfigContext)
   // const currentMonth = new Date().getMonth() + 1
   const [monthData, setMonthData] = React.useState(addMissingDays(new Date().getFullYear(), new Date().getMonth() + 1))
 
-  const sickLeave = monthData.filter((data) => data.sickLeave).reduce((acc, data) => acc + (data.sickLeave ? config.dailyWorkTime : 0), 0)
-  const sickLeaveDays = (sickLeave / config.dailyWorkTime).toFixed(1)
-  const doctorsLeave = monthData.filter((data) => data.doctorsLeave).reduce((acc, data) => acc + (data.doctorsLeave ? config.dailyWorkTime : 0), 0) // add time from interruptions
-  const doctorsLeaveDays = (doctorsLeave / config.dailyWorkTime).toFixed(1)
-  const doctorsLeaveFamily = monthData.filter((data) => data.doctorsLeaveFamily).reduce((acc, data) => acc + (data.doctorsLeaveFamily ? config.dailyWorkTime : 0), 0)
-  const doctorsLeaveFamilyDays = (doctorsLeaveFamily / config.dailyWorkTime).toFixed(1)
-  const worked = monthData.filter((data) => data.dayWorked).reduce((acc, data) => acc + (data.dayWorked.toNumber()), 0)
-  const workedDays = (worked / config.dailyWorkTime).toFixed(1)
-  const compensatoryLeave = monthData.filter((data) => data.compensatoryLeave).reduce((acc, data) => acc + (data.compensatoryLeave?.toNumber() ?? 0), 0)
-  const compensatoryLeaveDays = (compensatoryLeave / config.dailyWorkTime).toFixed(1)
-  const sickLeaveFamily = monthData.filter((data) => data.sickLeaveFamily).reduce((acc, data) => acc + (data.sickLeaveFamily ? config.dailyWorkTime : 0), 0)
-  const sickLeaveFamilyDays = (sickLeaveFamily / config.dailyWorkTime).toFixed(1)
+  const sickLeave = monthData.filter((data) => data.sickLeave).reduce((acc, data) => acc.plus(data.sickLeave ? config.officialWorkTime : new Decimal(0)), new Decimal(0))
+  const sickLeaveDays = sickLeave.dividedBy(config.officialWorkTime).toFixed(1)
+  const doctorsLeave = monthData.filter((data) => data.doctorsLeave).reduce((acc, data) => acc.plus(data.doctorsLeave ? config.officialWorkTime : new Decimal(0)), new Decimal(0)) // add time from interruptions
+  const doctorsLeaveDays = doctorsLeave.dividedBy(config.officialWorkTime).toFixed(1)
+  const doctorsLeaveFamily = monthData.filter((data) => data.doctorsLeaveFamily).reduce((acc, data) => acc.plus(data.doctorsLeaveFamily ? config.officialWorkTime : new Decimal(0)), new Decimal(0))
+  const doctorsLeaveFamilyDays = doctorsLeaveFamily.dividedBy(config.officialWorkTime).toFixed(1)
+  const worked = monthData.filter((data) => data.dayWorked).reduce((acc, data) => acc.plus(data.dayWorked.toNumber()), new Decimal(0))
+  const workedDays = worked.dividedBy(config.officialWorkTime).toFixed(1)
+  const compensatoryLeave = monthData.filter((data) => data.compensatoryLeave).reduce((acc, data) => acc.plus(data.compensatoryLeave?.toNumber() ?? new Decimal(0)), new Decimal(0))
+  const compensatoryLeaveDays = compensatoryLeave.dividedBy(config.officialWorkTime).toFixed(1)
+  const sickLeaveFamily = monthData.filter((data) => data.sickLeaveFamily).reduce((acc, data) => acc.plus(data.sickLeaveFamily ? config.officialWorkTime : new Decimal(0)), new Decimal(0))
+  const sickLeaveFamilyDays = sickLeaveFamily.dividedBy(config.officialWorkTime).toFixed(1)
   
   const saveWorkDay = React.useCallback((workDay: WorkDay) => {
     setMonthData((month) => {
@@ -225,12 +222,12 @@ const Sheet = () => {
       <MonthPager update={updateMonthData} />
       <div className="grid auto-rows-min gap-2 md:grid-cols-3 grid-cols-2">
         {/* <div className="flex flex-col"> */}
-          <span>odpr.: {worked}h / {workedDays}d</span>
-          <span>NV: {compensatoryLeave}h / {compensatoryLeaveDays}d</span>
-          <span>P-cko: {doctorsLeave}h / {doctorsLeaveDays}d</span>
-          <span>Dopr.: {doctorsLeaveFamily}h / {doctorsLeaveFamilyDays}d</span>
-          <span>PN: {sickLeave}h / {sickLeaveDays}d</span>
-          <span>OCR: {sickLeaveFamily}h / {sickLeaveFamilyDays}d</span>
+          <span>odpr.: {worked.toNumber()}h / {workedDays}d</span>
+          <span>NV: {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays}d</span>
+          <span>P-cko: {doctorsLeave.toNumber()}h / {doctorsLeaveDays}d</span>
+          <span>Dopr.: {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays}d</span>
+          <span>PN: {sickLeave.toNumber()}h / {sickLeaveDays}d</span>
+          <span>OCR: {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays}d</span>
         {/* </div> */}
       </div>
       <div>

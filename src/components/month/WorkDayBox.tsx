@@ -1,13 +1,13 @@
-import React from "react"
 import { format } from "date-fns"
-// import { Button } from "../../components/ui/button"
-import { type WorkDay } from "../../app/sheet/types"
 import { isWeekend } from "date-fns/fp/isWeekend"
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer"
-import { Button } from "../ui/button"
-import WorkDayForm from "./WorkDayForm"
 import Decimal from "decimal.js"
 import { Soup } from "lucide-react"
+import { useContext } from "react"
+import ConfigContext from "../../app/sheet/ConfigContext"
+import { type WorkDay } from "../../app/sheet/types"
+import { Button } from "../ui/button"
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer"
+import WorkDayForm from "./WorkDayForm"
 
 const getTitle = (
   workingDay?: boolean,
@@ -32,8 +32,8 @@ const getTitle = (
   return ""
 }
 
-const isFullDay = (hours: Decimal | undefined): boolean => {
-  return hours?.equals(7.5) ?? false
+const isFullDay = (hours: Decimal | undefined, workTime: Decimal): boolean => {
+  return hours?.equals(workTime) ?? false
 }
 
 interface WorkDayBoxProps extends WorkDay {
@@ -56,14 +56,14 @@ const WorkDayBox = ({
   interruptions = [],
   saveWorkDay,
 }: WorkDayBoxProps) => {
-//   const [open, setOpen] = React.useState(false)
+  const config = useContext(ConfigContext)
   const month = startTime.getMonth()
   const year = startTime.getFullYear()
   const isWeekEnd = isWeekend(startTime)
   // const showTitle = isWeekEnd || isFullDay(compensatoryLeave) || isFullDay(doctorsLeave) || isFullDay(doctorsLeaveFamily) || sickLeave || sickLeaveFamily || isFullDay(vacation) || holiday ? true : false
-  const isWorkingDay = !isWeekEnd && !isFullDay(compensatoryLeave) && !doctorsLeave && !doctorsLeaveFamily && !sickLeave && !sickLeaveFamily && !isFullDay(vacation) && !holiday && dayWorked.greaterThan(0)
-  const title = getTitle(isWorkingDay, isFullDay(compensatoryLeave), doctorsLeave, doctorsLeaveFamily, sickLeave, sickLeaveFamily, isFullDay(vacation), holiday, isWeekEnd)
-  const hasDisturbance = !isFullDay(compensatoryLeave) && !doctorsLeave && !doctorsLeaveFamily && !isFullDay(vacation) && (compensatoryLeave.greaterThan(0) || interruptions.length > 0 || vacation.greaterThan(0))
+  const isWorkingDay = !isWeekEnd && !isFullDay(compensatoryLeave, config.officialWorkTime) && !doctorsLeave && !doctorsLeaveFamily && !sickLeave && !sickLeaveFamily && !isFullDay(vacation, config.officialWorkTime) && !holiday && dayWorked.greaterThan(0)
+  const title = getTitle(isWorkingDay, isFullDay(compensatoryLeave, config.officialWorkTime), doctorsLeave, doctorsLeaveFamily, sickLeave, sickLeaveFamily, isFullDay(vacation, config.officialWorkTime), holiday, isWeekEnd)
+  const hasDisturbance = !isFullDay(compensatoryLeave, config.officialWorkTime) && !doctorsLeave && !doctorsLeaveFamily && !isFullDay(vacation, config.officialWorkTime) && (compensatoryLeave.greaterThan(0) || interruptions.length > 0 || vacation.greaterThan(0))
   const doctorsLeaveTime = interruptions.filter((interruption) => interruption.type === 'doctorsLeave').reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
   const doctorsLeaveFamilyTime = interruptions.filter((interruption) => interruption.type === 'doctorsLeaveFamily').reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
 

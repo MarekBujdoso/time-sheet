@@ -1,25 +1,21 @@
+import { differenceInMinutes } from "date-fns/differenceInMinutes";
 import { format } from "date-fns/format";
+import { set } from "date-fns/set";
+import Decimal from "decimal.js";
 import { X } from "lucide-react";
-import React from "react";
 import { InterruptionTimeProps } from "../../app/sheet/types";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { set } from "date-fns/set";
-import Decimal from "decimal.js";
-import { differenceInMinutes } from "date-fns/differenceInMinutes";
 
 interface InterruptionTimeCompProps extends InterruptionTimeProps {
   remove: (id: string) => void
   update: (newValue: InterruptionTimeProps) => void
 }
 
-// nemozem hned ratat s prerusenim, ale az ked stlacim check
 const InterruptionTime = (props: InterruptionTimeCompProps) => {
   const { id, type, startTime, endTime, remove, update } = props
   const interruption = { id, type, startTime, endTime }
-  // const [startTimeNew, setStartTime] = React.useState(startTime)
-  // const [endTimeNew, setEndTime] = React.useState(endTime)
 
   const interruptionTitle = type === 'doctorsLeave' ? 'P-čko' : 'Doprovod'
 
@@ -48,9 +44,6 @@ const InterruptionTime = (props: InterruptionTimeCompProps) => {
             const newEndTime = set(endTime, { hours, minutes })
             update({...interruption, endTime: newEndTime, time: new Decimal(differenceInMinutes(newEndTime, startTime) / 60)})
           }}
-          //   // setEndTime(set(endTimeNew, { hours, minutes }))
-          //   update(id, 'endTime', set(endTime, { hours, minutes }))
-          // }}
         />
       </div>
       <div  className="flex items-center space-x-1">

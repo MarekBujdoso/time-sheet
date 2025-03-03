@@ -1,20 +1,21 @@
-import React from "react";
-import { Cross, UserRoundPlus } from "lucide-react";
+import { differenceInMinutes } from "date-fns/differenceInMinutes";
 import { format } from "date-fns/format";
-import { Checkbox } from "../ui/checkbox";
+import { set } from "date-fns/set";
+import Decimal from "decimal.js";
+import { Cross, Soup, UserRoundPlus } from "lucide-react";
+import React, { useContext } from "react";
+import { v4 as uuidv4 } from 'uuid';
+import ConfigContext from "../../app/sheet/ConfigContext";
+import { DAY_TYPES, DAY_TYPES_KEYS, identifyDayType } from "../../app/sheet/dayTypes";
+import { InterruptionTimeProps, InterruptionWithTimeType, WorkDay, WorkDayFull } from "../../app/sheet/types";
+import { Button } from "../ui/button";
+// import { Checkbox } from "../ui/checkbox";
+import { DrawerClose, DrawerFooter } from "../ui/drawer";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { InterruptionTimeProps, InterruptionWithTimeType, WorkDay, WorkDayFull } from "../../app/sheet/types";
-import { DrawerClose, DrawerFooter } from "../ui/drawer";
-import { Button } from "../ui/button";
-import { differenceInMinutes } from "date-fns/differenceInMinutes";
-import Decimal from "decimal.js";
-import { DAY_TYPES, DAY_TYPES_KEYS, identifyDayType } from "../../app/sheet/dayTypes";
-import InterruptionTime from "./InterruptionTime";
-import { v4 as uuidv4 } from 'uuid'
-import { set } from "date-fns/set";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { calculateWorked, recalculateWorkDay } from "../utils/calculations";
+import InterruptionTime from "./InterruptionTime";
 
 
 
@@ -26,20 +27,22 @@ interface WorkDayFormProps {
 const WorkDayForm = ({
   workDay,
   saveWorkDay,
-}: WorkDayFormProps) => {  
+}: WorkDayFormProps) => {
+  const config = useContext(ConfigContext)
+  const {officialWorkTime, officialStartTime, officialEndTime} = config
   const [oneDay, setOneDay] = React.useState<WorkDayFull>({
     ...workDay,
     ...calculateWorked(new Decimal(differenceInMinutes(workDay.endTime, workDay.startTime)).dividedBy(60), workDay.interruptions, workDay.compensatoryLeave),
   })
-  const [dayType, setDayType] = React.useState<keyof typeof DAY_TYPES>(identifyDayType(oneDay, new Decimal(7.5)))
+  const [dayType, setDayType] = React.useState<keyof typeof DAY_TYPES>(identifyDayType(oneDay, officialWorkTime))
 
   const changeDay = React.useCallback((key: string, value: string | Decimal | boolean | Date | InterruptionTimeProps[]) => {
     if ((key === 'startTime' || key === 'endTime') && typeof value === 'string') {
       value = new Date(oneDay[key].setHours(Number(value.split(':')[0]), Number(value.split(':')[1])))
     }
 
-    setOneDay((day) => recalculateWorkDay({...day, [key]: value}, new Decimal(7.5)))
-  }, [oneDay])
+    setOneDay((day) => recalculateWorkDay({...day, [key]: value}, officialWorkTime))
+  }, [officialWorkTime, oneDay])
 
   const handleSubmit = (formData: FormData) => {
     console.log('submit', oneDay)
@@ -51,7 +54,7 @@ const WorkDayForm = ({
   const addInterruption = (e: React.FormEvent, type: InterruptionWithTimeType) => {
     e.preventDefault();
     if (oneDay.interruptions.length >= 3) return
-    changeDay('interruptions',[...oneDay.interruptions, {id: uuidv4(), type, startTime: set(oneDay.startTime, { hours: 7, minutes: 30 }), endTime: set(oneDay.endTime, {hours: 7, minutes: 30}), time: new Decimal(0)}])
+    changeDay('interruptions',[...oneDay.interruptions, {id: uuidv4(), type, startTime: set(oneDay.startTime, officialStartTime), endTime: set(oneDay.endTime, officialStartTime), time: new Decimal(0)}])
   }
 
   const removeInterruption = (id: string) => {
@@ -64,7 +67,7 @@ const WorkDayForm = ({
 
   const changeDayType = (type: keyof typeof DAY_TYPES) => {
     setDayType(type)
-    setOneDay((day) => ({...DAY_TYPES[type], startTime: set(day.startTime, { hours: 7, minutes: 30 }), endTime: set(day.endTime, {hours: 15, minutes: 30}), month: day.month, year: day.year}))
+    setOneDay((day) => ({...DAY_TYPES[type](officialWorkTime), startTime: set(day.startTime, officialStartTime), endTime: set(day.endTime, officialEndTime), month: day.month, year: day.year}))
   }
 
   const isDisabled = dayType !== 'workType'
@@ -110,19 +113,17 @@ const WorkDayForm = ({
               <span className="text-lg font-semibold">{oneDay.workFromHome.toDecimalPlaces(3).toNumber()}</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox className="bg-white" disabled id="lunchTime" name="lunchTime" checked={oneDay.lunch}
-                // onCheckedChange={() => changeDay('lunch', !oneDay.lunch)}
+            {oneDay.lunch && (<Soup />)}
+              {/* <Checkbox className="bg-white" disabled id="lunchTime" name="lunchTime" checked={oneDay.lunch}
               />
               <label 
                 htmlFor="lunchTime"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 Obed
-              </label>
+              </label> */}
             </div>
           </div>
-          {/* <div className="flex items-center space-x-2">
-          </div> */}
           <div>
             <Label htmlFor="startTime">Začiatok</Label>
             <Input 

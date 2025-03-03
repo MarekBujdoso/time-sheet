@@ -1,7 +1,7 @@
 import Decimal from "decimal.js";
 import { WorkDayFull } from "./types";
 
-export const workType: WorkDayFull = {
+export const workType = (workTime: Decimal): WorkDayFull => ({
     month: 0,
     year: 0,
     startTime: new Date(),
@@ -13,13 +13,13 @@ export const workType: WorkDayFull = {
     compensatoryLeave: new Decimal(0),
     doctorsLeave: false,
     doctorsLeaveFamily: false,
-    dayWorked: new Decimal(7.5),
+    dayWorked: workTime,
     holiday: false,
     vacation: new Decimal(0),
     interruptions: [],
-}
+})
 
-export const holiday: WorkDayFull = {
+export const holiday = (workTime: Decimal): WorkDayFull => ({
     month: 0,
     year: 0,
     startTime: new Date(),
@@ -31,13 +31,13 @@ export const holiday: WorkDayFull = {
     compensatoryLeave: new Decimal(0),
     doctorsLeave: false,
     doctorsLeaveFamily: false,
-    dayWorked: new Decimal(7.5),
+    dayWorked: workTime,
     holiday: true,
     vacation: new Decimal(0),
     interruptions: [],
-}
+})
 
-export const vacation: WorkDayFull = {
+export const vacation = (workTime: Decimal): WorkDayFull => ({
     month: 0,
     year: 0,
     startTime: new Date(),
@@ -49,13 +49,13 @@ export const vacation: WorkDayFull = {
     compensatoryLeave: new Decimal(0),
     doctorsLeave: false,
     doctorsLeaveFamily: false,
-    dayWorked: new Decimal(7.5),
+    dayWorked: workTime,
     holiday: false,
-    vacation: new Decimal(7.5),
+    vacation: workTime,
     interruptions: [],
-}
+})
 
-export const sickLeave: WorkDayFull = {
+export const sickLeave = (): WorkDayFull => ({
     month: 0,
     year: 0,
     startTime: new Date(),
@@ -71,9 +71,9 @@ export const sickLeave: WorkDayFull = {
     holiday: false,
     vacation: new Decimal(0),
     interruptions: [],
-}
+})
 
-export const sickLeaveFamily: WorkDayFull = {
+export const sickLeaveFamily = (): WorkDayFull => ({
     month: 0,
     year: 0,
     startTime: new Date(),
@@ -89,9 +89,9 @@ export const sickLeaveFamily: WorkDayFull = {
     holiday: false,
     vacation: new Decimal(0),
     interruptions: [],
-}
+})
 
-export const doctorsLeave: WorkDayFull = {
+export const doctorsLeave = (): WorkDayFull => ({
     month: 0,
     year: 0,
     startTime: new Date(),
@@ -107,9 +107,9 @@ export const doctorsLeave: WorkDayFull = {
     holiday: false,
     vacation: new Decimal(0),
     interruptions: [],
-}
+})
 
-export const doctorsLeaveFamily: WorkDayFull = {
+export const doctorsLeaveFamily = (): WorkDayFull => ({
     month: 0,
     year: 0,
     startTime: new Date(),
@@ -125,9 +125,9 @@ export const doctorsLeaveFamily: WorkDayFull = {
     holiday: false,
     vacation: new Decimal(0),
     interruptions: [],
-}
+})
 
-export const compensatoryLeave: WorkDayFull = {
+export const compensatoryLeave = (workTime: Decimal): WorkDayFull => ({
     month: 0,
     year: 0,
     startTime: new Date(),
@@ -136,14 +136,14 @@ export const compensatoryLeave: WorkDayFull = {
     workFromHome: new Decimal(0),
     sickLeave: false,
     sickLeaveFamily: false,
-    compensatoryLeave: new Decimal(7.5),
+    compensatoryLeave: workTime,
     doctorsLeave: false,
     doctorsLeaveFamily: false,
-    dayWorked: new Decimal(7.5),
+    dayWorked: workTime,
     holiday: false,
     vacation: new Decimal(0),
     interruptions: [],
-}
+})
 
 export const DAY_TYPES = {
     workType,

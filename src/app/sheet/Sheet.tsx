@@ -11,6 +11,9 @@ import { DAY_TYPES } from "./dayTypes"
 import { isBefore } from "date-fns/isBefore"
 import { set } from "date-fns/set"
 import { isWeekend } from "date-fns/isWeekend"
+import { Button } from "../../components/ui/button"
+import ExcelJS from "exceljs"
+import { format } from "date-fns/format"
 
 const tempData: WorkDay[] = [
   {
@@ -232,6 +235,55 @@ const Sheet = () => {
     setMonthData(addMissingDays(activeYear, activeMonth, config))
   }, [config])
 
+  const generateEPC = () => {
+    console.log('generate EPC')
+    const month = format(monthData[0].startTime, 'MMMM')
+    // const year = monthData[0].startTime.getFullYear()
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet(`${month}`);
+    sheet.columns = [
+      { header: 'dni', key: 'day', width: 5 },
+      { header: 'príchod', key: 'startTime', width: 15 },
+      { header: 'odchod', key: 'endTime', width: 15 },
+      { header: 'čas (h)', key: 'lunch', width: 5 },
+      { header: 'od', key: 'intFrom', width: 15 },
+      { header: 'do', key: 'intTo', width: 15 },
+      { header: 'spolu', key: 'intTime', width: 15 },
+      { header: 'Nadčasové práca', key: 'overtime', width: 15 },
+      { header: 'NV', key: 'compensatory', width: 15 },
+      { header: 'Dovolenka', key: 'vacation', width: 15 },
+      { header: 'doma', key: 'home', width: 15 },
+      { header: 'pracovny cas', key: 'workTime', width: 15 },
+    ]
+    monthData.forEach((data) => {
+      sheet.addRow({
+        day: data.startTime.getDate(),
+        startTime: data.startTime.toLocaleTimeString(),
+        endTime: data.endTime.toLocaleTimeString(),
+        lunch: data.lunch ? 0.5 : '',
+        intFrom: '',
+        intTo: '',
+        intTime: '',
+        overtime: '',
+        compensatory: data.compensatoryLeave && data.compensatoryLeave.greaterThan(0) ? data.compensatoryLeave.toNumber() : '',
+        vacation: data.vacation && data.vacation.greaterThan(0) ? data.vacation.toNumber() : '',
+        home: data.workFromHome && data.workFromHome.greaterThan(0) ? data.workFromHome.toNumber() : '',
+        workTime: data.dayWorked.toNumber(),
+      })
+    }
+    )
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'epc.xlsx'
+      a.click()
+      window.URL.revokeObjectURL(url)
+    }
+    )
+  }
+
 
   return (
     <div className="flex flex-col w-full min-w-[400px] min-h-svh justify-top border-2 border-black p-2 rounded-lg ">
@@ -253,6 +305,7 @@ const Sheet = () => {
           ))}
         </div>
       </div>
+      <Button variant="default" type="button" onClick={generateEPC}>Generuj EPC</Button>
     </div>
   )
 }

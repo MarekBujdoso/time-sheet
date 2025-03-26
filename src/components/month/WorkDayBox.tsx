@@ -4,7 +4,7 @@ import Decimal from 'decimal.js';
 import { Soup } from 'lucide-react';
 import { useContext } from 'react';
 import ConfigContext from '../../app/sheet/ConfigContext';
-import { type WorkDay } from '../../app/sheet/types';
+import { InterruptionWithTimeType, type WorkDay } from '../../app/sheet/types';
 import { Button } from '../ui/button';
 import {
   Drawer,
@@ -16,6 +16,46 @@ import {
 } from '../ui/drawer';
 import { getTitle, isFullDay } from '../utils/workDay';
 import WorkDayForm from './WorkDayForm';
+
+// const calcPercentage = (part: Decimal, whole: Decimal): string => {
+//   console.log(part, whole);
+//   const perc = part.div(whole).times(100).toNumber().toFixed(0);
+//   console.log(perc);
+//   return '50';
+// }
+
+const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
+  const {
+    compensatoryLeave,
+    doctorsLeave,
+    doctorsLeaveFamily,
+    sickLeave,
+    sickLeaveFamily,
+    vacation,
+    holiday,
+    dayWorked,
+  } = workDay;
+  if (doctorsLeave) return 'bg-rose-200';
+  if (doctorsLeaveFamily) return 'bg-rose-200';
+  if (sickLeave) return 'bg-rose-200';
+  if (sickLeaveFamily) return 'bg-rose-200';
+  if (holiday) return 'bg-emerald-100';
+  if (compensatoryLeave?.greaterThan(0)) return 'bg-blue-200';
+  if (vacation?.equals(officialWorkTime)) return 'bg-emerald-100';
+  if (dayWorked.equals(officialWorkTime)) return 'bg-blue-200';
+  if (isWeekend(workDay.startTime)) return 'bg-emerald-100';
+  if (dayWorked.greaterThan(0)) {
+    // if (compensatoryLeave?.greaterThan(0)) return 'bg-gradient-to-r from-blue-200 to-rose-200';
+    if (vacation?.greaterThan(0)) return `bg-gradient-to-r from-blue-200 to-emerald-100`;
+    if (workDay.interruptions?.some((interruption) => 
+      (interruption.type === InterruptionWithTimeType.DOCTORS_LEAVE) ||
+      (interruption.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY)
+    
+    )) return `bg-gradient-to-r from-blue-200  to-rose-200`;
+    // return `bg-gradient-to-r from-blue-200 from-${calcPercentage(dayWorked, officialWorkTime)}% to-rose-200 to-100%`;
+  }
+  return 'bg-white';
+}
 
 interface WorkDayBoxProps {
   workDay: WorkDay;
@@ -58,7 +98,7 @@ const WorkDayBox = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
 
   return (
     <>
-      <div className='flex flex-row gap-1 items-center p-2 rounded-md border text-sm shadow-sm md:min-h-[100px]'>
+      <div className={`flex flex-row gap-1 items-center p-2 rounded-md border text-sm shadow-sm md:min-h-[100px] ${getBaseColor(workDay, config.officialWorkTime)}`}>
         <div className='flex flex-col'>
           <span className='text-xs font-semibold'>{format(startTime, 'dd.MM.')}</span>
           <span className='text-xs font-semibold'>{format(startTime, 'EEEEEE')}</span>
@@ -66,28 +106,28 @@ const WorkDayBox = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
         <div className='flex flex-col grow'>
           <span className='text-lg font-semibold self-start'>{title}</span>
         </div>
+        {hasDisturbance && (
+          <div className='grid gap-1'>
+            {compensatoryLeave.greaterThan(0) && (
+              <span className='text-s font-semibold'>NV: {compensatoryLeave.toNumber()}h</span>
+            )}
+            {vacation.greaterThan(0) && (
+              <span className='text-s font-semibold'>Dovolenka: {vacation.toNumber()}h</span>
+            )}
+            {doctorsLeaveTime.greaterThan(0) && (
+              <span className='text-s font-semibold'>P-čko: {doctorsLeaveTime.toNumber()}h</span>
+            )}
+            {doctorsLeaveFamilyTime.greaterThan(0) && (
+              <span className='text-s font-semibold'>
+                Doprovod: {doctorsLeaveFamilyTime.toNumber()}h
+              </span>
+            )}
+          </div>
+        )}
         {lunch && <Soup />}
         {dayWorked.greaterThan(0) && (
           <div className='flex flex-col w-14'>
             <span className='text-lg font-semibold'>{dayWorked.toDecimalPlaces(3).toNumber()}</span>
-          </div>
-        )}
-        {hasDisturbance && (
-          <div className='grid gap-1 text-end'>
-            {compensatoryLeave.greaterThan(0) && (
-              <span className='text-xs font-semibold'>NV: {compensatoryLeave.toNumber()}h</span>
-            )}
-            {vacation.greaterThan(0) && (
-              <span className='text-xs font-semibold'>Dovolenka: {vacation.toNumber()}h</span>
-            )}
-            {doctorsLeaveTime.greaterThan(0) && (
-              <span className='text-xs font-semibold'>P-čko: {doctorsLeaveTime.toNumber()}h</span>
-            )}
-            {doctorsLeaveFamilyTime.greaterThan(0) && (
-              <span className='text-xs font-semibold'>
-                Doprovod: {doctorsLeaveFamilyTime.toNumber()}h
-              </span>
-            )}
           </div>
         )}
         {!isWeekEnd && (

@@ -33,6 +33,8 @@ export interface WorkDayFull extends WorkDay {
 export enum InterruptionWithTimeType {
     DOCTORS_LEAVE = 'doctorsLeave',
     DOCTORS_LEAVE_FAMILY = 'doctorsLeaveFamily',
+    VACATION = 'vacation',
+    COMPENSATORY_LEAVE = 'compensatoryLeave',
 }
 
 export interface InterruptionTimeProps {

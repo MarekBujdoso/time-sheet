@@ -93,12 +93,12 @@ const tempData: WorkDay[] = [
     startTime: toDate(new Date(2025, 1, 3, 7, 30, 0)),
     endTime: toDate(new Date(2025, 1, 3, 15, 30, 0)),
     lunch: true,
-    compensatoryLeave: new Decimal(0.5),
+    compensatoryLeave: new Decimal(0),
     // doctorsLeave: new Decimal(0.5),
     // doctorsLeaveFamily: new Decimal(0.5),
-    dayWorked: new Decimal(4.5),
+    dayWorked: new Decimal(7),
     workFromHome: new Decimal(0),
-    vacation: new Decimal(0.5),
+    vacation: new Decimal(0),
     interruptions: [
       {
         id: uuidv4(),
@@ -107,13 +107,13 @@ const tempData: WorkDay[] = [
         endTime: toDate(new Date(2025, 1, 3, 8, 30, 0)),
         time: new Decimal(0.5),
       },
-      {
-        id: uuidv4(),
-        type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY,
-        startTime: toDate(new Date(2025, 1, 3, 9, 0, 0)),
-        endTime: toDate(new Date(2025, 1, 3, 9, 30, 0)),
-        time: new Decimal(0.5),
-      },
+      // {
+      //   id: uuidv4(),
+      //   type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY,
+      //   startTime: toDate(new Date(2025, 1, 3, 9, 0, 0)),
+      //   endTime: toDate(new Date(2025, 1, 3, 9, 30, 0)),
+      //   time: new Decimal(0.5),
+      // },
     ],
   },
   {
@@ -180,9 +180,9 @@ const addMissingDays = (
       const currentDay = new Date(activeYear, activeMonth - 1, i);
       if (isBefore(currentDay, new Date()) && !isWeekend(currentDay)) {
         data.push({
-          ...DAY_TYPES.workType(config.officialWorkTime),
-          startTime: set(currentDay, config.officialStartTime),
-          endTime: set(currentDay, config.officialEndTime),
+          ...DAY_TYPES.workDay(config.officialWorkTime),
+          startTime: set(currentDay, config.defaultStartTime),
+          endTime: set(currentDay, config.defaultEndTime),
           month: activeMonth,
           year: activeYear,
         });
@@ -301,14 +301,14 @@ const Sheet = () => {
 
       const row = sheet.addRow({
         day: data.startTime.getDate(),
-        startTime: isWorkingDay ? data.startTime.toLocaleTimeString() : title,
-        endTime: isWorkingDay ? data.endTime.toLocaleTimeString() : null,
+        startTime: isWorkingDay ? format(data.startTime, "HH: mm") : title,
+        endTime: isWorkingDay ? format(data.endTime, "HH:mm") : null,
         lunch: data.lunch ? 0.5 : '',
         intFrom: data.interruptions
-          ?.map((interruption) => interruption.startTime.toLocaleTimeString())
+          ?.map((interruption) => format(interruption.startTime, "HH:mm"))
           .join('\r\n'),
         intTo: data.interruptions
-          ?.map((interruption) => interruption.endTime.toLocaleTimeString())
+          ?.map((interruption) => format(interruption.endTime, "HH:mm"))
           .join('\r\n'),
         intTime: data.interruptions
           ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))

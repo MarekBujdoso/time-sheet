@@ -41,19 +41,53 @@ export const calculateWorked = (
 const updateTimes = (interruptions: InterruptionTimeProps[], currentDay: Date, config: ConfigContextType) => {
   const sortedInterruptions = interruptions
     .map((a) => a)
-    .sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+    .sort((b, a) => {
+      const res = b.startTime.getTime() - a.startTime.getTime()
+      return res === 0 ? b.endTime.getTime() - a.endTime.getTime() : res
+    });
+
   let startTime = set(currentDay, config.defaultStartTime);
   let endTime = set(currentDay, config.defaultEndTime);
   if (sortedInterruptions.length > 0) {
-    sortedInterruptions.forEach((interruption) => {
+    const mergedTimes: Array<{ startTime: Date; endTime: Date }> = [];
+    let startIndex = 0;
+    let endIndex = 1;
+    let interruption = sortedInterruptions[startIndex];
+    let start = interruption.startTime;
+    let end = interruption.endTime;
+    while(endIndex < sortedInterruptions.length && startIndex < sortedInterruptions.length) {
+      const nextInterruption = sortedInterruptions[endIndex];
+      const nextStart = nextInterruption.startTime;
+      const nextEnd = nextInterruption.endTime;
+      if (start <= nextStart && end <= nextEnd && nextStart <= end) {
+        end = nextEnd;
+        endIndex++;
+      } else if (start <= nextStart && end >= nextEnd) {
+        endIndex++;
+      } else {
+        mergedTimes.push({startTime: start, endTime: end});
+        startIndex = endIndex;
+        interruption = sortedInterruptions[startIndex];
+        start = interruption.startTime;
+        end = interruption.endTime;
+        endIndex++;
+      }
+      // if it is the last interruption, push it to the mergedTimes
+      if (endIndex >= sortedInterruptions.length) {
+        mergedTimes.push({startTime: start, endTime: end});
+      }
+    }
+
+    mergedTimes.forEach((interruption) => {
       if (
         startTime.getTime() >= interruption.startTime.getTime() &&
-        endTime.getTime() > interruption.endTime.getTime()
+        endTime.getTime() >= interruption.endTime.getTime()
       ) {
         startTime = interruption.endTime;
+
       }
     });
-    sortedInterruptions.reverse().forEach((interruption) => {
+    mergedTimes.reverse().forEach((interruption) => {
       if (
         startTime.getTime() < interruption.startTime.getTime() &&
         endTime.getTime() <= interruption.endTime.getTime()

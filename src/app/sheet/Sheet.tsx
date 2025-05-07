@@ -281,19 +281,85 @@ const Sheet = () => {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet(`${month}`);
     sheet.columns = [
-      { header: 'dni', key: 'day', width: 5 },
-      { header: 'príchod', key: 'startTime', width: 15 },
-      { header: 'odchod', key: 'endTime', width: 15 },
-      { header: 'čas (h)', key: 'lunch', width: 5 },
-      { header: 'od', key: 'intFrom', width: 7 },
-      { header: 'do', key: 'intTo', width: 7 },
-      { header: 'spolu', key: 'intTime', width: 6 },
-      { header: 'Nadčasové práca', key: 'overtime', width: 15 },
-      { header: 'NV', key: 'compensatory', width: 15 },
-      { header: 'Dovolenka', key: 'vacation', width: 15 },
-      { header: 'doma', key: 'home', width: 15 },
-      { header: 'pracovny cas', key: 'workTime', width: 15 },
+      {key: 'day', width: 3 },
+      {key: 'startTime', width: 9 },
+      {key: 'endTime', width: 9 },
+      {key: 'lunch', width: 6 },
+      {key: 'intFrom', width: 6 },
+      {key: 'intTo', width: 6 },
+      {key: 'intTime', width: 5 },
+      {key: 'overtime', width: 6 },
+      {key: 'compensatory', width: 6 },
+      {key: 'vacation', width: 6 },
+      {key: 'home', width: 6 },
+      {key: 'workTime', width: 7 },
+      {key: 'signature', width: 9 },
     ];
+    //                         A        B                    C    D           E   F  G                                                                                 H               I              J               K                   L                                  M
+    let row = sheet.addRow(['dni',  'Základný pracovný čas','', 'Prerušenie','','','',                                                                              'Nadčasová práca','Čerpanie NV','Dovolenka DOV','práca doma (PZ)','celkom odpracovaný pracovný čas',  'podpis zamestnanca']);
+    row.eachCell((cell) => {
+      cell.font = { bold: true, size: 10 };
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFDDE5C3' },
+        bgColor: { argb: 'FFDDE5C3' },
+      }
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: 'thin', color: { argb: 'FF000000' } },
+        left: { style: 'thin', color: { argb: 'FF000000' } },
+        right: { style: 'thin', color: { argb: 'FF000000' } },
+      };
+    }
+    );
+    row = sheet.addRow(['',     '','',                      'z toho prestávku v čase od 11:30 do 14:30','lekárske ošetrenie, sprevádzanie s členom rodiny na ošetrenie','','',     '',               '',           '',             '',               '',                                 '']);
+    row.eachCell((cell) => {
+      cell.font = { bold: true, size: 10 };
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFDDE5C3' },
+        bgColor: { argb: 'FFDDE5C3' },
+      };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: 'thin', color: { argb: 'FF000000' } },
+        left: { style: 'thin', color: { argb: 'FF000000' } },
+        right: { style: 'thin', color: { argb: 'FF000000' } },
+      };
+    }
+    );
+    row = sheet.addRow(['',     'príchod','odchod',         'čas /h/',                                  'od','do','spolu',                                      'čas /h/',        'čas /h/',    'čas /h/',      'čas /h/',        'čas /h/',                          '']);
+    row.eachCell((cell) => {
+      cell.font = { bold: true, size: 10 };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFDDE5C3' },
+        bgColor: { argb: 'FFDDE5C3' },
+      };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: 'thin', color: { argb: 'FF000000' } },
+        left: { style: 'thin', color: { argb: 'FF000000' } },
+        right: { style: 'thin', color: { argb: 'FF000000' } },
+      };
+    }
+    );
+    sheet.mergeCells('A1:A3'); //dni
+    sheet.mergeCells('B1:C2'); //Základný pracovný čas
+    sheet.mergeCells('D1:G1'); //Prerušenie
+    sheet.mergeCells('E2:G2');
+    sheet.mergeCells('H1:H2'); //Nadčasové práca
+    sheet.mergeCells('I1:I2'); //Čerpanie NV
+    sheet.mergeCells('J1:J2'); //Dovolenka DOV
+    sheet.mergeCells('K1:K2'); //práca doma (PZ)
+    sheet.mergeCells('L1:L2'); //celkom odpracovaný pracovný čas
+    sheet.mergeCells('M1:M3'); //podpis zamestnanca
     monthData.forEach((data) => {
       const title = getTitle(data, config);
       const isWorkingDay = title === 'Práca';
@@ -302,17 +368,20 @@ const Sheet = () => {
       const row = sheet.addRow({
         day: data.startTime.getDate(),
         startTime: isWorkingDay ? format(data.startTime, "HH: mm") : title,
-        endTime: isWorkingDay ? format(data.endTime, "HH:mm") : null,
+        endTime: isWorkingDay ? format(data.endTime, "HH:mm") : '',
         lunch: data.lunch ? 0.5 : '',
         intFrom: data.interruptions
+          ?.filter((interruption) => interruption.type !== 'compensatoryLeave')
           ?.map((interruption) => format(interruption.startTime, "HH:mm"))
-          .join('\r\n'),
+          .join('\r\n') ?? '',
         intTo: data.interruptions
+          ?.filter((interruption) => interruption.type !== 'compensatoryLeave')
           ?.map((interruption) => format(interruption.endTime, "HH:mm"))
-          .join('\r\n'),
+          .join('\r\n') ?? '',
         intTime: data.interruptions
+          ?.filter((interruption) => interruption.type !== 'compensatoryLeave')
           ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
-          .toNumber(),
+          .toNumber() ?? '',
         overtime: '',
         compensatory:
           data.compensatoryLeave && data.compensatoryLeave.greaterThan(0)
@@ -321,11 +390,23 @@ const Sheet = () => {
         vacation: data.vacation && data.vacation.greaterThan(0) ? data.vacation.toNumber() : '',
         home:
           data.workFromHome && data.workFromHome.greaterThan(0) ? data.workFromHome.toNumber() : '',
-        workTime: data.dayWorked.toNumber(),
+        workTime: data.dayWorked.toNumber() + (data.interruptions ?? []).filter((interruption) => interruption.type === 'compensatoryLeave').reduce((acc, interruption) => acc.plus(interruption?.time ?? new Decimal(0)), new Decimal(0)).toNumber(),
+        signature: '',
       });
-      row.height = 15 * (data.interruptions?.length ?? 1);
-      row.getCell('intFrom').alignment = { wrapText: true };
-      row.getCell('intTo').alignment = { wrapText: true };
+      // row.height = 15 * (data.interruptions?.length ?? 1);
+      // row.getCell('intFrom').alignment = { wrapText: true };
+      // row.getCell('intTo').alignment = { wrapText: true };
+      row.eachCell((cell) => {
+        cell.font = { size: 10 };
+        cell.alignment = { vertical: 'middle' };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FF000000' } },
+          bottom: { style: 'thin', color: { argb: 'FF000000' } },
+          left: { style: 'thin', color: { argb: 'FF000000' } },
+          right: { style: 'thin', color: { argb: 'FF000000' } },
+        };
+      }
+      );
     });
     workbook.xlsx.writeBuffer().then((buffer) => {
       const blob = new Blob([buffer], {

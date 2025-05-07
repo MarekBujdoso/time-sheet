@@ -21,6 +21,7 @@ const InterruptionTime = (props: InterruptionTimeCompProps) => {
   const config = useContext(ConfigContext);
   const { id, type, startTime, endTime, remove, update } = props
   const interruption = { id, type, startTime, endTime }
+  const isInvalid = startTime.getTime() > endTime.getTime()
 
   const interruptionTitle = DAY_INTERRUPTIONS_KEYS[type]
 
@@ -28,7 +29,7 @@ const InterruptionTime = (props: InterruptionTimeCompProps) => {
     <div className="col-span-2 flex items-center space-x-2 justify-between">
       <Label className="w-[100px]" htmlFor="doctorsLeave">{interruptionTitle}</Label>
       <div className="flex items-center space-x-1">
-        <Input className="w-[100px]"
+        <Input className={`w-[100px] ${isInvalid ? 'border-red-500' : ''}`}
           id="interruptionStart" name="interruptionStart"
           type="time"
           min={`${String(config.officialStartTime.hours).padStart(2,'0')}:${config.officialStartTime.minutes}`}
@@ -41,7 +42,7 @@ const InterruptionTime = (props: InterruptionTimeCompProps) => {
             update({...interruption, startTime: newStartTime, time: new Decimal(differenceInMinutes(endTime, newStartTime) / 60)})
           }}
         />
-        <Input className="w-[100px]"
+        <Input className={`w-[100px] ${isInvalid ? 'border-red-500' : ''}`}
             id="interruptionEnd" name="interruptionEnd"
           type="time"
           min={`${String(config.officialStartTime.hours).padStart(2,'0')}:${config.officialStartTime.minutes}`}

@@ -282,9 +282,9 @@ const Sheet = () => {
     const sheet = workbook.addWorksheet(`${month}`);
     sheet.columns = [
       {key: 'day', width: 3 },
-      {key: 'startTime', width: 9 },
-      {key: 'endTime', width: 9 },
-      {key: 'lunch', width: 6 },
+      {key: 'startTime', width: 8 },
+      {key: 'endTime', width: 8 },
+      {key: 'lunch', width: 8 },
       {key: 'intFrom', width: 6 },
       {key: 'intTo', width: 6 },
       {key: 'intTime', width: 5 },
@@ -297,9 +297,9 @@ const Sheet = () => {
     ];
     //                         A        B                    C    D           E   F  G                                                                                 H               I              J               K                   L                                  M
     let row = sheet.addRow(['dni',  'Základný pracovný čas','', 'Prerušenie','','','',                                                                              'Nadčasová práca','Čerpanie NV','Dovolenka DOV','práca doma (PZ)','celkom odpracovaný pracovný čas',  'podpis zamestnanca']);
-    row.eachCell((cell) => {
+    row.eachCell((cell, collNumber) => {
       cell.font = { bold: true, size: 10 };
-      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true, textRotation: [1,8,12,13].includes(collNumber) ? 90 : 0, };
       cell.fill = {
         type: 'pattern',
         pattern: 'solid',
@@ -315,8 +315,9 @@ const Sheet = () => {
     }
     );
     row = sheet.addRow(['',     '','',                      'z toho prestávku v čase od 11:30 do 14:30','lekárske ošetrenie, sprevádzanie s členom rodiny na ošetrenie','','',     '',               '',           '',             '',               '',                                 '']);
-    row.eachCell((cell) => {
-      cell.font = { bold: true, size: 10 };
+    row.eachCell((cell, colNumber) => {
+
+      cell.font = { bold: true, size: colNumber === 4 ? 7.5 : 10 };
       cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
       cell.fill = {
         type: 'pattern',
@@ -393,18 +394,26 @@ const Sheet = () => {
         workTime: data.dayWorked.toNumber() + (data.interruptions ?? []).filter((interruption) => interruption.type === 'compensatoryLeave').reduce((acc, interruption) => acc.plus(interruption?.time ?? new Decimal(0)), new Decimal(0)).toNumber(),
         signature: '',
       });
-      // row.height = 15 * (data.interruptions?.length ?? 1);
+      row.height = 10 //* (data.interruptions?.length ?? 1);
       // row.getCell('intFrom').alignment = { wrapText: true };
       // row.getCell('intTo').alignment = { wrapText: true };
-      row.eachCell((cell) => {
+      row.eachCell((cell, colNumber) => {
         cell.font = { size: 10 };
-        cell.alignment = { vertical: 'middle' };
+        cell.alignment = { horizontal: 'center' };
         cell.border = {
           top: { style: 'thin', color: { argb: 'FF000000' } },
           bottom: { style: 'thin', color: { argb: 'FF000000' } },
           left: { style: 'thin', color: { argb: 'FF000000' } },
           right: { style: 'thin', color: { argb: 'FF000000' } },
         };
+        if (title === 'Víkend' || [7,12].includes(colNumber)) {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFDDE5C3' },
+            bgColor: { argb: 'FFDDE5C3' },
+          };
+        }
       }
       );
     });

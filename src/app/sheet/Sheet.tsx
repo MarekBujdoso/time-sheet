@@ -13,6 +13,7 @@ import { set } from 'date-fns/set';
 import { isWeekend } from 'date-fns/isWeekend';
 import { Button } from '../../components/ui/button';
 import { generateEPC } from '../../utils/excelUtils';
+import { calcCompensatoryLeave, calcDoctorsLeave, calcDoctorsLeaveFamily, calcSickLeave, calcSickLeaveFamily, calcWorked } from '../../components/utils/calculations';
 
 const tempData: WorkDay[] = [
   {
@@ -186,19 +187,11 @@ const addMissingDays = (
         });
       } else {
         data.push({
+          ...DAY_TYPES.emptyDay(),
           month: activeMonth,
           year: activeYear,
           startTime: currentDay,
           endTime: currentDay,
-          lunch: false,
-          compensatoryLeave: new Decimal(0),
-          doctorsLeave: false,
-          doctorsLeaveFamily: false,
-          sickLeaveFamily: false,
-          dayWorked: new Decimal(0),
-          workFromHome: new Decimal(0),
-          sickLeave: false,
-          holiday: false,
         });
       }
     }
@@ -209,49 +202,16 @@ const addMissingDays = (
 const Sheet = () => {
   const config = useContext(ConfigContext);
   // const currentMonth = new Date().getMonth() + 1
-  const [monthData, setMonthData] = React.useState(
+  const [monthData, setMonthData] = React.useState<WorkDay[]>(
     addMissingDays(new Date().getFullYear(), new Date().getMonth() + 1, config),
   );
 
-  const sickLeave = monthData
-    .filter((data) => data.sickLeave)
-    .reduce(
-      (acc, data) => acc.plus(data.sickLeave ? config.officialWorkTime : new Decimal(0)),
-      new Decimal(0),
-    );
-  const sickLeaveDays = sickLeave.dividedBy(config.officialWorkTime).toFixed(1);
-  const doctorsLeave = monthData
-    .filter((data) => data.doctorsLeave)
-    .reduce(
-      (acc, data) => acc.plus(data.doctorsLeave ? config.officialWorkTime : new Decimal(0)),
-      new Decimal(0),
-    ); // add time from interruptions
-  const doctorsLeaveDays = doctorsLeave.dividedBy(config.officialWorkTime).toFixed(1);
-  const doctorsLeaveFamily = monthData
-    .filter((data) => data.doctorsLeaveFamily)
-    .reduce(
-      (acc, data) => acc.plus(data.doctorsLeaveFamily ? config.officialWorkTime : new Decimal(0)),
-      new Decimal(0),
-    );
-  const doctorsLeaveFamilyDays = doctorsLeaveFamily.dividedBy(config.officialWorkTime).toFixed(1);
-  const worked = monthData
-    .filter((data) => data.dayWorked)
-    .reduce((acc, data) => acc.plus(data.dayWorked.toNumber()), new Decimal(0));
-  const workedDays = worked.dividedBy(config.officialWorkTime).toFixed(1);
-  const compensatoryLeave = monthData
-    .filter((data) => data.compensatoryLeave)
-    .reduce(
-      (acc, data) => acc.plus(data.compensatoryLeave?.toNumber() ?? new Decimal(0)),
-      new Decimal(0),
-    );
-  const compensatoryLeaveDays = compensatoryLeave.dividedBy(config.officialWorkTime).toFixed(1);
-  const sickLeaveFamily = monthData
-    .filter((data) => data.sickLeaveFamily)
-    .reduce(
-      (acc, data) => acc.plus(data.sickLeaveFamily ? config.officialWorkTime : new Decimal(0)),
-      new Decimal(0),
-    );
-  const sickLeaveFamilyDays = sickLeaveFamily.dividedBy(config.officialWorkTime).toFixed(1);
+  const [sickLeave, sickLeaveDays] = calcSickLeave(monthData, config);
+  const [sickLeaveFamily, sickLeaveFamilyDays] = calcSickLeaveFamily(monthData, config);
+  const [doctorsLeave, doctorsLeaveDays] = calcDoctorsLeave(monthData, config);
+  const [doctorsLeaveFamily, doctorsLeaveFamilyDays] = calcDoctorsLeaveFamily(monthData, config);
+  const [worked, workedDays] = calcWorked(monthData, config);
+  const [compensatoryLeave, compensatoryLeaveDays] = calcCompensatoryLeave(monthData, config);
 
   const saveWorkDay = React.useCallback((workDay: WorkDay) => {
     setMonthData((month) => {
@@ -278,22 +238,22 @@ const Sheet = () => {
       <div className='grid auto-rows-min gap-2 md:grid-cols-3 grid-cols-2'>
         {/* <div className="flex flex-col"> */}
         <span>
-          odpr.: {worked.toNumber()}h / {workedDays}d
+          odpr.: {worked.toNumber()}h / {workedDays.toFixed(1)}d
         </span>
         <span>
-          NV: {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays}d
+          NV: {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
         </span>
         <span>
-          P-cko: {doctorsLeave.toNumber()}h / {doctorsLeaveDays}d
+          P-cko: {doctorsLeave.toNumber()}h / {doctorsLeaveDays.toFixed(1)}d
         </span>
         <span>
-          Dopr.: {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays}d
+          Dopr.: {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays.toFixed(1)}d
         </span>
         <span>
-          PN: {sickLeave.toNumber()}h / {sickLeaveDays}d
+          PN: {sickLeave.toNumber()}h / {sickLeaveDays.toFixed(1)}d
         </span>
         <span>
-          OCR: {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays}d
+          OCR: {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays.toFixed(1)}d
         </span>
         {/* </div> */}
       </div>

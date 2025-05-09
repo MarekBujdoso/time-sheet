@@ -163,6 +163,24 @@ export const weekend = (): WorkDayFull => ({
   interruptions: [],
 });
 
+export const emptyDay = (): WorkDayFull => ({
+  month: 0,
+  year: 0,
+  startTime: new Date(),
+  endTime: new Date(),
+  lunch: false,
+  workFromHome: new Decimal(0),
+  sickLeave: false,
+  sickLeaveFamily: false,
+  compensatoryLeave: new Decimal(0),
+  doctorsLeave: false,
+  doctorsLeaveFamily: false,
+  dayWorked: new Decimal(0),
+  holiday: false,
+  vacation: new Decimal(0),
+  interruptions: [],
+});
+
 export const DAY_TYPES = {
   workDay,
   holiday,
@@ -173,6 +191,7 @@ export const DAY_TYPES = {
   doctorsLeaveFamily,
   compensatoryLeave,
   weekend,
+  emptyDay,
 };
 
 export enum DAY_TYPES_KEYS {

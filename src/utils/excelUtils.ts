@@ -1,9 +1,15 @@
-import ExcelJS from 'exceljs';
 import { format } from 'date-fns/format';
-import { getTitle } from '../components/utils/workDay';
+import Decimal from 'decimal.js';
+import ExcelJS from 'exceljs';
 import { ConfigContextType } from '../app/sheet/ConfigContext';
 import { WorkDay } from '../app/sheet/types';
-import Decimal from 'decimal.js';
+import {
+  calcDoctorsLeave,
+  calcDoctorsLeaveFamily,
+  calcSickLeave,
+  calcSickLeaveFamily,
+} from '../components/utils/calculations';
+import { getTitle } from '../components/utils/workDay';
 import { getMonthName } from './skUtils';
 
 const BLACK_COLOR = 'FF000000';
@@ -33,7 +39,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
   const month = monthData[0].month;
   const year = monthData[0].year;
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet(`${month}`);
+  const sheet = workbook.addWorksheet(`${getMonthName(month)}`);
   sheet.columns = [
     { key: 'day', width: 3 },
     { key: 'startTime', width: 8 },
@@ -178,6 +184,11 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
     const title = getTitle(data, config);
     const isWorkingDay = title === 'Práca';
     // data.interruptions.forEach((interruption) => {
+    console.log(
+      data.interruptions)
+    const negativeInterruptions = data.interruptions?.filter(
+      (interruption) => interruption.type !== 'compensatoryLeave',
+    ) ?? [];
 
     const row = sheet.addRow({
       day: data.startTime.getDate(),
@@ -185,20 +196,17 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
       endTime: isWorkingDay ? format(data.endTime, 'HH:mm') : '',
       lunch: data.lunch ? 0.5 : '',
       intFrom:
-        data.interruptions
-          ?.filter((interruption) => interruption.type !== 'compensatoryLeave')
+        negativeInterruptions
           ?.map((interruption) => format(interruption.startTime, 'HH:mm'))
           .join('\r\n') ?? '',
       intTo:
-        data.interruptions
-          ?.filter((interruption) => interruption.type !== 'compensatoryLeave')
+        negativeInterruptions
           ?.map((interruption) => format(interruption.endTime, 'HH:mm'))
           .join('\r\n') ?? '',
       intTime:
-        data.interruptions
-          ?.filter((interruption) => interruption.type !== 'compensatoryLeave')
+        negativeInterruptions?.length > 0 ? negativeInterruptions
           ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
-          .toNumber() ?? '',
+          .toNumber() ?? '' : '',
       overtime: '',
       compensatory:
         data.compensatoryLeave && data.compensatoryLeave.greaterThan(0)
@@ -259,6 +267,10 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
   row.eachCell((cell) => {
     cell.font = { size: 10 };
   });
+  const [doctorsLeave] = calcDoctorsLeave(monthData, config);
+  const [doctorsLeaveFamily] = calcDoctorsLeaveFamily(monthData, config);
+  const [sickLeave] = calcSickLeave(monthData, config);
+  const [sickLeaveFamily] = calcSickLeaveFamily(monthData, config);
   row = sheet.addRow([
     '',
     '',
@@ -352,7 +364,21 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
     }
   });
   sheet.mergeCells(`I${sheet.rowCount}:K${sheet.rowCount}`);
-  row = sheet.addRow(['', '', '', '', '', '', '', '', 'PN, OČR', null, null, 36, 36]);
+  row = sheet.addRow([
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    'PN, OČR',
+    null,
+    null,
+    { formula: `M${sheet.rowCount + 1}/H2` },
+    sickLeave.plus(sickLeaveFamily).toNumber(),
+  ]);
   row.eachCell((cell, collNumber) => {
     cell.font = { size: 10 };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
@@ -361,7 +387,21 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
     }
   });
   sheet.mergeCells(`I${sheet.rowCount}:K${sheet.rowCount}`);
-  row = sheet.addRow(['', '', '', '', '', '', '', '', 'SČR na O ("péčko")', null, null, 37, 37]);
+  row = sheet.addRow([
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    'SČR na O ("péčko")',
+    null,
+    null,
+    { formula: `M${sheet.rowCount + 1}/H2` },
+    doctorsLeaveFamily.toNumber(),
+  ]);
   row.eachCell((cell, collNumber) => {
     cell.font = { size: 10 };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
@@ -382,12 +422,15 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
     'lekárske ošetrenie ("péčko")',
     null,
     null,
-    38,
-    38,
+    { formula: `M${sheet.rowCount + 1}/H2` },
+    doctorsLeave.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
     cell.font = { size: 10 };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
+    if (collNumber === 12) {
+      cell.numFmt = '0.0';
+    }
     if (collNumber > 8) {
       borderCell(cell);
     }

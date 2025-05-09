@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js';
-import { InterruptionTimeProps, WorkDayFull } from '../../app/sheet/types';
+import { InterruptionTimeProps, InterruptionWithTimeType, WorkDay, WorkDayFull } from '../../app/sheet/types';
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
 import { differenceInMinutes } from 'date-fns/differenceInMinutes';
@@ -137,3 +137,72 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
 //     workFromHome
 //   }
 // }
+
+export const calcSickLeave = (monthData: WorkDay[], config: ConfigContextType) => {
+  const sickLeave = monthData
+    .filter((data) => data.sickLeave)
+    .reduce(
+      (acc, data) => acc.plus(data.sickLeave ? config.officialWorkTime : new Decimal(0)),
+      new Decimal(0),
+    );
+  const sickLeaveDays = sickLeave.dividedBy(config.officialWorkTime);
+  return [sickLeave, sickLeaveDays];
+};
+
+export const calcDoctorsLeave = (monthData: WorkDay[], config: ConfigContextType) => {
+  const doctorsLeave = monthData
+    .filter((data) => data.doctorsLeave || data.interruptions?.some((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE))
+    .reduce(
+      (acc, data) => acc
+        .plus(data.doctorsLeave ? config.officialWorkTime : new Decimal(0))
+        .plus(data.interruptions?.filter((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE)
+          .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0)),
+      new Decimal(0),
+    ); // add time from interruptions
+  const doctorsLeaveDays = doctorsLeave.dividedBy(config.officialWorkTime);
+  return [doctorsLeave, doctorsLeaveDays];
+};
+
+export const calcDoctorsLeaveFamily = (monthData: WorkDay[], config: ConfigContextType) => {
+  const doctorsLeaveFamily = monthData
+    .filter((data) => data.doctorsLeaveFamily || data.interruptions?.some((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY))
+    .reduce(
+      (acc, data) => acc
+        .plus(data.doctorsLeaveFamily ? config.officialWorkTime : new Decimal(0))
+        .plus(data.interruptions?.filter((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY)
+          .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0)),
+      new Decimal(0),
+    );
+  const doctorsLeaveFamilyDays = doctorsLeaveFamily.dividedBy(config.officialWorkTime);
+  return [doctorsLeaveFamily, doctorsLeaveFamilyDays];
+};
+
+export const calcWorked = (monthData: WorkDay[], config: ConfigContextType) => { 
+  const worked = monthData
+    .filter((data) => data.dayWorked)
+    .reduce((acc, data) => acc.plus(data.dayWorked.toNumber()), new Decimal(0));
+  const workedDays = worked.dividedBy(config.officialWorkTime);
+  return [worked, workedDays];
+};
+
+export const calcCompensatoryLeave = (monthData: WorkDay[], config: ConfigContextType) => {
+  const compensatoryLeave = monthData
+    .filter((data) => data.compensatoryLeave)
+    .reduce(
+      (acc, data) => acc.plus(data.compensatoryLeave?.toNumber() ?? new Decimal(0)),
+      new Decimal(0),
+    );
+  const compensatoryLeaveDays = compensatoryLeave.dividedBy(config.officialWorkTime);
+  return [compensatoryLeave, compensatoryLeaveDays];
+};
+
+export const calcSickLeaveFamily = (monthData: WorkDay[], config: ConfigContextType) => {
+  const sickLeaveFamily = monthData
+    .filter((data) => data.sickLeaveFamily)
+    .reduce(
+      (acc, data) => acc.plus(data.sickLeaveFamily ? config.officialWorkTime : new Decimal(0)),
+      new Decimal(0),
+    );
+  const sickLeaveFamilyDays = sickLeaveFamily.dividedBy(config.officialWorkTime);
+  return [sickLeaveFamily, sickLeaveFamilyDays];
+};

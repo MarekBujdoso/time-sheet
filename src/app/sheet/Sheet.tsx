@@ -12,9 +12,7 @@ import { isBefore } from 'date-fns/isBefore';
 import { set } from 'date-fns/set';
 import { isWeekend } from 'date-fns/isWeekend';
 import { Button } from '../../components/ui/button';
-import ExcelJS from 'exceljs';
-import { format } from 'date-fns/format';
-import { getTitle } from '../../components/utils/workDay';
+import { generateEPC } from '../../utils/excelUtils';
 
 const tempData: WorkDay[] = [
   {
@@ -274,162 +272,6 @@ const Sheet = () => {
     [config],
   );
 
-  const generateEPC = () => {
-    console.log('generate EPC');
-    const month = format(monthData[0].startTime, 'MMMM');
-    // const year = monthData[0].startTime.getFullYear()
-    const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet(`${month}`);
-    sheet.columns = [
-      {key: 'day', width: 3 },
-      {key: 'startTime', width: 8 },
-      {key: 'endTime', width: 8 },
-      {key: 'lunch', width: 8 },
-      {key: 'intFrom', width: 6 },
-      {key: 'intTo', width: 6 },
-      {key: 'intTime', width: 5 },
-      {key: 'overtime', width: 6 },
-      {key: 'compensatory', width: 6 },
-      {key: 'vacation', width: 6 },
-      {key: 'home', width: 6 },
-      {key: 'workTime', width: 7 },
-      {key: 'signature', width: 9 },
-    ];
-    //                         A        B                    C    D           E   F  G                                                                                 H               I              J               K                   L                                  M
-    let row = sheet.addRow(['dni',  'Základný pracovný čas','', 'Prerušenie','','','',                                                                              'Nadčasová práca','Čerpanie NV','Dovolenka DOV','práca doma (PZ)','celkom odpracovaný pracovný čas',  'podpis zamestnanca']);
-    row.eachCell((cell, collNumber) => {
-      cell.font = { bold: true, size: 10 };
-      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true, textRotation: [1,8,12,13].includes(collNumber) ? 90 : 0, };
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFDDE5C3' },
-        bgColor: { argb: 'FFDDE5C3' },
-      }
-      cell.border = {
-        top: { style: 'thin', color: { argb: 'FF000000' } },
-        bottom: { style: 'thin', color: { argb: 'FF000000' } },
-        left: { style: 'thin', color: { argb: 'FF000000' } },
-        right: { style: 'thin', color: { argb: 'FF000000' } },
-      };
-    }
-    );
-    row = sheet.addRow(['',     '','',                      'z toho prestávku v čase od 11:30 do 14:30','lekárske ošetrenie, sprevádzanie s členom rodiny na ošetrenie','','',     '',               '',           '',             '',               '',                                 '']);
-    row.eachCell((cell, colNumber) => {
-
-      cell.font = { bold: true, size: colNumber === 4 ? 7.5 : 10 };
-      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFDDE5C3' },
-        bgColor: { argb: 'FFDDE5C3' },
-      };
-      cell.border = {
-        top: { style: 'thin', color: { argb: 'FF000000' } },
-        bottom: { style: 'thin', color: { argb: 'FF000000' } },
-        left: { style: 'thin', color: { argb: 'FF000000' } },
-        right: { style: 'thin', color: { argb: 'FF000000' } },
-      };
-    }
-    );
-    row = sheet.addRow(['',     'príchod','odchod',         'čas /h/',                                  'od','do','spolu',                                      'čas /h/',        'čas /h/',    'čas /h/',      'čas /h/',        'čas /h/',                          '']);
-    row.eachCell((cell) => {
-      cell.font = { bold: true, size: 10 };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFDDE5C3' },
-        bgColor: { argb: 'FFDDE5C3' },
-      };
-      cell.border = {
-        top: { style: 'thin', color: { argb: 'FF000000' } },
-        bottom: { style: 'thin', color: { argb: 'FF000000' } },
-        left: { style: 'thin', color: { argb: 'FF000000' } },
-        right: { style: 'thin', color: { argb: 'FF000000' } },
-      };
-    }
-    );
-    sheet.mergeCells('A1:A3'); //dni
-    sheet.mergeCells('B1:C2'); //Základný pracovný čas
-    sheet.mergeCells('D1:G1'); //Prerušenie
-    sheet.mergeCells('E2:G2');
-    sheet.mergeCells('H1:H2'); //Nadčasové práca
-    sheet.mergeCells('I1:I2'); //Čerpanie NV
-    sheet.mergeCells('J1:J2'); //Dovolenka DOV
-    sheet.mergeCells('K1:K2'); //práca doma (PZ)
-    sheet.mergeCells('L1:L2'); //celkom odpracovaný pracovný čas
-    sheet.mergeCells('M1:M3'); //podpis zamestnanca
-    monthData.forEach((data) => {
-      const title = getTitle(data, config);
-      const isWorkingDay = title === 'Práca';
-      // data.interruptions.forEach((interruption) => {
-
-      const row = sheet.addRow({
-        day: data.startTime.getDate(),
-        startTime: isWorkingDay ? format(data.startTime, "HH: mm") : title,
-        endTime: isWorkingDay ? format(data.endTime, "HH:mm") : '',
-        lunch: data.lunch ? 0.5 : '',
-        intFrom: data.interruptions
-          ?.filter((interruption) => interruption.type !== 'compensatoryLeave')
-          ?.map((interruption) => format(interruption.startTime, "HH:mm"))
-          .join('\r\n') ?? '',
-        intTo: data.interruptions
-          ?.filter((interruption) => interruption.type !== 'compensatoryLeave')
-          ?.map((interruption) => format(interruption.endTime, "HH:mm"))
-          .join('\r\n') ?? '',
-        intTime: data.interruptions
-          ?.filter((interruption) => interruption.type !== 'compensatoryLeave')
-          ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
-          .toNumber() ?? '',
-        overtime: '',
-        compensatory:
-          data.compensatoryLeave && data.compensatoryLeave.greaterThan(0)
-            ? data.compensatoryLeave.toNumber()
-            : '',
-        vacation: data.vacation && data.vacation.greaterThan(0) ? data.vacation.toNumber() : '',
-        home:
-          data.workFromHome && data.workFromHome.greaterThan(0) ? data.workFromHome.toNumber() : '',
-        workTime: data.dayWorked.toNumber() + (data.interruptions ?? []).filter((interruption) => interruption.type === 'compensatoryLeave').reduce((acc, interruption) => acc.plus(interruption?.time ?? new Decimal(0)), new Decimal(0)).toNumber(),
-        signature: '',
-      });
-      row.height = 10 //* (data.interruptions?.length ?? 1);
-      // row.getCell('intFrom').alignment = { wrapText: true };
-      // row.getCell('intTo').alignment = { wrapText: true };
-      row.eachCell((cell, colNumber) => {
-        cell.font = { size: 10 };
-        cell.alignment = { horizontal: 'center' };
-        cell.border = {
-          top: { style: 'thin', color: { argb: 'FF000000' } },
-          bottom: { style: 'thin', color: { argb: 'FF000000' } },
-          left: { style: 'thin', color: { argb: 'FF000000' } },
-          right: { style: 'thin', color: { argb: 'FF000000' } },
-        };
-        if (title === 'Víkend' || [7,12].includes(colNumber)) {
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: 'FFDDE5C3' },
-            bgColor: { argb: 'FFDDE5C3' },
-          };
-        }
-      }
-      );
-    });
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      const blob = new Blob([buffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'epc.xlsx';
-      a.click();
-      window.URL.revokeObjectURL(url);
-    });
-  };
-
   return (
     <div className='flex flex-col w-full min-w-[400px] min-h-svh justify-top border-2 border-black p-2 rounded-lg '>
       <MonthPager update={updateMonthData} />
@@ -466,7 +308,7 @@ const Sheet = () => {
           ))}
         </div>
       </div>
-      <Button variant='default' type='button' onClick={generateEPC}>
+      <Button variant='default' type='button' onClick={() => generateEPC(config, monthData)}>
         Generuj EPC
       </Button>
     </div>

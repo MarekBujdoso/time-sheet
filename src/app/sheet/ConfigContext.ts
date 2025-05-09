@@ -2,6 +2,7 @@ import Decimal from "decimal.js"
 import React from "react"
 
 export interface ConfigContextType {
+  userName: string
   officialWorkTime: Decimal
   lunchBreak: number
   officialStartTime: {hours: number, minutes: number}
@@ -11,6 +12,7 @@ export interface ConfigContextType {
 }
 
 const ConfigContext = React.createContext<ConfigContextType>({
+  userName: 'Janko Hrasko',
   officialWorkTime: new Decimal(7.5),
   lunchBreak: 0.5,
   officialStartTime: {hours: 7, minutes: 30}, 

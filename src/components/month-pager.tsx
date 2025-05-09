@@ -1,21 +1,6 @@
 import React from "react"
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination"
-
-
-const monthsMap: { [key: number]: string } = {
-  1: "Januar", 
-  2: "Februar", 
-  3: "Marec", 
-  4: "April", 
-  5: "Maj", 
-  6: "Jun", 
-  7: "Jul", 
-  8: "August", 
-  9: "September", 
-  10: "Oktober", 
-  11: "November", 
-  12: "December",
-}
+import { getMonthName } from "../utils/skUtils"
 
 interface MonthPagerProps {
   update: (month: number, year: number) => void
@@ -55,7 +40,7 @@ const MonthPager = ({ update }: MonthPagerProps) => {
             <PaginationLink className="w-40 select-none" onClick={handleMonth} isActive>{monthsMap[activeMonth]}</PaginationLink>
           </PaginationItem> */}
           <div className="w-40 select-none font-semibold">
-            {`${monthsMap[activeMonth]} ${activeYear}`}
+            {`${getMonthName(activeMonth)} ${activeYear}`}
           </div>
           {/* <PaginationItem>
             <PaginationLink href="#">3</PaginationLink>

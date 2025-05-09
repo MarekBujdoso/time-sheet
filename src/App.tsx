@@ -11,6 +11,7 @@ function App() {
   return (
     <ConfigContext.Provider
       value={{
+        userName: 'Judita Bujdosoova',
         officialWorkTime: new Decimal(7.5),
         lunchBreak: 0.5,
         officialStartTime: { hours: 7, minutes: 30 },

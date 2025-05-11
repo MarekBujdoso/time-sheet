@@ -2,7 +2,8 @@ import Decimal from 'decimal.js';
 import { InterruptionTimeProps, InterruptionWithTimeType, WorkDay, WorkDayFull } from '../../app/sheet/types';
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
-import { differenceInMinutes } from 'date-fns/differenceInMinutes';
+// import { differenceInMinutes } from 'date-fns/differenceInMinutes';
+import { format } from 'date-fns/format';
 
 const calculateLunch = (workedHours: Decimal) => {
   return workedHours.greaterThanOrEqualTo(6) ? new Decimal(0.5) : new Decimal(0);
@@ -30,14 +31,6 @@ export const calculateWorked = (
   };
 };
 
-// const calculateOfficialWork = (
-//   workedHours: Decimal,
-//   interruptions: InterruptionTimeProps[] = [],
-// ) => {
-//   const interruptionsTime = interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0));
-//   return workedHours.minus(interruptionsTime);
-// };
-
 const updateTimes = (interruptions: InterruptionTimeProps[], currentDay: Date, config: ConfigContextType) => {
   const sortedInterruptions = interruptions
     .map((a) => a)
@@ -48,6 +41,7 @@ const updateTimes = (interruptions: InterruptionTimeProps[], currentDay: Date, c
 
   let startTime = set(currentDay, config.defaultStartTime);
   let endTime = set(currentDay, config.defaultEndTime);
+  let interruptionHours = new Decimal(0);
   if (sortedInterruptions.length > 0) {
     const mergedTimes: Array<{ startTime: Date; endTime: Date }> = [];
     let startIndex = 0;
@@ -95,21 +89,22 @@ const updateTimes = (interruptions: InterruptionTimeProps[], currentDay: Date, c
         endTime = interruption.startTime;
       }
     });
+    interruptionHours = mergedTimes.reduce((acc, interruption) => {
+      return acc.plus(interruption.endTime.getTime()/1000/60/60).minus(interruption.startTime.getTime()/1000/60/60);
+    }
+    , new Decimal(0));
   }
+  const lunch = interruptionHours.lessThanOrEqualTo(1.5);
 
-  return { startTime, endTime };
+  return { startTime, endTime: !lunch && format(endTime, 'HH:mm') === `${config.defaultEndTime.hours}:${config.defaultEndTime.minutes}` ? set(endTime, {minutes: 0}) : endTime , interruptionHours, lunch };
 };
 
 export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextType) => {
-  // const officialWork = calculateOfficialWork(config.officialWorkTime, workDay.interruptions);
-  // const lunchTime = calculateLunch(officialWork.plus(new Decimal(0.5)));
   const currentDay = new Date(workDay.startTime);
-  const { startTime, endTime } = updateTimes(workDay.interruptions, currentDay, config);
-  const workedTime = new Decimal(differenceInMinutes(endTime, startTime)).dividedBy(60)
-  const {dayWorked, lunch } = calculateWorked(workedTime, currentDay, workDay.interruptions, config)
+  const { startTime, endTime, interruptionHours, lunch } = updateTimes(workDay.interruptions, currentDay, config);
+  const dayWorked = config.officialWorkTime.minus(interruptionHours);
   const compensatoryLeave = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'compensatoryLeave'))
   const vacation = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'vacation'))
-  // const worked = config.officialWork.minus(dayWorked)
   // const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
   const workFromHome = new Decimal(0)
   return {
@@ -123,20 +118,6 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
     vacation,
   };
 };
-// export const recalculateWorkDay = (workDay: WorkDayFull, officialWorkTime: Decimal) => {
-//   const workedTime = new Decimal(differenceInMinutes(workDay.endTime, workDay.startTime)).dividedBy(60)
-//   // const workedTime = officialWorkTime.plus(calculateLunch(officialWorkTime))
-//   const {dayWorked, lunch } = calculateWorked(workedTime, workDay.interruptions, workDay.compensatoryLeave)
-//   const officialWork = calculateOfficialWork(officialWorkTime, workDay.interruptions, workDay.vacation)
-//   const worked = officialWork.minus(dayWorked)
-//   const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
-//   return {
-//     ...workDay,
-//     lunch,
-//     dayWorked,
-//     workFromHome
-//   }
-// }
 
 export const calcSickLeave = (monthData: WorkDay[], config: ConfigContextType) => {
   const sickLeave = monthData

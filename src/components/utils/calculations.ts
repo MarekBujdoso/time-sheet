@@ -72,10 +72,10 @@ const updateTimes = (interruptions: InterruptionTimeProps[], currentDay: Date, c
         end = interruption.endTime;
         endIndex++;
       }
-      // if it is the last interruption, push it to the mergedTimes
-      if (endIndex >= sortedInterruptions.length) {
-        mergedTimes.push({startTime: start, endTime: end});
-      }
+    }
+    // if it is the last interruption, push it to the mergedTimes
+    if (endIndex >= sortedInterruptions.length) {
+      mergedTimes.push({startTime: start, endTime: end});
     }
 
     mergedTimes.forEach((interruption) => {

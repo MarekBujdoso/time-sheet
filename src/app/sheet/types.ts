@@ -1,4 +1,6 @@
 import { Decimal } from 'decimal.js';
+import { LucideIcon } from 'lucide-react';
+
 export interface WorkDay {
     month: number, // Mesiac
     year: number, // Rok
@@ -15,6 +17,7 @@ export interface WorkDay {
     holiday?: boolean, // Sviatok
     vacation?: Decimal, // Dovolenka
     interruptions?: InterruptionTimeProps[], // Prerusenia
+    typeIcon?: LucideIcon,
 }
 
 export interface WorkDayFull extends WorkDay {
@@ -28,6 +31,7 @@ export interface WorkDayFull extends WorkDay {
     holiday: boolean, // Sviatok
     vacation: Decimal, // Dovolenka
     interruptions: InterruptionTimeProps[], // Prerusenia
+    typeIcon?: LucideIcon
 }
 
 export enum InterruptionWithTimeType {

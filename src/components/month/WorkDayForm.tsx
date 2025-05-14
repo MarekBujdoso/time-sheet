@@ -124,7 +124,9 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
                   <SelectValue placeholder='Vyber si deň' />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(DAY_TYPES_KEYS).map(([key, value]) => (
+                  {Object.entries(DAY_TYPES_KEYS)
+                    .filter(([key]) => key !== 'weekend')
+                    .map(([key, value]) => (
                     <SelectItem key={key} value={key}>
                       {value}
                     </SelectItem>
@@ -230,7 +232,7 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
               type='button'
               onClick={(e) => addInterruption(e, InterruptionWithTimeType.DOCTORS_LEAVE)}
             >
-              <Cross /> P-cko
+              <Cross /> P-čko
             </Button>
           </div>
           <div className='flex items-center justify-end'>

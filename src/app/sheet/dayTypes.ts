@@ -1,5 +1,6 @@
 import Decimal from 'decimal.js';
 import { WorkDayFull } from './types';
+import { GraduationCap, TreePalm, TentTree, Cross, Hospital, UserRoundPlus, Pickaxe, Pill, Sun, LucideIcon } from 'lucide-react';
 
 export const workDay = (workTime: Decimal): WorkDayFull => ({
   month: 0,
@@ -17,6 +18,7 @@ export const workDay = (workTime: Decimal): WorkDayFull => ({
   holiday: false,
   vacation: new Decimal(0),
   interruptions: [],
+  typeIcon: GraduationCap,
 });
 
 export const holiday = (workTime: Decimal): WorkDayFull => ({
@@ -35,6 +37,7 @@ export const holiday = (workTime: Decimal): WorkDayFull => ({
   holiday: true,
   vacation: new Decimal(0),
   interruptions: [],
+  typeIcon: TentTree,
 });
 
 export const vacation = (workTime: Decimal): WorkDayFull => ({
@@ -53,6 +56,7 @@ export const vacation = (workTime: Decimal): WorkDayFull => ({
   holiday: false,
   vacation: workTime,
   interruptions: [],
+  typeIcon: TreePalm,
 });
 
 export const sickLeave = (): WorkDayFull => ({
@@ -71,6 +75,7 @@ export const sickLeave = (): WorkDayFull => ({
   holiday: false,
   vacation: new Decimal(0),
   interruptions: [],
+  typeIcon: Pill,
 });
 
 export const sickLeaveFamily = (): WorkDayFull => ({
@@ -89,6 +94,7 @@ export const sickLeaveFamily = (): WorkDayFull => ({
   holiday: false,
   vacation: new Decimal(0),
   interruptions: [],
+  typeIcon: Hospital,
 });
 
 export const doctorsLeave = (): WorkDayFull => ({
@@ -107,6 +113,7 @@ export const doctorsLeave = (): WorkDayFull => ({
   holiday: false,
   vacation: new Decimal(0),
   interruptions: [],
+  typeIcon: Cross,
 });
 
 export const doctorsLeaveFamily = (): WorkDayFull => ({
@@ -125,6 +132,7 @@ export const doctorsLeaveFamily = (): WorkDayFull => ({
   holiday: false,
   vacation: new Decimal(0),
   interruptions: [],
+  typeIcon: UserRoundPlus,
 });
 
 export const compensatoryLeave = (workTime: Decimal): WorkDayFull => ({
@@ -143,6 +151,7 @@ export const compensatoryLeave = (workTime: Decimal): WorkDayFull => ({
   holiday: false,
   vacation: new Decimal(0),
   interruptions: [],
+  typeIcon: Pickaxe,
 });
 
 export const weekend = (): WorkDayFull => ({
@@ -161,6 +170,7 @@ export const weekend = (): WorkDayFull => ({
   holiday: false,
   vacation: new Decimal(0),
   interruptions: [],
+  typeIcon: Sun,
 });
 
 export const emptyDay = (): WorkDayFull => ({
@@ -179,6 +189,7 @@ export const emptyDay = (): WorkDayFull => ({
   holiday: false,
   vacation: new Decimal(0),
   interruptions: [],
+  typeIcon: undefined,
 });
 
 export const DAY_TYPES = {
@@ -227,3 +238,28 @@ export const identifyDayType = (
   if (day.dayWorked.greaterThan(0)) return 'workDay';
   return undefined;
 };
+
+export const getIconByDayType = (dayType: DAY_TYPES_KEYS): LucideIcon | undefined => {
+  switch (dayType) {
+    case DAY_TYPES_KEYS.holiday:
+      return TentTree;
+    case DAY_TYPES_KEYS.vacation:
+      return TreePalm;
+    case DAY_TYPES_KEYS.sickLeave:
+      return Pill;
+    case DAY_TYPES_KEYS.sickLeaveFamily:
+      return Hospital;
+    case DAY_TYPES_KEYS.doctorsLeave:
+      return Cross;
+    case DAY_TYPES_KEYS.doctorsLeaveFamily:
+      return UserRoundPlus;
+    case DAY_TYPES_KEYS.compensatoryLeave:
+      return Pickaxe;
+    case DAY_TYPES_KEYS.weekend:
+      return Sun;
+    case DAY_TYPES_KEYS.workDay:
+      return GraduationCap;
+    default:
+      return undefined;
+  }
+}

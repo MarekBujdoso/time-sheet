@@ -15,3 +15,34 @@ const monthsMap: { [key: number]: string } = {
 export const getMonthName = (month: number) => {
   return monthsMap[month] || '';
 }
+
+const getDayName = (day: number) => {
+  const dayNames = [
+    'Nedeľa',
+    'Pondelok',
+    'Utorok',
+    'Streda',
+    'Štvrtok',
+    'Piatok',
+    'Sobota',
+  ];
+  return dayNames[day] || '';
+}
+
+const getShortDayName = (day: number) => {
+  const shortDayNames = [
+    'Ne',
+    'Po',
+    'Ut',
+    'St',
+    'Št',
+    'Pi',
+    'So',
+  ];
+  return shortDayNames[day] || '';
+}
+
+export const getDayNameFromDate = (date: Date, short = false) => {
+  const day = date.getDay();
+  return short ? getShortDayName(day) : getDayName(day);
+}

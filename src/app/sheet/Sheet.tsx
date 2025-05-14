@@ -13,7 +13,9 @@ import { set } from 'date-fns/set';
 import { isWeekend } from 'date-fns/isWeekend';
 import { Button } from '../../components/ui/button';
 import { generateEPC } from '../../utils/excelUtils';
+import { useMediaQuery } from 'react-responsive';
 import { calcCompensatoryLeave, calcDoctorsLeave, calcDoctorsLeaveFamily, calcSickLeave, calcSickLeaveFamily, calcWorked } from '../../components/utils/calculations';
+import WorkDayBoxDesktop from '../../components/month/WorkDayBoxDesktop';
 
 const tempData: WorkDay[] = [
   {
@@ -201,6 +203,7 @@ const addMissingDays = (
 
 const Sheet = () => {
   const config = useContext(ConfigContext);
+  const isDesktop = useMediaQuery({ minWidth: 767 });
   // const currentMonth = new Date().getMonth() + 1
   const [monthData, setMonthData] = React.useState<WorkDay[]>(
     addMissingDays(new Date().getFullYear(), new Date().getMonth() + 1, config),
@@ -233,43 +236,69 @@ const Sheet = () => {
   );
 
   return (
-    <div className='flex flex-col w-full min-w-[400px] min-h-svh justify-top border-2 border-black p-2 rounded-lg '>
+    <div className='flex flex-col w-full min-w-[400px] w-screen min-h-svh justify-top p-2 rounded-lg'>
       <MonthPager update={updateMonthData} />
-      <div className='grid auto-rows-min gap-2 md:grid-cols-3 grid-cols-2'>
+      <div className='grid auto-rows-min gap-[4px] md:grid-cols-6 grid-cols-4 border bg-white rounded-lg shadow-md my-[5px] py-[15px]'>
         {/* <div className="flex flex-col"> */}
-        <span>
-          odpr.: {worked.toNumber()}h / {workedDays.toFixed(1)}d
+        <span className='justify-self-end font-semibold'>
+          Odprac.:
         </span>
         <span>
-          NV: {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
+          {worked.toNumber()}h / {workedDays.toFixed(1)}d
+        </span>
+        <span className='justify-self-end font-semibold'>
+          NV:
         </span>
         <span>
-          P-cko: {doctorsLeave.toNumber()}h / {doctorsLeaveDays.toFixed(1)}d
+          {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
+        </span>
+        <span className='justify-self-end font-semibold'>
+          P-čko:
         </span>
         <span>
-          Dopr.: {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays.toFixed(1)}d
+          {doctorsLeave.toNumber()}h / {doctorsLeaveDays.toFixed(1)}d
+        </span>
+        <span className='justify-self-end font-semibold'>
+          Doprovod:
         </span>
         <span>
-          PN: {sickLeave.toNumber()}h / {sickLeaveDays.toFixed(1)}d
+          {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays.toFixed(1)}d
+        </span>
+        <span className='justify-self-end font-semibold'>
+          PN:
         </span>
         <span>
-          OCR: {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays.toFixed(1)}d
+          {sickLeave.toNumber()}h / {sickLeaveDays.toFixed(1)}d
+        </span>
+        <span className='justify-self-end font-semibold'>
+          OČR:
+        </span>
+        <span>
+          {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays.toFixed(1)}d
         </span>
         {/* </div> */}
       </div>
       <div>
-        <div className='grid auto-rows-min gap-1 md:grid-cols-3'>
-          {monthData.map((data) => (
+      <div className="grid auto-rows-min gap-1 md:grid-cols-[repeat(auto-fit,_minmax(260px,_1fr))] md:gap-y-11 md:my-[30px] md:justify-items-center">
+          {monthData.map((data) => {
+            return isDesktop ? (
+            <WorkDayBoxDesktop
+              key={data.startTime.toISOString()}
+              workDay={{ ...data }}
+              saveWorkDay={saveWorkDay}
+              />
+            ) : (
             <WorkDayBox
               key={data.startTime.toISOString()}
               workDay={{ ...data }}
               saveWorkDay={saveWorkDay}
             />
-          ))}
+            )}
+          )}
         </div>
       </div>
-      <Button variant='default' type='button' onClick={() => generateEPC(config, monthData)}>
-        Generuj EPC
+      <Button variant='outline' type='button' onClick={() => generateEPC(config, monthData)}>
+        Generuj EPČ
       </Button>
     </div>
   );

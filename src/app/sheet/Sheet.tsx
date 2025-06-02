@@ -8,19 +8,11 @@ import MonthPager from '../../components/month-pager';
 import WorkDayBox from '../../components/month/WorkDayBox';
 import WorkDayBoxDesktop from '../../components/month/WorkDayBoxDesktop';
 import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import {
-  calcCompensatoryLeave,
-  calcDoctorsLeave,
-  calcDoctorsLeaveFamily,
-  calcSickLeave,
-  calcSickLeaveFamily,
-  calcWorked,
-} from '../../components/utils/calculations';
 import { generateEPC } from '../../utils/excelUtils';
 import ConfigContext, { ConfigContextType } from './ConfigContext';
 import { DAY_TYPES } from './dayTypes';
 import { WorkDay } from './types';
+import SummaryBoard from '../../components/month/SummaryBoard';
 
 const addMissingDays = (
   activeYear: number,
@@ -67,30 +59,6 @@ const Sheet = () => {
   const [monthData, setMonthData] = React.useState<WorkDay[]>(
     addMissingDays(new Date().getFullYear(), new Date().getMonth() + 1, config),
   );
-  const [sickLeave, sickLeaveDays] = React.useMemo(
-    () => calcSickLeave(monthData, config),
-    [monthData, config],
-  );
-  const [sickLeaveFamily, sickLeaveFamilyDays] = React.useMemo(
-    () => calcSickLeaveFamily(monthData, config),
-    [monthData, config],
-  );
-  const [doctorsLeave, doctorsLeaveDays] = React.useMemo(
-    () => calcDoctorsLeave(monthData, config),
-    [monthData, config],
-  );
-  const [doctorsLeaveFamily, doctorsLeaveFamilyDays] = React.useMemo(
-    () => calcDoctorsLeaveFamily(monthData, config),
-    [monthData, config],
-  );
-  const [worked, workedDays] = React.useMemo(
-    () => calcWorked(monthData, config),
-    [monthData, config],
-  );
-  const [compensatoryLeave, compensatoryLeaveDays] = React.useMemo(
-    () => calcCompensatoryLeave(monthData, config),
-    [monthData, config],
-  );
   const isDesktop = useMediaQuery({ minWidth: 767 });
 
   const saveWorkDay = React.useCallback((workDay: WorkDay) => {
@@ -115,40 +83,7 @@ const Sheet = () => {
   return (
     <div className='flex flex-col w-full min-w-[400px] w-[98vw] min-h-svh justify-top p-2 rounded-lg'>
       <MonthPager update={updateMonthData} />
-      <div className='grid auto-rows-min gap-[4px] md:grid-cols-6 grid-cols-4 border bg-white rounded-2xl shadow-md my-[5px] py-[15px]'>
-        <span className='justify-self-end font-semibold py-[6px]'>Meno:</span>
-        <Input value={userName} onChange={(e) => setUserName(e.target.value)} />
-        <span className='justify-self-end font-semibold py-[6px]'>Časový fond:</span>
-        <span className='py-[6px]'>{config.officialWorkTime.toNumber()}h</span>
-        {isDesktop && (
-          <span className='justify-self-end font-semibold py-[6px]'>Nadčasová práca:</span>
-        )}
-        {isDesktop && <span className='py-[6px]'>0h / 0.0d</span>}
-        <span className='justify-self-end font-semibold py-[6px]'>Odprac.:</span>
-        <span className='py-[6px]'>
-          {worked.toNumber()}h / {workedDays.toFixed(1)}d
-        </span>
-        <span className='justify-self-end font-semibold py-[6px]'>NV:</span>
-        <span className='py-[6px]'>
-          {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
-        </span>
-        <span className='justify-self-end font-semibold py-[6px]'>P-čko:</span>
-        <span className='py-[6px]'>
-          {doctorsLeave.toNumber()}h / {doctorsLeaveDays.toFixed(1)}d
-        </span>
-        <span className='justify-self-end font-semibold py-[6px]'>Doprovod:</span>
-        <span className='py-[6px]'>
-          {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays.toFixed(1)}d
-        </span>
-        <span className='justify-self-end font-semibold py-[6px]'>PN:</span>
-        <span className='py-[6px]'>
-          {sickLeave.toNumber()}h / {sickLeaveDays.toFixed(1)}d
-        </span>
-        <span className='justify-self-end font-semibold py-[6px]'>OČR:</span>
-        <span className='py-[6px]'>
-          {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays.toFixed(1)}d
-        </span>
-      </div>
+      <SummaryBoard monthData={monthData} setUserName={setUserName} userName={userName} />
       <div>
         <div className='grid auto-rows-min gap-1 md:grid-cols-[repeat(auto-fit,_minmax(260px,_1fr))] md:gap-y-11 md:my-[30px] md:justify-items-center'>
           {monthData.map((data) => {

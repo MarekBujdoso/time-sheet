@@ -34,12 +34,12 @@ const MonthPager = ({ update }: MonthPagerProps) => {
       <Pagination >
         <PaginationContent className="w-full justify-between">
           <PaginationItem>
-            <PaginationPrevious size="lg" className="select-none" onClick={switchToPrevMonth} />
+            <PaginationPrevious size="lg" className="select-none border bg-white shadow-md" onClick={switchToPrevMonth} />
           </PaginationItem>
           {/* <PaginationItem>
             <PaginationLink className="w-40 select-none" onClick={handleMonth} isActive>{monthsMap[activeMonth]}</PaginationLink>
           </PaginationItem> */}
-          <div className="w-40 select-none font-semibold">
+          <div className="w-40 select-none font-semibold text-xl">
             {`${getMonthName(activeMonth)} ${activeYear}`}
           </div>
           {/* <PaginationItem>
@@ -49,7 +49,7 @@ const MonthPager = ({ update }: MonthPagerProps) => {
             <PaginationEllipsis />
           </PaginationItem> */}
           <PaginationItem>
-            <PaginationNext size="lg" className="select-none" onClick={switchToNextMonth} />
+            <PaginationNext size="lg" className="select-none border bg-white shadow-md" onClick={switchToNextMonth} />
           </PaginationItem>
         </PaginationContent>
       </Pagination>

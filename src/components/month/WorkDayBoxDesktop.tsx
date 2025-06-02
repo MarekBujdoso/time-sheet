@@ -92,6 +92,8 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay }: WorkDayBoxDesktopProps) => 
     !isFullDay(compensatoryLeave, config.officialWorkTime) &&
     !doctorsLeave &&
     !doctorsLeaveFamily &&
+    !sickLeave &&
+    !sickLeaveFamily &&
     !isFullDay(vacation, config.officialWorkTime) &&
     (compensatoryLeave.greaterThan(0) || interruptions.length > 0 || vacation.greaterThan(0));
   const doctorsLeaveTime = interruptions
@@ -117,7 +119,7 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay }: WorkDayBoxDesktopProps) => 
           <span className='text-xl font-semibold'>{format(startTime, 'dd.MM.')}</span>
           <span className='text-xs font-semibold'>{getDayNameFromDate(startTime)}</span>
         </div>
-        <div className={`${hasDisturbance ? 'grid grid-cols-[auto_1fr] auto-cols-max' : 'flex flex-col p-[0] justify-evenly'} self-stretch basis-1/2 grow content-center `}>
+        <div className={`${hasDisturbance ? 'grid grid-cols-[auto_1fr] auto-cols-max' : 'flex flex-col py-[0] px-[20px] justify-evenly'} self-stretch basis-1/2 grow content-center `}>
           <span
             className={`text-2xl ${hasDisturbance ? 'pl-[10px]' : ''} font-semibold justify-self-start ${dayWorked.equals(0) ? 'col-span-2' : ''} flex justify-center items-center`}
           >
@@ -168,7 +170,7 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay }: WorkDayBoxDesktopProps) => 
                 <line x1='0' y1='1' x2='100%' y2='1' stroke='lightgrey' strokeWidth='2' />
               </svg>
               <DrawerTrigger asChild>
-                <Button variant='outline'>Zmeniť</Button>
+                <Button variant='outline' size='lg' className='text-lg'>Zmeniť</Button>
               </DrawerTrigger>
             </>
             <DrawerContent>

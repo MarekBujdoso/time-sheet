@@ -97,10 +97,12 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
 
   const changeDayType = (type: keyof typeof DAY_TYPES) => {
     setDayType(type);
+    const startTime = set(oneDay.startTime, officialStartTime);
+    const endTime = set(oneDay.endTime, officialEndTime);
     setOneDay((day) => ({
-      ...DAY_TYPES[type](officialWorkTime),
-      startTime: set(day.startTime, officialStartTime),
-      endTime: set(day.endTime, officialEndTime),
+      ...DAY_TYPES[type](startTime, endTime, officialWorkTime),
+      startTime,
+      endTime,
       month: day.month,
       year: day.year,
     }));
@@ -223,6 +225,7 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
               {...interruption}
               remove={removeInterruption}
               update={updateInterruption}
+              isDisabled={isDisabled}
             />
           ))}
           <div>

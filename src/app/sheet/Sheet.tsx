@@ -1,11 +1,8 @@
 import { getDaysInMonth } from 'date-fns/getDaysInMonth';
-import { toDate } from 'date-fns/toDate';
 import React, { useContext } from 'react';
 import MonthPager from '../../components/month-pager';
 import WorkDayBox from '../../components/month/WorkDayBox';
-import { InterruptionWithTimeType, WorkDay } from './types';
-import Decimal from 'decimal.js';
-import { v4 as uuidv4 } from 'uuid';
+import { WorkDay } from './types';
 import ConfigContext, { ConfigContextType } from './ConfigContext';
 import { DAY_TYPES } from './dayTypes';
 import { isBefore } from 'date-fns/isBefore';
@@ -16,163 +13,15 @@ import { generateEPC } from '../../utils/excelUtils';
 import { useMediaQuery } from 'react-responsive';
 import { calcCompensatoryLeave, calcDoctorsLeave, calcDoctorsLeaveFamily, calcSickLeave, calcSickLeaveFamily, calcWorked } from '../../components/utils/calculations';
 import WorkDayBoxDesktop from '../../components/month/WorkDayBoxDesktop';
+import { Input } from '../../components/ui/input';
 
-const tempData: WorkDay[] = [
-  {
-    month: 1,
-    year: 2025,
-    startTime: toDate(new Date(2025, 0, 1, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 0, 1, 15, 30, 0)),
-    dayWorked: new Decimal(0),
-    vacation: new Decimal(7.5),
-  },
-  {
-    month: 1,
-    year: 2025,
-    startTime: toDate(new Date(2025, 0, 2, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 0, 2, 14, 30, 0)),
-    doctorsLeaveFamily: true,
-    dayWorked: new Decimal(0),
-  },
-  {
-    month: 1,
-    year: 2025,
-    startTime: toDate(new Date(2025, 0, 3, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 0, 3, 15, 30, 0)),
-    sickLeaveFamily: true,
-    dayWorked: new Decimal(0),
-  },
-  {
-    month: 1,
-    year: 2025,
-    startTime: toDate(new Date(2025, 0, 4, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 0, 4, 15, 30, 0)),
-    dayWorked: new Decimal(0),
-    sickLeave: true,
-  },
-  {
-    month: 1,
-    year: 2025,
-    startTime: toDate(new Date(2025, 0, 5, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 0, 5, 14, 30, 0)),
-    compensatoryLeave: new Decimal(7.5),
-    dayWorked: new Decimal(7.5),
-  },
-  {
-    month: 1,
-    year: 2025,
-    startTime: toDate(new Date(2025, 0, 6, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 0, 6, 15, 30, 0)),
-    dayWorked: new Decimal(0),
-    holiday: true,
-  },
-  {
-    month: 2,
-    year: 2025,
-    startTime: toDate(new Date(2025, 1, 1, 0, 0, 0)),
-    endTime: toDate(new Date(2025, 1, 1, 0, 0, 0)),
-    lunch: false,
-    compensatoryLeave: new Decimal(0),
-    // doctorsLeave: false,
-    // doctorsLeaveFamily: new Decimal(0),
-    sickLeaveFamily: false,
-    dayWorked: new Decimal(0),
-    workFromHome: new Decimal(0),
-    sickLeave: false,
-  },
-  {
-    month: 2,
-    year: 2025,
-    startTime: toDate(new Date(2025, 1, 2, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 1, 2, 14, 30, 0)),
-    doctorsLeave: true,
-    dayWorked: new Decimal(0),
-  },
-  {
-    month: 2,
-    year: 2025,
-    startTime: toDate(new Date(2025, 1, 3, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 1, 3, 15, 30, 0)),
-    lunch: true,
-    compensatoryLeave: new Decimal(0),
-    // doctorsLeave: new Decimal(0.5),
-    // doctorsLeaveFamily: new Decimal(0.5),
-    dayWorked: new Decimal(7),
-    workFromHome: new Decimal(0),
-    vacation: new Decimal(0),
-    interruptions: [
-      {
-        id: uuidv4(),
-        type: InterruptionWithTimeType.DOCTORS_LEAVE,
-        startTime: toDate(new Date(2025, 1, 3, 8, 0, 0)),
-        endTime: toDate(new Date(2025, 1, 3, 8, 30, 0)),
-        time: new Decimal(0.5),
-      },
-      // {
-      //   id: uuidv4(),
-      //   type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY,
-      //   startTime: toDate(new Date(2025, 1, 3, 9, 0, 0)),
-      //   endTime: toDate(new Date(2025, 1, 3, 9, 30, 0)),
-      //   time: new Decimal(0.5),
-      // },
-    ],
-  },
-  {
-    month: 2,
-    year: 2025,
-    startTime: toDate(new Date(2025, 1, 4, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 1, 4, 15, 30, 0)),
-    lunch: true,
-    compensatoryLeave: new Decimal(0),
-    // doctorsLeave: new Decimal(0),
-    // doctorsLeaveFamily: new Decimal(0),
-    dayWorked: new Decimal(7.5),
-    workFromHome: new Decimal(0),
-  },
-  {
-    month: 2,
-    year: 2025,
-    startTime: toDate(new Date(2025, 1, 5, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 1, 5, 15, 30, 0)),
-    lunch: false,
-    compensatoryLeave: new Decimal(0),
-    dayWorked: new Decimal(7.5),
-    workFromHome: new Decimal(0),
-  },
-  {
-    month: 2,
-    year: 2025,
-    startTime: toDate(new Date(2025, 1, 6, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 1, 6, 15, 30, 0)),
-    lunch: true,
-    compensatoryLeave: new Decimal(0),
-    dayWorked: new Decimal(7.5),
-    workFromHome: new Decimal(0),
-  },
-  {
-    month: 2,
-    year: 2025,
-    startTime: toDate(new Date(2025, 1, 7, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 1, 7, 15, 30, 0)),
-    sickLeave: true,
-    dayWorked: new Decimal(0),
-  },
-  {
-    month: 3,
-    year: 2025,
-    startTime: toDate(new Date(2025, 2, 4, 7, 30, 0)),
-    endTime: toDate(new Date(2025, 2, 4, 15, 30, 0)),
-    sickLeave: true,
-    dayWorked: new Decimal(0),
-  },
-];
 
 const addMissingDays = (
   activeYear: number,
   activeMonth: number,
   config: ConfigContextType,
 ): WorkDay[] => {
-  const data = tempData.filter((data) => data.month === activeMonth && data.year === activeYear);
+  const data: WorkDay[] = [] // = tempData.filter((data) => data.month === activeMonth && data.year === activeYear);
   const dateInActiveMonth = new Date(activeYear, activeMonth - 1);
   const daysInMonth = getDaysInMonth(dateInActiveMonth);
   const days = data.map((data) => data.startTime.getDate());
@@ -181,19 +30,15 @@ const addMissingDays = (
       const currentDay = new Date(activeYear, activeMonth - 1, i);
       if (isBefore(currentDay, new Date()) && !isWeekend(currentDay)) {
         data.push({
-          ...DAY_TYPES.workDay(config.officialWorkTime),
-          startTime: set(currentDay, config.defaultStartTime),
-          endTime: set(currentDay, config.defaultEndTime),
+          ...DAY_TYPES.workDay(set(currentDay, config.defaultStartTime), set(currentDay, config.defaultEndTime), config.officialWorkTime),
           month: activeMonth,
           year: activeYear,
         });
       } else {
         data.push({
-          ...DAY_TYPES.emptyDay(),
+          ...DAY_TYPES.emptyDay(currentDay, currentDay),
           month: activeMonth,
           year: activeYear,
-          startTime: currentDay,
-          endTime: currentDay,
         });
       }
     }
@@ -203,6 +48,7 @@ const addMissingDays = (
 
 const Sheet = () => {
   const config = useContext(ConfigContext);
+  const [userName, setUserName] = React.useState(config.userName);
   const isDesktop = useMediaQuery({ minWidth: 767 });
   // const currentMonth = new Date().getMonth() + 1
   const [monthData, setMonthData] = React.useState<WorkDay[]>(
@@ -236,47 +82,65 @@ const Sheet = () => {
   );
 
   return (
-    <div className='flex flex-col w-full min-w-[400px] w-screen min-h-svh justify-top p-2 rounded-lg'>
+    <div className='flex flex-col w-full min-w-[400px] w-[98vw] min-h-svh justify-top p-2 rounded-lg'>
       <MonthPager update={updateMonthData} />
-      <div className='grid auto-rows-min gap-[4px] md:grid-cols-6 grid-cols-4 border bg-white rounded-lg shadow-md my-[5px] py-[15px]'>
-        {/* <div className="flex flex-col"> */}
-        <span className='justify-self-end font-semibold'>
+      <div className='grid auto-rows-min gap-[4px] md:grid-cols-6 grid-cols-4 border bg-white rounded-2xl shadow-md my-[5px] py-[15px]'>
+        <span className='justify-self-end font-semibold py-[6px]'>
+          Meno:
+        </span>
+          <Input value={userName} onChange={(e) => setUserName(e.target.value)} />
+        <span className='justify-self-end font-semibold py-[6px]'>
+          Časový fond:
+        </span>
+        <span className='py-[6px]'>
+          {config.officialWorkTime.toNumber()}h
+        </span>
+        {isDesktop && (
+          <span className='justify-self-end font-semibold py-[6px]'>
+          Nadčasová práca:
+        </span>
+        )}
+        {isDesktop && (
+        <span className='py-[6px]'>
+          0h / 0.0d
+        </span>
+        )}
+        <span className='justify-self-end font-semibold py-[6px]'>
           Odprac.:
         </span>
-        <span>
+        <span className='py-[6px]'>
           {worked.toNumber()}h / {workedDays.toFixed(1)}d
         </span>
-        <span className='justify-self-end font-semibold'>
+        <span className='justify-self-end font-semibold py-[6px]'>
           NV:
         </span>
-        <span>
+        <span className='py-[6px]'>
           {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
         </span>
-        <span className='justify-self-end font-semibold'>
+        <span className='justify-self-end font-semibold py-[6px]'>
           P-čko:
         </span>
-        <span>
+        <span className='py-[6px]'>
           {doctorsLeave.toNumber()}h / {doctorsLeaveDays.toFixed(1)}d
         </span>
-        <span className='justify-self-end font-semibold'>
+        <span className='justify-self-end font-semibold py-[6px]'>
           Doprovod:
         </span>
-        <span>
+        <span className='py-[6px]'>
           {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays.toFixed(1)}d
         </span>
-        <span className='justify-self-end font-semibold'>
+        <span className='justify-self-end font-semibold py-[6px]'>
           PN:
         </span>
-        <span>
+        <span className='py-[6px]'>
           {sickLeave.toNumber()}h / {sickLeaveDays.toFixed(1)}d
         </span>
-        <span className='justify-self-end font-semibold'>
+        <span className='justify-self-end font-semibold py-[6px]'>
           OČR:
         </span>
-        <span>
+        <span className='py-[6px]'>
           {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays.toFixed(1)}d
         </span>
-        {/* </div> */}
       </div>
       <div>
       <div className="grid auto-rows-min gap-1 md:grid-cols-[repeat(auto-fit,_minmax(260px,_1fr))] md:gap-y-11 md:my-[30px] md:justify-items-center">
@@ -297,7 +161,7 @@ const Sheet = () => {
           )}
         </div>
       </div>
-      <Button variant='outline' type='button' onClick={() => generateEPC(config, monthData)}>
+      <Button className='h-[80px] text-lg mt-[5px] rounded-2xl shadow-[0_10px_20px_0_rgba(0,0,0,0.25)] font-semibold' variant='outline' type='button' onClick={() => generateEPC(config, monthData, userName)}>
         Generuj EPČ
       </Button>
     </div>

@@ -34,12 +34,14 @@ const borderCell = (cell: ExcelJS.Cell) => {
   };
 };
 
-export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => {
+export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], userName: string) => {
   console.log('generate EPC');
-  const month = monthData[0].month;
+  const month = monthData[0].month + 1;
   const year = monthData[0].year;
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet(`${getMonthName(month)}`);
+  const sheet = workbook.addWorksheet(`${getMonthName(month)}`,{
+    pageSetup:{paperSize: 9, orientation:'portrait'}
+  });
   sheet.columns = [
     { key: 'day', width: 3 },
     { key: 'startTime', width: 8 },
@@ -48,10 +50,10 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
     { key: 'intFrom', width: 6 },
     { key: 'intTo', width: 6 },
     { key: 'intTime', width: 5 },
-    { key: 'overtime', width: 6 },
-    { key: 'compensatory', width: 6 },
-    { key: 'vacation', width: 6 },
-    { key: 'home', width: 6 },
+    { key: 'overtime', width: 5 },
+    { key: 'compensatory', width: 5 },
+    { key: 'vacation', width: 5 },
+    { key: 'home', width: 5 },
     { key: 'workTime', width: 7 },
     { key: 'signature', width: 9 },
   ];
@@ -89,9 +91,8 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
     '',
     'zamestnanec:',
     null,
-    config.userName,
+    userName,
     null,
-    '',
   ]);
   row.eachCell((cell) => {
     cell.font = { size: 10, bold: true };
@@ -183,9 +184,6 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
   monthData.forEach((data) => {
     const title = getTitle(data, config);
     const isWorkingDay = title === 'Práca';
-    // data.interruptions.forEach((interruption) => {
-    console.log(
-      data.interruptions)
     const negativeInterruptions = data.interruptions?.filter(
       (interruption) => interruption.type !== 'compensatoryLeave',
     ) ?? [];
@@ -233,7 +231,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
       cell.font = { size: 10 };
       cell.alignment = { horizontal: 'center' };
       borderCell(cell);
-      if (title === 'Víkend' || [7, 12].includes(colNumber)) {
+      if (title === 'Víkend' || [8, 12].includes(colNumber)) {
         fillCell(cell, GREEN_COLOR);
       }
     });
@@ -250,7 +248,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[]) => 
     '',
     { formula: `SUM(G8:G${sheet.rowCount})` },
     { formula: `SUM(H8:H${sheet.rowCount})` },
-    '',
+    { formula: `SUM(I8:I${sheet.rowCount})` },
     { formula: `SUM(J8:J${sheet.rowCount})` },
     '',
     { formula: `SUM(L8:L${sheet.rowCount})` },

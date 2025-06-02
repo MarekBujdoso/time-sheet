@@ -39,6 +39,8 @@ export enum InterruptionWithTimeType {
     DOCTORS_LEAVE_FAMILY = 'doctorsLeaveFamily',
     VACATION = 'vacation',
     COMPENSATORY_LEAVE = 'compensatoryLeave',
+    SICK_LEAVE = 'sickLeave',
+    SICK_LEAVE_FAMILY = 'sickLeaveFamily',
 }
 
 export interface InterruptionTimeProps {

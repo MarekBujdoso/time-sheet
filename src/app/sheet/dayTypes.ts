@@ -1,12 +1,13 @@
 import Decimal from 'decimal.js';
-import { WorkDayFull } from './types';
+import { v4 as uuidv4 } from 'uuid';
+import { InterruptionWithTimeType, WorkDayFull } from './types';
 import { GraduationCap, TreePalm, TentTree, Cross, Hospital, UserRoundPlus, Pickaxe, Pill, Sun, LucideIcon } from 'lucide-react';
 
-export const workDay = (workTime: Decimal): WorkDayFull => ({
+export const workDay = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: true,
   workFromHome: new Decimal(0),
   sickLeave: false,
@@ -21,11 +22,11 @@ export const workDay = (workTime: Decimal): WorkDayFull => ({
   typeIcon: GraduationCap,
 });
 
-export const holiday = (workTime: Decimal): WorkDayFull => ({
+export const holiday = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: false,
   workFromHome: new Decimal(0),
   sickLeave: false,
@@ -40,11 +41,11 @@ export const holiday = (workTime: Decimal): WorkDayFull => ({
   typeIcon: TentTree,
 });
 
-export const vacation = (workTime: Decimal): WorkDayFull => ({
+export const vacation = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: false,
   workFromHome: new Decimal(0),
   sickLeave: false,
@@ -59,11 +60,11 @@ export const vacation = (workTime: Decimal): WorkDayFull => ({
   typeIcon: TreePalm,
 });
 
-export const sickLeave = (): WorkDayFull => ({
+export const sickLeave = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: false,
   workFromHome: new Decimal(0),
   sickLeave: true,
@@ -74,15 +75,21 @@ export const sickLeave = (): WorkDayFull => ({
   dayWorked: new Decimal(0),
   holiday: false,
   vacation: new Decimal(0),
-  interruptions: [],
+  interruptions: [{
+    id: uuidv4(),
+    type: InterruptionWithTimeType.SICK_LEAVE,
+    startTime,
+    endTime,
+    time: workTime,
+  }],
   typeIcon: Pill,
 });
 
-export const sickLeaveFamily = (): WorkDayFull => ({
+export const sickLeaveFamily = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: false,
   workFromHome: new Decimal(0),
   sickLeave: false,
@@ -93,15 +100,21 @@ export const sickLeaveFamily = (): WorkDayFull => ({
   dayWorked: new Decimal(0),
   holiday: false,
   vacation: new Decimal(0),
-  interruptions: [],
+  interruptions: [{
+    id: uuidv4(),
+    type: InterruptionWithTimeType.SICK_LEAVE_FAMILY,
+    startTime,
+    endTime,
+    time: workTime,
+  }],
   typeIcon: Hospital,
 });
 
-export const doctorsLeave = (): WorkDayFull => ({
+export const doctorsLeave = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: false,
   workFromHome: new Decimal(0),
   sickLeave: false,
@@ -112,15 +125,21 @@ export const doctorsLeave = (): WorkDayFull => ({
   dayWorked: new Decimal(0),
   holiday: false,
   vacation: new Decimal(0),
-  interruptions: [],
+  interruptions: [{
+    id: uuidv4(),
+    type: InterruptionWithTimeType.DOCTORS_LEAVE,
+    startTime,
+    endTime,
+    time: workTime,
+  }],
   typeIcon: Cross,
 });
 
-export const doctorsLeaveFamily = (): WorkDayFull => ({
+export const doctorsLeaveFamily = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: false,
   workFromHome: new Decimal(0),
   sickLeave: false,
@@ -131,15 +150,21 @@ export const doctorsLeaveFamily = (): WorkDayFull => ({
   dayWorked: new Decimal(0),
   holiday: false,
   vacation: new Decimal(0),
-  interruptions: [],
+  interruptions: [{
+    id: uuidv4(),
+    type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY,
+    startTime,
+    endTime,
+    time: workTime,
+  }],
   typeIcon: UserRoundPlus,
 });
 
-export const compensatoryLeave = (workTime: Decimal): WorkDayFull => ({
+export const compensatoryLeave = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: false,
   workFromHome: new Decimal(0),
   sickLeave: false,
@@ -154,11 +179,11 @@ export const compensatoryLeave = (workTime: Decimal): WorkDayFull => ({
   typeIcon: Pickaxe,
 });
 
-export const weekend = (): WorkDayFull => ({
+export const weekend = (startTime: Date, endTime: Date): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: false,
   workFromHome: new Decimal(0),
   sickLeave: false,
@@ -173,11 +198,11 @@ export const weekend = (): WorkDayFull => ({
   typeIcon: Sun,
 });
 
-export const emptyDay = (): WorkDayFull => ({
+export const emptyDay = (startTime: Date, endTime: Date): WorkDayFull => ({
   month: 0,
   year: 0,
-  startTime: new Date(),
-  endTime: new Date(),
+  startTime,
+  endTime,
   lunch: false,
   workFromHome: new Decimal(0),
   sickLeave: false,
@@ -222,6 +247,8 @@ export enum DAY_INTERRUPTIONS_KEYS {
   doctorsLeaveFamily = 'Doprovod',
   compensatoryLeave = 'NV',
   vacation = 'Dovolenka',
+  sickLeave = 'PN',
+  sickLeaveFamily = 'OČR',
 };
 
 export const identifyDayType = (

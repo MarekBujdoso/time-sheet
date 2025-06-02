@@ -1,8 +1,13 @@
 import Decimal from 'decimal.js';
-import { InterruptionTimeProps, InterruptionWithTimeType, WorkDay, WorkDayFull } from '../../app/sheet/types';
+import {
+  InterruptionTimeProps,
+  InterruptionWithTimeType,
+  WorkDay,
+  WorkDayFull,
+} from '../../app/sheet/types';
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
-// import { differenceInMinutes } from 'date-fns/differenceInMinutes';
+import { differenceInMinutes } from 'date-fns/differenceInMinutes';
 import { format } from 'date-fns/format';
 
 const calculateLunch = (workedHours: Decimal) => {
@@ -21,9 +26,11 @@ export const calculateWorked = (
 ) => {
   const { startTime, endTime } = updateTimes(interruptions, currentDay, config);
   const interruptionsTime = interruptions
-    .filter((interruption) => interruption.startTime >= startTime && interruption.endTime <= endTime)
+    .filter(
+      (interruption) => interruption.startTime >= startTime && interruption.endTime <= endTime,
+    )
     .reduce((acc, { time }) => acc.add(time), new Decimal(0));
-  
+
   const lunchTime = calculateLunch(workedHours.minus(interruptionsTime));
   return {
     dayWorked: workedHours.minus(interruptionsTime).minus(lunchTime),
@@ -31,35 +38,86 @@ export const calculateWorked = (
   };
 };
 
-const updateTimes = (interruptions: InterruptionTimeProps[], currentDay: Date, config: ConfigContextType) => {
+const updateTimes = (
+  interruptions: InterruptionTimeProps[],
+  currentDay: Date,
+  config: ConfigContextType,
+) => {
   const sortedInterruptions = interruptions
     .map((a) => a)
     .sort((b, a) => {
-      const res = b.startTime.getTime() - a.startTime.getTime()
-      return res === 0 ? b.endTime.getTime() - a.endTime.getTime() : res
+      const res = b.startTime.getTime() - a.startTime.getTime();
+      return res === 0 ? b.endTime.getTime() - a.endTime.getTime() : res;
     });
 
+  console.log('sortedInterruptions', sortedInterruptions);
   let startTime = set(currentDay, config.defaultStartTime);
   let endTime = set(currentDay, config.defaultEndTime);
   let interruptionHours = new Decimal(0);
   if (sortedInterruptions.length > 0) {
+    // sortedInterruptions.forEach((interruption) => {
+    //   interruption.time = new Decimal(differenceInMinutes(interruption.endTime, interruption.startTime) / 60);
+    //   console.log('interruption', interruption.id, 'time', interruption.time.toNumber())
+    // })
+
     const mergedTimes: Array<{ startTime: Date; endTime: Date }> = [];
     let startIndex = 0;
     let endIndex = 1;
     let interruption = sortedInterruptions[startIndex];
     let start = interruption.startTime;
     let end = interruption.endTime;
-    while(endIndex < sortedInterruptions.length && startIndex < sortedInterruptions.length) {
+    while (endIndex < sortedInterruptions.length && startIndex < sortedInterruptions.length) {
       const nextInterruption = sortedInterruptions[endIndex];
       const nextStart = nextInterruption.startTime;
       const nextEnd = nextInterruption.endTime;
-      if (start <= nextStart && end <= nextEnd && nextStart <= end) {
+      console.log(
+        'start',
+        format(start, 'HH:mm'),
+        'end',
+        format(end, 'HH:mm'),
+        'nextStart',
+        format(nextStart, 'HH:mm'),
+        'nextEnd',
+        format(nextEnd, 'HH:mm'),
+      );
+      console.log(
+        'start < nextStart && end <= nextEnd && nextStart <= end',
+        start < nextStart && end <= nextEnd && nextStart <= end,
+      );
+      console.log('start <= nextStart && end >= nextEnd', start <= nextStart && end >= nextEnd);
+      console.log('nextStart <= start && nextEnd >= end', nextStart <= start && nextEnd >= end);
+      // I don't differentiate between interruption types, so the type calculation can be wrong if the interruption is merged with another interruption
+      if (start < nextStart && end <= nextEnd && nextStart <= end) {
+        nextInterruption.time = new Decimal(differenceInMinutes(nextEnd, end) / 60);
         end = nextEnd;
         endIndex++;
       } else if (start <= nextStart && end >= nextEnd) {
+        // current interruption has next interruption inside 0 <= 2 && 10 >= 4  => <0; 10> with next <2; 4>
+        // next interruption is useless and can be skipped
+        nextInterruption.time = new Decimal(0);
+        console.log(
+          'nextInterruption',
+          nextInterruption.id,
+          'set to time = 0',
+          nextInterruption.time.toNumber(),
+        );
+        endIndex++;
+      } else if (nextStart <= start && nextEnd >= end) {
+        // current interruption is useless and can be skipped
+        interruption.time = new Decimal(0);
+        console.log(
+          'interruption',
+          interruption.id,
+          'set to time = 0',
+          interruption.time.toNumber(),
+        );
+        startIndex = endIndex;
+        interruption = sortedInterruptions[startIndex];
+        start = interruption.startTime;
+        end = interruption.endTime;
         endIndex++;
       } else {
-        mergedTimes.push({startTime: start, endTime: end});
+        mergedTimes.push({ startTime: start, endTime: end });
         startIndex = endIndex;
         interruption = sortedInterruptions[startIndex];
         start = interruption.startTime;
@@ -69,7 +127,7 @@ const updateTimes = (interruptions: InterruptionTimeProps[], currentDay: Date, c
     }
     // if it is the last interruption, push it to the mergedTimes
     if (endIndex >= sortedInterruptions.length) {
-      mergedTimes.push({startTime: start, endTime: end});
+      mergedTimes.push({ startTime: start, endTime: end });
     }
 
     mergedTimes.forEach((interruption) => {
@@ -78,7 +136,6 @@ const updateTimes = (interruptions: InterruptionTimeProps[], currentDay: Date, c
         endTime.getTime() >= interruption.endTime.getTime()
       ) {
         startTime = interruption.endTime;
-
       }
     });
     mergedTimes.reverse().forEach((interruption) => {
@@ -90,23 +147,39 @@ const updateTimes = (interruptions: InterruptionTimeProps[], currentDay: Date, c
       }
     });
     interruptionHours = mergedTimes.reduce((acc, interruption) => {
-      return acc.plus(interruption.endTime.getTime()/1000/60/60).minus(interruption.startTime.getTime()/1000/60/60);
-    }
-    , new Decimal(0));
+      return acc
+        .plus(interruption.endTime.getTime() / 1000 / 60 / 60)
+        .minus(interruption.startTime.getTime() / 1000 / 60 / 60);
+    }, new Decimal(0));
+    console.log(sortedInterruptions.map((i) => i.time.toNumber()));
   }
+  console.log('interruptionHours', interruptionHours.toNumber());
   const lunch = interruptionHours.lessThanOrEqualTo(1.5);
+  endTime =
+    !lunch &&
+    format(endTime, 'HH:mm') === `${config.defaultEndTime.hours}:${config.defaultEndTime.minutes}`
+      ? set(endTime, { minutes: 0 })
+      : endTime;
 
-  return { startTime, endTime: !lunch && format(endTime, 'HH:mm') === `${config.defaultEndTime.hours}:${config.defaultEndTime.minutes}` ? set(endTime, {minutes: 0}) : endTime , interruptionHours, lunch };
+  return { startTime, endTime, interruptionHours, lunch };
 };
 
 export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextType) => {
   const currentDay = new Date(workDay.startTime);
-  const { startTime, endTime, interruptionHours, lunch } = updateTimes(workDay.interruptions, currentDay, config);
+  const { startTime, endTime, interruptionHours, lunch } = updateTimes(
+    workDay.interruptions,
+    currentDay,
+    config,
+  );
   const dayWorked = config.officialWorkTime.minus(interruptionHours);
-  const compensatoryLeave = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'compensatoryLeave'))
-  const vacation = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'vacation'))
+  const compensatoryLeave = calculateInterruptions(
+    workDay.interruptions.filter((interruption) => interruption.type === 'compensatoryLeave'),
+  );
+  const vacation = calculateInterruptions(
+    workDay.interruptions.filter((interruption) => interruption.type === 'vacation'),
+  );
   // const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
-  const workFromHome = new Decimal(0)
+  const workFromHome = new Decimal(0);
   return {
     ...workDay,
     startTime,
@@ -121,9 +194,18 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
 
 export const calcSickLeave = (monthData: WorkDay[], config: ConfigContextType) => {
   const sickLeave = monthData
-    .filter((data) => data.sickLeave)
+    .filter(
+      (data) =>
+        data.sickLeave ||
+        data.interruptions?.some((i) => i.type === InterruptionWithTimeType.SICK_LEAVE),
+    )
     .reduce(
-      (acc, data) => acc.plus(data.sickLeave ? config.officialWorkTime : new Decimal(0)),
+      (acc, data) =>
+        acc.plus(
+          data.interruptions
+            ?.filter((i) => i.type === InterruptionWithTimeType.SICK_LEAVE)
+            .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0),
+        ),
       new Decimal(0),
     );
   const sickLeaveDays = sickLeave.dividedBy(config.officialWorkTime);
@@ -132,12 +214,18 @@ export const calcSickLeave = (monthData: WorkDay[], config: ConfigContextType) =
 
 export const calcDoctorsLeave = (monthData: WorkDay[], config: ConfigContextType) => {
   const doctorsLeave = monthData
-    .filter((data) => data.doctorsLeave || data.interruptions?.some((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE))
+    .filter(
+      (data) =>
+        data.doctorsLeave ||
+        data.interruptions?.some((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE),
+    )
     .reduce(
-      (acc, data) => acc
-        .plus(data.doctorsLeave ? config.officialWorkTime : new Decimal(0))
-        .plus(data.interruptions?.filter((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE)
-          .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0)),
+      (acc, data) =>
+        acc.plus(
+          data.interruptions
+            ?.filter((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE)
+            .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0),
+        ),
       new Decimal(0),
     ); // add time from interruptions
   const doctorsLeaveDays = doctorsLeave.dividedBy(config.officialWorkTime);
@@ -146,19 +234,25 @@ export const calcDoctorsLeave = (monthData: WorkDay[], config: ConfigContextType
 
 export const calcDoctorsLeaveFamily = (monthData: WorkDay[], config: ConfigContextType) => {
   const doctorsLeaveFamily = monthData
-    .filter((data) => data.doctorsLeaveFamily || data.interruptions?.some((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY))
+    .filter(
+      (data) =>
+        data.doctorsLeaveFamily ||
+        data.interruptions?.some((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY),
+    )
     .reduce(
-      (acc, data) => acc
-        .plus(data.doctorsLeaveFamily ? config.officialWorkTime : new Decimal(0))
-        .plus(data.interruptions?.filter((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY)
-          .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0)),
+      (acc, data) =>
+        acc.plus(
+          data.interruptions
+            ?.filter((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY)
+            .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0),
+        ),
       new Decimal(0),
     );
   const doctorsLeaveFamilyDays = doctorsLeaveFamily.dividedBy(config.officialWorkTime);
   return [doctorsLeaveFamily, doctorsLeaveFamilyDays];
 };
 
-export const calcWorked = (monthData: WorkDay[], config: ConfigContextType) => { 
+export const calcWorked = (monthData: WorkDay[], config: ConfigContextType) => {
   const worked = monthData
     .filter((data) => data.dayWorked)
     .reduce((acc, data) => acc.plus(data.dayWorked.toNumber()), new Decimal(0));
@@ -170,7 +264,14 @@ export const calcCompensatoryLeave = (monthData: WorkDay[], config: ConfigContex
   const compensatoryLeave = monthData
     .filter((data) => data.compensatoryLeave)
     .reduce(
-      (acc, data) => acc.plus(data.compensatoryLeave?.toNumber() ?? new Decimal(0)),
+      (acc, data) =>
+        acc
+          .plus(data.compensatoryLeave?.toNumber() ?? new Decimal(0))
+          .plus(
+            data.interruptions
+              ?.filter((i) => i.type === InterruptionWithTimeType.COMPENSATORY_LEAVE)
+              .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0),
+          ),
       new Decimal(0),
     );
   const compensatoryLeaveDays = compensatoryLeave.dividedBy(config.officialWorkTime);
@@ -179,9 +280,18 @@ export const calcCompensatoryLeave = (monthData: WorkDay[], config: ConfigContex
 
 export const calcSickLeaveFamily = (monthData: WorkDay[], config: ConfigContextType) => {
   const sickLeaveFamily = monthData
-    .filter((data) => data.sickLeaveFamily)
+    .filter(
+      (data) =>
+        data.sickLeaveFamily ||
+        data.interruptions?.some((i) => i.type === InterruptionWithTimeType.SICK_LEAVE_FAMILY),
+    )
     .reduce(
-      (acc, data) => acc.plus(data.sickLeaveFamily ? config.officialWorkTime : new Decimal(0)),
+      (acc, data) =>
+        acc.plus(
+          data.interruptions
+            ?.filter((i) => i.type === InterruptionWithTimeType.SICK_LEAVE_FAMILY)
+            .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0),
+        ),
       new Decimal(0),
     );
   const sickLeaveFamilyDays = sickLeaveFamily.dividedBy(config.officialWorkTime);

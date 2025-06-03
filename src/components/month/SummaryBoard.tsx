@@ -51,7 +51,13 @@ const SummaryBoard = ({
   return (
     <div className='grid auto-rows-min gap-[4px] md:grid-cols-6 grid-cols-4 border bg-white rounded-2xl shadow-md my-[5px] py-[15px]'>
       <span className='justify-self-end font-semibold py-[6px]'>Meno:</span>
-      <Input value={userName} onChange={(e) => setUserName(e.target.value)} />
+      <Input 
+        id="user-name"
+        name="userName"
+        value={userName}
+        autoComplete='off'
+        onChange={(e) => setUserName(e.target.value)} 
+      />
       <span className='justify-self-end font-semibold py-[6px]'>Časový fond:</span>
       <span className='py-[6px]'>{config.officialWorkTime.toNumber()}h</span>
       {isDesktop && (

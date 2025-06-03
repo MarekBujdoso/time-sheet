@@ -104,18 +104,18 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
   const isDisabled = React.useMemo(() => identifyDayType(oneDay, officialWorkTime) !== 'workDay', [oneDay, officialWorkTime]);
 
   return (
-    <form action={handleSubmit}>
+    <form action={handleSubmit} name='workDayForm'>
       <div className='rounded-md border p-2 text-sm shadow-sm'>
         <div className='grid grid-cols-2 gap-2 items-left p-2'>
           <div className='col-span-2'>
-            <Label>Typ dňa</Label>
+            <Label htmlFor='dayType'>Typ dňa</Label>
             <div className='flex gap-2 flex-wrap justify-between'>
               <Select
                 name='dayType'
                 value={identifyDayType(oneDay, officialWorkTime)}
                 onValueChange={(value) => changeDayType(value as keyof typeof DAY_TYPES)}
               >
-                <SelectTrigger>
+                <SelectTrigger id='dayType' className="w-full" autoFocus>
                   <SelectValue placeholder='Vyber si deň' />
                 </SelectTrigger>
                 <SelectContent>
@@ -156,14 +156,14 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
           </div>
           <div className='flex items-center space-x-2 col-span-2 justify-between'>
             <div className='flex items-center space-x-2'>
-              <Label>Odpracované</Label>
+            <div className='text-sm font-medium leading-none'>Odpracované</div>
               <span className='text-lg font-semibold'>
                 {oneDay.dayWorked.toDecimalPlaces(3).toNumber()}
               </span>
             </div>
             <div className='flex items-center space-x-2'>{oneDay.lunch && <Soup />}</div>
             <div className='flex items-center space-x-2'>
-              <Label>Doma</Label>
+            <div className='text-sm font-medium leading-none'>Doma</div>
               <span className='text-lg font-semibold'>
                 {oneDay.workFromHome.toDecimalPlaces(3).toNumber()}
               </span>
@@ -171,13 +171,13 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
           </div>
           <div className='flex items-center space-x-2 col-span-2 justify-between'>
             <div className='flex items-center space-x-2'>
-              <Label>Dovolenka</Label>
+            <div className='text-sm font-medium leading-none'>Dovolenka</div>
               <span className='text-lg font-semibold'>
                 {oneDay.vacation.toDecimalPlaces(3).toNumber()}
               </span>
             </div>
             <div className='flex items-center space-x-2'>
-              <Label>Náhradné voľno</Label>
+            <div className='text-sm font-medium leading-none'>Náhradné voľno</div>
               <span className='text-lg font-semibold'>
                 {oneDay.compensatoryLeave.toDecimalPlaces(3).toNumber()}
               </span>

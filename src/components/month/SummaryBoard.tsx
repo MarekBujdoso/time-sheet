@@ -54,7 +54,7 @@ const SummaryBoard = ({
   );
 
   return (
-    <div className='grid auto-rows-min gap-[4px] md:grid-cols-6 grid-cols-4 border bg-white rounded-2xl shadow-md my-[5px] py-[15px]'>
+    <div className='grid auto-rows-min gap-[4px] md:grid-cols-6 grid-cols-4 border bg-white rounded-2xl shadow-md my-[5px] py-[15px] text-sm md:text-base'>
       {isDesktop && (<span></span>)}
       <span className='justify-self-end font-semibold py-[6px]'>Meno:</span>
       <Input 
@@ -80,7 +80,7 @@ const SummaryBoard = ({
         {vacation.toNumber()}h / {vacationDays.toFixed(1)}d
       </span>
       
-      <span className='justify-self-end font-semibold py-[6px]'>Náhradné voľno:</span>
+      <span className='justify-self-end font-semibold py-[6px]'>NV:</span>
       <span className='py-[6px]'>
         {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
       </span>

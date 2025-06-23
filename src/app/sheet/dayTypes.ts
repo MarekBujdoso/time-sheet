@@ -53,7 +53,7 @@ export const vacation = (startTime: Date, endTime: Date, workTime: Decimal): Wor
   compensatoryLeave: new Decimal(0),
   doctorsLeave: false,
   doctorsLeaveFamily: false,
-  dayWorked: workTime,
+  dayWorked: new Decimal(0),
   holiday: false,
   vacation: workTime,
   interruptions: [],

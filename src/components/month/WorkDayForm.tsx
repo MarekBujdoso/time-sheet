@@ -14,12 +14,11 @@ import {
   WorkDayFull,
 } from '../../app/sheet/types';
 import { Button } from '../ui/button';
-// import { Checkbox } from "../ui/checkbox";
 import { DrawerClose, DrawerFooter } from '../ui/drawer';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { calculateWorked, recalculateWorkDay } from '../utils/calculations';
+import { calculateWorked, calcVacation, recalculateWorkDay } from '../utils/calculations';
 import InterruptionTime from './InterruptionTime';
 
 interface WorkDayFormProps {
@@ -37,30 +36,25 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
       new Date(workDay.startTime),
       workDay.interruptions,
       config,
-      // workDay.compensatoryLeave,
     ),
   });
-  const [dayType, setDayType] = React.useState<keyof typeof DAY_TYPES | undefined>(
-    identifyDayType(oneDay, officialWorkTime),
-  );
 
   const changeDay = React.useCallback(
     (key: string, value: string | Decimal | boolean | Date | InterruptionTimeProps[]) => {
-      if ((key === 'startTime' || key === 'endTime') && typeof value === 'string') {
-        value = new Date(
-          oneDay[key].setHours(Number(value.split(':')[0]), Number(value.split(':')[1])),
-        );
-      }
-
-      setOneDay((day) => recalculateWorkDay({ ...day, [key]: value }, config));
+      setOneDay((day) => {
+        if ((key === 'startTime' || key === 'endTime') && typeof value === 'string') {
+          const timeArray = value.split(':');
+          value = new Date(
+            day[key].setHours(Number(timeArray[0]), Number(timeArray[1])),
+          );
+        }
+        return recalculateWorkDay({ ...day, [key]: value }, config)
+      });
     },
-    [config, oneDay],
+    [config],
   );
 
-  const handleSubmit = (formData: FormData) => {
-    console.log('submit', oneDay);
-    console.log(formData);
-    // e.preventDefault();
+  const handleSubmit = () => {
     saveWorkDay(oneDay);
   };
 
@@ -96,7 +90,6 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
   };
 
   const changeDayType = (type: keyof typeof DAY_TYPES) => {
-    setDayType(type);
     const startTime = set(oneDay.startTime, officialStartTime);
     const endTime = set(oneDay.endTime, officialEndTime);
     setOneDay((day) => ({
@@ -108,21 +101,21 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
     }));
   };
 
-  const isDisabled = dayType !== 'workDay';
+  const isDisabled = React.useMemo(() => identifyDayType(oneDay, officialWorkTime) !== 'workDay', [oneDay, officialWorkTime]);
 
   return (
-    <form action={handleSubmit}>
+    <form action={handleSubmit} name='workDayForm'>
       <div className='rounded-md border p-2 text-sm shadow-sm'>
         <div className='grid grid-cols-2 gap-2 items-left p-2'>
           <div className='col-span-2'>
-            <Label>Typ dňa</Label>
+            <Label htmlFor='dayType'>Typ dňa</Label>
             <div className='flex gap-2 flex-wrap justify-between'>
               <Select
                 name='dayType'
-                value={dayType}
+                value={identifyDayType(oneDay, officialWorkTime)}
                 onValueChange={(value) => changeDayType(value as keyof typeof DAY_TYPES)}
               >
-                <SelectTrigger>
+                <SelectTrigger id='dayType' className="w-full" autoFocus>
                   <SelectValue placeholder='Vyber si deň' />
                 </SelectTrigger>
                 <SelectContent>
@@ -163,14 +156,14 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
           </div>
           <div className='flex items-center space-x-2 col-span-2 justify-between'>
             <div className='flex items-center space-x-2'>
-              <Label>Odpracované</Label>
+            <div className='text-sm font-medium leading-none'>Odpracované</div>
               <span className='text-lg font-semibold'>
                 {oneDay.dayWorked.toDecimalPlaces(3).toNumber()}
               </span>
             </div>
             <div className='flex items-center space-x-2'>{oneDay.lunch && <Soup />}</div>
             <div className='flex items-center space-x-2'>
-              <Label>Doma</Label>
+            <div className='text-sm font-medium leading-none'>Doma</div>
               <span className='text-lg font-semibold'>
                 {oneDay.workFromHome.toDecimalPlaces(3).toNumber()}
               </span>
@@ -178,47 +171,18 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
           </div>
           <div className='flex items-center space-x-2 col-span-2 justify-between'>
             <div className='flex items-center space-x-2'>
-              <Label>Dovolenka</Label>
+            <div className='text-sm font-medium leading-none'>Dovolenka</div>
               <span className='text-lg font-semibold'>
-                {oneDay.vacation.toDecimalPlaces(3).toNumber()}
+                {calcVacation([oneDay], config)[0].toDecimalPlaces(3).toNumber()}
               </span>
             </div>
             <div className='flex items-center space-x-2'>
-              <Label>Náhradné voľno</Label>
+            <div className='text-sm font-medium leading-none'>Náhradné voľno</div>
               <span className='text-lg font-semibold'>
                 {oneDay.compensatoryLeave.toDecimalPlaces(3).toNumber()}
               </span>
             </div>
-            {/* <div className='flex items-center space-x-2'>{oneDay.lunch && <Soup />}</div> */}
           </div>
-          {/* <div>
-            <Label htmlFor='vacation'>Dovolenka</Label>
-            <Input
-              disabled={isDisabled}
-              id='vacation'
-              type='number'
-              name='vacation'
-              value={oneDay.vacation?.toNumber()}
-              min={0}
-              max={config.officialWorkTime.toNumber()}
-              step={0.5}
-              onChange={(e) => changeDay('vacation', new Decimal(e.target.value))}
-            />
-          </div>
-          <div>
-            <Label htmlFor='compensatoryLeave'>Náhradé voľno</Label>
-            <Input
-              disabled={isDisabled}
-              id='compensatoryLeave'
-              name='compensatoryLeave'
-              type='number'
-              value={oneDay.compensatoryLeave?.toNumber()}
-              min={0}
-              max={config.officialWorkTime.toNumber()}
-              step={0.5}
-              onChange={(e) => changeDay('compensatoryLeave', new Decimal(e.target.value))}
-            />
-          </div> */}
           {oneDay.interruptions.map((interruption) => (
             <InterruptionTime
               key={interruption.id}

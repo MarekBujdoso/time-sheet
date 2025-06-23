@@ -10,11 +10,13 @@ import { set } from 'date-fns/set';
 import { differenceInMinutes } from 'date-fns/differenceInMinutes';
 import { format } from 'date-fns/format';
 
-const calculateLunch = (workedHours: Decimal) => {
-  return workedHours.greaterThanOrEqualTo(6) ? new Decimal(0.5) : new Decimal(0);
+const LUNCH_THRESHOLD = 6;
+
+export const calculateLunch = (workedHours: Decimal) => {
+  return workedHours.greaterThanOrEqualTo(LUNCH_THRESHOLD) ? new Decimal(0.5) : new Decimal(0);
 };
 
-const calculateInterruptions = (interruptions: InterruptionTimeProps[]): Decimal => {
+export const calculateInterruptions = (interruptions: InterruptionTimeProps[]): Decimal => {
   return interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0));
 };
 
@@ -24,35 +26,31 @@ export const calculateWorked = (
   interruptions: InterruptionTimeProps[] = [],
   config: ConfigContextType,
 ) => {
-  const { startTime, endTime } = updateTimes(interruptions, currentDay, config);
-  const interruptionsTime = interruptions
-    .filter(
-      (interruption) => interruption.startTime >= startTime && interruption.endTime <= endTime,
-    )
-    .reduce((acc, { time }) => acc.add(time), new Decimal(0));
-
-  const lunchTime = calculateLunch(workedHours.minus(interruptionsTime));
+  const { interruptionHours, lunch } = updateTimes(interruptions, currentDay, config);
+  const lunchTime = lunch ? new Decimal(0.5) : new Decimal(0);
   return {
-    dayWorked: workedHours.minus(interruptionsTime).minus(lunchTime),
-    lunch: lunchTime.greaterThan(0),
-  };
+    dayWorked: workedHours.minus(interruptionHours).minus(lunchTime),
+    lunch,
+  }
 };
 
-const updateTimes = (
+// TODO: Consider using a more robust interval merging algorithm that handles all edge cases
+export const updateTimes = (
   interruptions: InterruptionTimeProps[],
   currentDay: Date,
   config: ConfigContextType,
 ) => {
+  let startTime = set(currentDay, config.defaultStartTime);
+  let endTime = set(currentDay, config.defaultEndTime);
+  // TODO: Consider using date-fns/areIntervalsOverlapping for more reliable interval comparison
   const sortedInterruptions = interruptions
     .map((a) => a)
+    .filter((a) => a.endTime.getTime() > a.startTime.getTime() && a.endTime.getTime() > startTime.getTime() && a.startTime.getTime() < endTime.getTime())
     .sort((b, a) => {
       const res = b.startTime.getTime() - a.startTime.getTime();
       return res === 0 ? b.endTime.getTime() - a.endTime.getTime() : res;
     });
 
-  console.log('sortedInterruptions', sortedInterruptions);
-  let startTime = set(currentDay, config.defaultStartTime);
-  let endTime = set(currentDay, config.defaultEndTime);
   let interruptionHours = new Decimal(0);
   if (sortedInterruptions.length > 0) {
     // sortedInterruptions.forEach((interruption) => {
@@ -64,28 +62,13 @@ const updateTimes = (
     let startIndex = 0;
     let endIndex = 1;
     let interruption = sortedInterruptions[startIndex];
-    let start = interruption.startTime;
+    let start = interruption.startTime.getTime() < startTime.getTime() ? startTime : interruption.startTime;
     let end = interruption.endTime;
     while (endIndex < sortedInterruptions.length && startIndex < sortedInterruptions.length) {
       const nextInterruption = sortedInterruptions[endIndex];
-      const nextStart = nextInterruption.startTime;
+      const nextStart = nextInterruption.startTime.getTime() < startTime.getTime() ? startTime : nextInterruption.startTime;
       const nextEnd = nextInterruption.endTime;
-      console.log(
-        'start',
-        format(start, 'HH:mm'),
-        'end',
-        format(end, 'HH:mm'),
-        'nextStart',
-        format(nextStart, 'HH:mm'),
-        'nextEnd',
-        format(nextEnd, 'HH:mm'),
-      );
-      console.log(
-        'start < nextStart && end <= nextEnd && nextStart <= end',
-        start < nextStart && end <= nextEnd && nextStart <= end,
-      );
-      console.log('start <= nextStart && end >= nextEnd', start <= nextStart && end >= nextEnd);
-      console.log('nextStart <= start && nextEnd >= end', nextStart <= start && nextEnd >= end);
+      // TODO: Consider using date-fns/areIntervalsOverlapping for more reliable overlap detection
       // I don't differentiate between interruption types, so the type calculation can be wrong if the interruption is merged with another interruption
       if (start < nextStart && end <= nextEnd && nextStart <= end) {
         nextInterruption.time = new Decimal(differenceInMinutes(nextEnd, end) / 60);
@@ -125,6 +108,8 @@ const updateTimes = (
         endIndex++;
       }
     }
+    // TODO: Handle edge case: Last interruption might not be processed correctly in all scenarios
+    //     if (endIndex >= sortedInterruptions.length && start && end) {
     // if it is the last interruption, push it to the mergedTimes
     if (endIndex >= sortedInterruptions.length) {
       mergedTimes.push({ startTime: start, endTime: end });
@@ -151,10 +136,8 @@ const updateTimes = (
         .plus(interruption.endTime.getTime() / 1000 / 60 / 60)
         .minus(interruption.startTime.getTime() / 1000 / 60 / 60);
     }, new Decimal(0));
-    console.log(sortedInterruptions.map((i) => i.time.toNumber()));
   }
-  console.log('interruptionHours', interruptionHours.toNumber());
-  const lunch = interruptionHours.lessThanOrEqualTo(1.5);
+  const lunch = config.officialWorkTime.minus(interruptionHours).greaterThanOrEqualTo(LUNCH_THRESHOLD);
   endTime =
     !lunch &&
     format(endTime, 'HH:mm') === `${config.defaultEndTime.hours}:${config.defaultEndTime.minutes}`
@@ -164,6 +147,7 @@ const updateTimes = (
   return { startTime, endTime, interruptionHours, lunch };
 };
 
+// TODO: Add JSDoc comments for all exported functions
 export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextType) => {
   const currentDay = new Date(workDay.startTime);
   const { startTime, endTime, interruptionHours, lunch } = updateTimes(
@@ -174,10 +158,8 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
   const dayWorked = config.officialWorkTime.minus(interruptionHours);
   const compensatoryLeave = calculateInterruptions(
     workDay.interruptions.filter((interruption) => interruption.type === 'compensatoryLeave'),
-  );
-  const vacation = calculateInterruptions(
-    workDay.interruptions.filter((interruption) => interruption.type === 'vacation'),
-  );
+  )
+
   // const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
   const workFromHome = new Decimal(0);
   return {
@@ -188,7 +170,6 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
     dayWorked,
     workFromHome,
     compensatoryLeave,
-    vacation,
   };
 };
 
@@ -296,4 +277,24 @@ export const calcSickLeaveFamily = (monthData: WorkDay[], config: ConfigContextT
     );
   const sickLeaveFamilyDays = sickLeaveFamily.dividedBy(config.officialWorkTime);
   return [sickLeaveFamily, sickLeaveFamilyDays];
+};
+
+export const calcVacation = (monthData: WorkDay[], config: ConfigContextType) => {
+  const vacation = monthData
+    .filter(
+      (data) =>
+        data.interruptions?.some((i) => i.type === InterruptionWithTimeType.VACATION),
+    )
+    .reduce(
+      (acc, data) =>
+        acc
+        .plus(
+          data.interruptions
+            ?.filter((i) => i.type === InterruptionWithTimeType.VACATION)
+            .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0),
+        ),
+      new Decimal(0),
+    );
+  const vacationDays = vacation.dividedBy(config.officialWorkTime);
+  return [vacation, vacationDays];
 };

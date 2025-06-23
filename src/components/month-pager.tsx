@@ -28,28 +28,18 @@ const MonthPager = ({ update }: MonthPagerProps) => {
   }, [activeMonth, setActiveMonth, setActiveYear, update, activeYear])
 
   return (
-//   <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
   <div className="flex  w-full">
     <div className="w-full">
       <Pagination >
         <PaginationContent className="w-full justify-between">
           <PaginationItem>
-            <PaginationPrevious size="lg" className="select-none border bg-white shadow-md" onClick={switchToPrevMonth} />
+            <PaginationPrevious size="lg" className="select-none px-8 border bg-white shadow-md" onClick={switchToPrevMonth} />
           </PaginationItem>
-          {/* <PaginationItem>
-            <PaginationLink className="w-40 select-none" onClick={handleMonth} isActive>{monthsMap[activeMonth]}</PaginationLink>
-          </PaginationItem> */}
           <div className="w-40 select-none font-semibold text-xl">
             {`${getMonthName(activeMonth)} ${activeYear}`}
           </div>
-          {/* <PaginationItem>
-            <PaginationLink href="#">3</PaginationLink>
-          </PaginationItem>
           <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem> */}
-          <PaginationItem>
-            <PaginationNext size="lg" className="select-none border bg-white shadow-md" onClick={switchToNextMonth} />
+            <PaginationNext size="lg" className="select-none border px-8 bg-white shadow-md" onClick={switchToNextMonth} />
           </PaginationItem>
         </PaginationContent>
       </Pagination>

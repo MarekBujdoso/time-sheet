@@ -46,18 +46,17 @@ export const updateTimes = (
   currentDay: Date,
   config: ConfigContextType,
 ) => {
+  let startTime = set(currentDay, config.defaultStartTime);
+  let endTime = set(currentDay, config.defaultEndTime);
   // TODO: Consider using date-fns/areIntervalsOverlapping for more reliable interval comparison
   const sortedInterruptions = interruptions
     .map((a) => a)
-    .filter((a) => a.endTime.getTime() > a.startTime.getTime())
+    .filter((a) => a.endTime.getTime() > a.startTime.getTime() && a.endTime.getTime() > startTime.getTime() && a.startTime.getTime() < endTime.getTime())
     .sort((b, a) => {
       const res = b.startTime.getTime() - a.startTime.getTime();
       return res === 0 ? b.endTime.getTime() - a.endTime.getTime() : res;
     });
 
-  console.log('sortedInterruptions', sortedInterruptions);
-  let startTime = set(currentDay, config.defaultStartTime);
-  let endTime = set(currentDay, config.defaultEndTime);
   let interruptionHours = new Decimal(0);
   if (sortedInterruptions.length > 0) {
     // sortedInterruptions.forEach((interruption) => {
@@ -69,28 +68,12 @@ export const updateTimes = (
     let startIndex = 0;
     let endIndex = 1;
     let interruption = sortedInterruptions[startIndex];
-    let start = interruption.startTime;
+    let start = interruption.startTime.getTime() < startTime.getTime() ? startTime : interruption.startTime;
     let end = interruption.endTime;
     while (endIndex < sortedInterruptions.length && startIndex < sortedInterruptions.length) {
       const nextInterruption = sortedInterruptions[endIndex];
-      const nextStart = nextInterruption.startTime;
+      const nextStart = nextInterruption.startTime.getTime() < startTime.getTime() ? startTime : nextInterruption.startTime;
       const nextEnd = nextInterruption.endTime;
-      console.log(
-        'start',
-        format(start, 'HH:mm'),
-        'end',
-        format(end, 'HH:mm'),
-        'nextStart',
-        format(nextStart, 'HH:mm'),
-        'nextEnd',
-        format(nextEnd, 'HH:mm'),
-      );
-      console.log(
-        'start < nextStart && end <= nextEnd && nextStart <= end',
-        start < nextStart && end <= nextEnd && nextStart <= end,
-      );
-      console.log('start <= nextStart && end >= nextEnd', start <= nextStart && end >= nextEnd);
-      console.log('nextStart <= start && nextEnd >= end', nextStart <= start && nextEnd >= end);
       // TODO: Consider using date-fns/areIntervalsOverlapping for more reliable overlap detection
       // I don't differentiate between interruption types, so the type calculation can be wrong if the interruption is merged with another interruption
       if (start < nextStart && end <= nextEnd && nextStart <= end) {
@@ -159,9 +142,7 @@ export const updateTimes = (
         .plus(interruption.endTime.getTime() / 1000 / 60 / 60)
         .minus(interruption.startTime.getTime() / 1000 / 60 / 60);
     }, new Decimal(0));
-    console.log(sortedInterruptions.map((i) => i.time.toNumber()));
   }
-  console.log('interruptionHours', interruptionHours.toNumber());
   const lunch = config.officialWorkTime.minus(interruptionHours).greaterThanOrEqualTo(LUNCH_THRESHOLD);
   endTime =
     !lunch &&
@@ -183,10 +164,10 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
   const dayWorked = config.officialWorkTime.minus(interruptionHours);
   const compensatoryLeave = calculateInterruptions(
     workDay.interruptions.filter((interruption) => interruption.type === 'compensatoryLeave'),
-  );
+  )
   const vacation = calculateInterruptions(
     workDay.interruptions.filter((interruption) => interruption.type === 'vacation'),
-  );
+  )
   // const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
   const workFromHome = new Decimal(0);
   return {

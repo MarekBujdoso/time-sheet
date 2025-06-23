@@ -17,8 +17,8 @@ const ConfigContext = React.createContext<ConfigContextType>({
   lunchBreak: 0.5,
   officialStartTime: {hours: 7, minutes: 30}, 
   officialEndTime: {hours: 15, minutes: 30}, // calculated from startTime, officialWorkTime and lunchBreak
-  defaultStartTime: {hours: 7, minutes: 30},
-  defaultEndTime: {hours: 15, minutes: 30},
+  defaultStartTime: {hours: 7, minutes: 30}, // default - fixed time
+  defaultEndTime: {hours: 15, minutes: 30}, // default - fixed time
 })
 
 export default ConfigContext

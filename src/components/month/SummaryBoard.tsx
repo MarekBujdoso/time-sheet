@@ -50,6 +50,7 @@ const SummaryBoard = ({
 
   return (
     <div className='grid auto-rows-min gap-[4px] md:grid-cols-6 grid-cols-4 border bg-white rounded-2xl shadow-md my-[5px] py-[15px]'>
+      {isDesktop && (<span></span>)}
       <span className='justify-self-end font-semibold py-[6px]'>Meno:</span>
       <Input 
         id="user-name"
@@ -57,18 +58,24 @@ const SummaryBoard = ({
         value={userName}
         autoComplete='off'
         onChange={(e) => setUserName(e.target.value)} 
-      />
+        />
       <span className='justify-self-end font-semibold py-[6px]'>Časový fond:</span>
       <span className='py-[6px]'>{config.officialWorkTime.toNumber()}h</span>
-      {isDesktop && (
-        <span className='justify-self-end font-semibold py-[6px]'>Nadčasová práca:</span>
-      )}
-      {isDesktop && <span className='py-[6px]'>0h / 0.0d</span>}
+      {isDesktop && (<span></span>)}
+      {isDesktop && (<span></span>)}
       <span className='justify-self-end font-semibold py-[6px]'>Odprac.:</span>
       <span className='py-[6px]'>
         {worked.toNumber()}h / {workedDays.toFixed(1)}d
       </span>
-      <span className='justify-self-end font-semibold py-[6px]'>NV:</span>
+      <span className='justify-self-end font-semibold py-[6px]'>Nadčasy:</span>
+      <span className='py-[6px]'>0h / 0.0d</span>
+      {isDesktop && (<span></span>)}
+      <span className='justify-self-end font-semibold py-[6px]'>Dovolenka:</span>
+      <span className='py-[6px]'>
+        {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
+      </span>
+      
+      <span className='justify-self-end font-semibold py-[6px]'>Náhradné voľno:</span>
       <span className='py-[6px]'>
         {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
       </span>

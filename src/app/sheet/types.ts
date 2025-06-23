@@ -15,7 +15,7 @@ export interface WorkDay {
     doctorsLeaveFamily?: boolean, // P-doprovod cely den
     dayWorked: Decimal, // Odpracovane za den
     holiday?: boolean, // Sviatok
-    vacation?: Decimal, // Dovolenka
+    vacation?: boolean, // Dovolenka
     interruptions?: InterruptionTimeProps[], // Prerusenia
     typeIcon?: LucideIcon,
 }
@@ -29,7 +29,7 @@ export interface WorkDayFull extends WorkDay {
     doctorsLeave: boolean, // P-cko cely den
     doctorsLeaveFamily: boolean, // P-doprovod cely den
     holiday: boolean, // Sviatok
-    vacation: Decimal, // Dovolenka
+    vacation: boolean, // Dovolenka
     interruptions: InterruptionTimeProps[], // Prerusenia
     typeIcon?: LucideIcon
 }

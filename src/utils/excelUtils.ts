@@ -187,21 +187,24 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     const negativeInterruptions = data.interruptions?.filter(
       (interruption) => interruption.type !== 'compensatoryLeave',
     ) ?? [];
+    const vacationTime = data.interruptions?.filter(
+      (interruption) => interruption.type === 'vacation',
+    )?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0)) ?? new Decimal(0);
 
     const row = sheet.addRow({
       day: data.startTime.getDate(),
       startTime: isWorkingDay ? format(data.startTime, 'HH: mm') : title,
       endTime: isWorkingDay ? format(data.endTime, 'HH:mm') : '',
       lunch: data.lunch ? 0.5 : '',
-      intFrom:
+      intFrom: data.vacation ? '' : 
         negativeInterruptions
           ?.map((interruption) => format(interruption.startTime, 'HH:mm'))
           .join('\r\n') ?? '',
-      intTo:
+      intTo: data.vacation ? '' : 
         negativeInterruptions
           ?.map((interruption) => format(interruption.endTime, 'HH:mm'))
           .join('\r\n') ?? '',
-      intTime:
+      intTime: data.vacation ? '' : 
         negativeInterruptions?.length > 0 ? negativeInterruptions
           ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
           .toNumber() ?? '' : '',
@@ -210,7 +213,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
         data.compensatoryLeave && data.compensatoryLeave.greaterThan(0)
           ? data.compensatoryLeave.toNumber()
           : '',
-      vacation: data.vacation && data.vacation.greaterThan(0) ? data.vacation.toNumber() : '',
+      vacation: data.vacation || vacationTime.greaterThan(0) ? vacationTime.toNumber() : '',
       home:
         data.workFromHome && data.workFromHome.greaterThan(0) ? data.workFromHome.toNumber() : '',
       workTime:

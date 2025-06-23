@@ -16,7 +16,7 @@ const useWorkDayBox = (workDay: WorkDay, config: ConfigContextType) => {
     sickLeaveFamily = false,
     dayWorked,
     workFromHome = new Decimal(0),
-    vacation = new Decimal(0),
+    vacation = false,
     holiday = false,
     interruptions = [],
   } = workDay;
@@ -30,13 +30,16 @@ const useWorkDayBox = (workDay: WorkDay, config: ConfigContextType) => {
     !doctorsLeaveFamily &&
     !sickLeave &&
     !sickLeaveFamily &&
-    !isFullDay(vacation, config.officialWorkTime) &&
-    (compensatoryLeave.greaterThan(0) || interruptions.length > 0 || vacation.greaterThan(0));
+    !vacation &&
+    (compensatoryLeave.greaterThan(0) || interruptions.length > 0);
   const doctorsLeaveTime = interruptions
     .filter((interruption) => interruption.type === 'doctorsLeave')
     .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
   const doctorsLeaveFamilyTime = interruptions
     .filter((interruption) => interruption.type === 'doctorsLeaveFamily')
+    .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
+  const vacationTime = interruptions
+    .filter((interruption) => interruption.type === 'vacation')
     .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
 
   return {
@@ -60,6 +63,7 @@ const useWorkDayBox = (workDay: WorkDay, config: ConfigContextType) => {
     hasDisturbance,
     doctorsLeaveTime,
     doctorsLeaveFamilyTime,
+    vacationTime,
   };
 };
 

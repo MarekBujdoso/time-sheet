@@ -20,13 +20,12 @@ export const getTitle = (workDay: WorkDay, config: ConfigContextType): string =>
     sickLeaveFamily = false,
     dayWorked,
     // workFromHome = new Decimal(0),
-    vacation = new Decimal(0),
+    vacation = false,
     holiday = false,
     // interruptions = []
   } = workDay;
   const isWeekEnd = isWeekend(startTime);
   const isFullCompensatoryLeave = isFullDay(compensatoryLeave, config.officialWorkTime);
-  const isFullVacation = isFullDay(vacation, config.officialWorkTime);
   const isWorkingDay =
     !isWeekEnd &&
     !isFullCompensatoryLeave &&
@@ -34,7 +33,7 @@ export const getTitle = (workDay: WorkDay, config: ConfigContextType): string =>
     !doctorsLeaveFamily &&
     !sickLeave &&
     !sickLeaveFamily &&
-    !isFullVacation &&
+    !vacation &&
     !holiday &&
     dayWorked.greaterThan(0);
 
@@ -43,7 +42,7 @@ export const getTitle = (workDay: WorkDay, config: ConfigContextType): string =>
   if (doctorsLeaveFamily) return DAY_TYPES_KEYS.doctorsLeaveFamily;
   if (sickLeave) return DAY_TYPES_KEYS.sickLeave;
   if (sickLeaveFamily) return DAY_TYPES_KEYS.sickLeaveFamily;
-  if (isFullVacation) return DAY_TYPES_KEYS.vacation;
+  if (vacation) return DAY_TYPES_KEYS.vacation;
   if (holiday) return DAY_TYPES_KEYS.holiday;
   if (isWeekEnd) return DAY_TYPES_KEYS.weekend;
   if (isWorkingDay) return DAY_TYPES_KEYS.workDay;

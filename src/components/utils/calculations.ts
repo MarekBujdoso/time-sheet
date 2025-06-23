@@ -26,18 +26,12 @@ export const calculateWorked = (
   interruptions: InterruptionTimeProps[] = [],
   config: ConfigContextType,
 ) => {
-  const { startTime, endTime } = updateTimes(interruptions, currentDay, config);
-  const interruptionsTime = interruptions
-    .filter(
-      (interruption) => interruption.startTime >= startTime && interruption.endTime <= endTime,
-    )
-    .reduce((acc, { time }) => acc.add(time), new Decimal(0));
-
-  const lunchTime = calculateLunch(workedHours.minus(interruptionsTime));
+  const { interruptionHours, lunch } = updateTimes(interruptions, currentDay, config);
+  const lunchTime = lunch ? new Decimal(0.5) : new Decimal(0);
   return {
-    dayWorked: workedHours.minus(interruptionsTime).minus(lunchTime),
-    lunch: lunchTime.greaterThan(0),
-  };
+    dayWorked: workedHours.minus(interruptionHours).minus(lunchTime),
+    lunch,
+  }
 };
 
 // TODO: Consider using a more robust interval merging algorithm that handles all edge cases
@@ -165,9 +159,7 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
   const compensatoryLeave = calculateInterruptions(
     workDay.interruptions.filter((interruption) => interruption.type === 'compensatoryLeave'),
   )
-  const vacation = calculateInterruptions(
-    workDay.interruptions.filter((interruption) => interruption.type === 'vacation'),
-  )
+
   // const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
   const workFromHome = new Decimal(0);
   return {
@@ -178,7 +170,6 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
     dayWorked,
     workFromHome,
     compensatoryLeave,
-    vacation,
   };
 };
 
@@ -286,4 +277,24 @@ export const calcSickLeaveFamily = (monthData: WorkDay[], config: ConfigContextT
     );
   const sickLeaveFamilyDays = sickLeaveFamily.dividedBy(config.officialWorkTime);
   return [sickLeaveFamily, sickLeaveFamilyDays];
+};
+
+export const calcVacation = (monthData: WorkDay[], config: ConfigContextType) => {
+  const vacation = monthData
+    .filter(
+      (data) =>
+        data.interruptions?.some((i) => i.type === InterruptionWithTimeType.VACATION),
+    )
+    .reduce(
+      (acc, data) =>
+        acc
+        .plus(
+          data.interruptions
+            ?.filter((i) => i.type === InterruptionWithTimeType.VACATION)
+            .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0),
+        ),
+      new Decimal(0),
+    );
+  const vacationDays = vacation.dividedBy(config.officialWorkTime);
+  return [vacation, vacationDays];
 };

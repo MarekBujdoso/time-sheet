@@ -51,7 +51,7 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
     sickLeaveFamily = false,
     dayWorked,
     workFromHome = new Decimal(0),
-    vacation = new Decimal(0),
+    vacation = false,
     holiday = false,
     interruptions = [],
     month,
@@ -61,6 +61,7 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
     hasDisturbance,
     doctorsLeaveTime,
     doctorsLeaveFamilyTime,
+    vacationTime,
   } = useWorkDayBox(workDay, config);
 
   const MainIcon = getIconByDayType(title as DAY_TYPES_KEYS);
@@ -105,8 +106,8 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
               <Pickaxe className='mr-[10px]' />
             </InterruptionItem>
           )}
-          {hasDisturbance && vacation.greaterThan(0) && (
-            <InterruptionItem hours={vacation} name='Dovolenka'>
+          {hasDisturbance && vacationTime.greaterThan(0) && (
+            <InterruptionItem hours={vacationTime} name='Dovolenka'>
               <TreePalm className='mr-[10px]' />
             </InterruptionItem>
           )}

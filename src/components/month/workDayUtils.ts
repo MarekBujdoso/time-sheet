@@ -26,12 +26,17 @@ export const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
   if (sickLeaveFamily) return 'bg-rose-200';
   if (holiday) return 'bg-emerald-100';
   if (compensatoryLeave?.greaterThan(0)) return 'bg-blue-200';
-  if (vacation?.equals(officialWorkTime)) return 'bg-emerald-100';
+  if (vacation) return 'bg-emerald-100';
   if (dayWorked.equals(officialWorkTime)) return 'bg-blue-200';
   if (isWeekend(workDay.startTime)) return 'bg-emerald-100';
   if (dayWorked.greaterThan(0)) {
     // if (compensatoryLeave?.greaterThan(0)) return 'bg-gradient-to-r from-blue-200 to-rose-200';
-    if (vacation?.greaterThan(0)) return `bg-gradient-to-r from-blue-200 to-emerald-100`;
+    if (
+      workDay.interruptions?.some(
+        (interruption) => interruption.type === InterruptionWithTimeType.VACATION,
+      )
+    )
+      return `bg-gradient-to-r from-blue-200 to-emerald-100`;
     if (
       workDay.interruptions?.some(
         (interruption) =>

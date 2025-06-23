@@ -5,6 +5,7 @@ import {
   calcSickLeave,
   calcSickLeaveFamily,
   calcWorked,
+  calcVacation,
 } from '../../components/utils/calculations';
 import React, { useContext } from 'react';
 import { WorkDay } from '../../app/sheet/types';
@@ -23,6 +24,10 @@ const SummaryBoard = ({
 }) => {
   const config = useContext(ConfigContext);
   const isDesktop = useMediaQuery({ minWidth: 767 });
+  const [vacation, vacationDays] = React.useMemo(
+    () => calcVacation(monthData, config),
+    [monthData, config],
+  );
   const [sickLeave, sickLeaveDays] = React.useMemo(
     () => calcSickLeave(monthData, config),
     [monthData, config],
@@ -72,7 +77,7 @@ const SummaryBoard = ({
       {isDesktop && (<span></span>)}
       <span className='justify-self-end font-semibold py-[6px]'>Dovolenka:</span>
       <span className='py-[6px]'>
-        {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
+        {vacation.toNumber()}h / {vacationDays.toFixed(1)}d
       </span>
       
       <span className='justify-self-end font-semibold py-[6px]'>Náhradné voľno:</span>

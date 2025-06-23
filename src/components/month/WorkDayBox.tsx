@@ -30,7 +30,7 @@ const WorkDayBox = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
     sickLeaveFamily = false,
     dayWorked,
     workFromHome = new Decimal(0),
-    vacation = new Decimal(0),
+    vacation = false,
     holiday = false,
     interruptions = [],
     month,
@@ -40,6 +40,7 @@ const WorkDayBox = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
     hasDisturbance,
     doctorsLeaveTime,
     doctorsLeaveFamilyTime,
+    vacationTime,
   } = useWorkDayBox(workDay, config);
 
   return (
@@ -59,8 +60,8 @@ const WorkDayBox = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
             {compensatoryLeave.greaterThan(0) && (
               <span className='text-s font-semibold'>NV: {compensatoryLeave.toNumber()}h</span>
             )}
-            {vacation.greaterThan(0) && (
-              <span className='text-s font-semibold'>Dovolenka: {vacation.toNumber()}h</span>
+            {vacationTime.greaterThan(0) && (
+              <span className='text-s font-semibold'>Dovolenka: {vacationTime.toNumber()}h</span>
             )}
             {doctorsLeaveTime.greaterThan(0) && (
               <span className='text-s font-semibold'>P-čko: {doctorsLeaveTime.toNumber()}h</span>

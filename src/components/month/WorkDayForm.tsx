@@ -18,7 +18,7 @@ import { DrawerClose, DrawerFooter } from '../ui/drawer';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { calculateWorked, recalculateWorkDay } from '../utils/calculations';
+import { calculateWorked, calcVacation, recalculateWorkDay } from '../utils/calculations';
 import InterruptionTime from './InterruptionTime';
 
 interface WorkDayFormProps {
@@ -173,7 +173,7 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
             <div className='flex items-center space-x-2'>
             <div className='text-sm font-medium leading-none'>Dovolenka</div>
               <span className='text-lg font-semibold'>
-                {oneDay.vacation.toDecimalPlaces(3).toNumber()}
+                {calcVacation([oneDay], config)[0].toDecimalPlaces(3).toNumber()}
               </span>
             </div>
             <div className='flex items-center space-x-2'>

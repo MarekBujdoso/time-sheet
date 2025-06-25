@@ -237,15 +237,15 @@ export const DAY_TYPES = {
 };
 
 export enum DAY_TYPES_KEYS {
-  holiday = 'Štátny sviatok',
+  workDay = 'Práca',
   vacation = 'Dovolenka',
+  doctorsLeave = 'P-čko celý deň',
+  holiday = 'Štátny sviatok',
   sickLeave = 'PN',
   sickLeaveFamily = 'OČR',
-  doctorsLeave = 'P-čko celý deň',
   doctorsLeaveFamily = 'Doprovod celý deň',
   compensatoryLeave = 'Náhradné voľno',
   weekend = 'Víkend',
-  workDay = 'Práca',
 };
 
 export enum DAY_INTERRUPTIONS_KEYS {

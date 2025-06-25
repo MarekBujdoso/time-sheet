@@ -53,4 +53,5 @@ export const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
 export interface WorkDayBoxProps {
   workDay: WorkDay;
   saveWorkDay: (workDay: WorkDay) => void;
+  saveTillEndOfMonth: (workDay: WorkDay) => void;
 }

@@ -17,7 +17,7 @@ import useWorkDayBox from './useWorkDayBox';
 import WorkDayForm from './WorkDayForm';
 import { getBaseColor, WorkDayBoxProps } from './workDayUtils';
 
-const WorkDayBox = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
+const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProps) => {
   const config = useContext(ConfigContext);
   const {
     startTime,
@@ -109,6 +109,7 @@ const WorkDayBox = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
                     holiday,
                   }}
                   saveWorkDay={saveWorkDay}
+                  saveTillEndOfMonth={saveTillEndOfMonth}
                 />
               </div>
             </DrawerContent>

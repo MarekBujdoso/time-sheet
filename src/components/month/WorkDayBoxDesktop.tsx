@@ -38,7 +38,7 @@ export const InterruptionItem = ({
   );
 };
 
-const WorkDayBoxDesktop = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
+const WorkDayBoxDesktop = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProps) => {
   const config = useContext(ConfigContext);
   const {
     startTime,
@@ -160,6 +160,7 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay }: WorkDayBoxProps) => {
                     holiday,
                   }}
                   saveWorkDay={saveWorkDay}
+                  saveTillEndOfMonth={saveTillEndOfMonth}
                 />
               </div>
             </DrawerContent>

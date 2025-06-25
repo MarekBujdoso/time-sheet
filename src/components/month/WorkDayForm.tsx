@@ -24,9 +24,10 @@ import InterruptionTime from './InterruptionTime';
 interface WorkDayFormProps {
   workDay: WorkDayFull;
   saveWorkDay: (workDay: WorkDay) => void;
+  saveTillEndOfMonth: (workDay: WorkDay) => void;
 }
 
-const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
+const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormProps) => {
   const config = useContext(ConfigContext);
   const { officialWorkTime, officialStartTime, officialEndTime } = config;
   const [oneDay, setOneDay] = React.useState<WorkDayFull>({
@@ -54,8 +55,15 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
     [config],
   );
 
-  const handleSubmit = () => {
-    saveWorkDay(oneDay);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
+    const buttonName = submitter?.name || 'default';
+    if (buttonName === 'SaveToEndOfMonth') {
+      saveTillEndOfMonth(oneDay);
+    } else {
+      saveWorkDay(oneDay);
+    }
   };
 
   const addInterruption = (e: React.FormEvent, type: InterruptionWithTimeType) => {
@@ -104,7 +112,7 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
   const isDisabled = React.useMemo(() => identifyDayType(oneDay, officialWorkTime) !== 'workDay', [oneDay, officialWorkTime]);
 
   return (
-    <form action={handleSubmit} name='workDayForm'>
+    <form onSubmit={handleSubmit} name='workDayForm'>
       <div className='rounded-md border p-2 text-sm shadow-sm'>
         <div className='grid grid-cols-2 gap-2 items-left p-2'>
           <div className='col-span-2'>
@@ -241,6 +249,7 @@ const WorkDayForm = ({ workDay, saveWorkDay }: WorkDayFormProps) => {
             <Button variant='outline' type='button'>
               Zrušiť
             </Button>
+            <Button name='SaveToEndOfMonth'>Uložiť do konca mesiaca</Button>
           </div>
         </DrawerClose>
       </DrawerFooter>

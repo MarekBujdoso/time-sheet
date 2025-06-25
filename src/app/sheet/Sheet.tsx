@@ -105,7 +105,7 @@ const Sheet = () => {
   );
 
   return (
-    <div className='flex flex-col w-full min-w-[400px] w-[98vw] min-h-svh justify-top p-2 rounded-lg'>
+    <div className='flex flex-col w-full min-w-[320px] w-[98vw] min-h-svh justify-top p-2 rounded-lg'>
       <MonthPager update={updateMonthData} />
       <SummaryBoard monthData={monthData} setUserName={setUserName} userName={userName} />
       <div>

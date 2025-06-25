@@ -29,7 +29,7 @@ export function LoginForm({
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
-                  id="email"
+                  name="email"
                   type="email"
                   placeholder="m@example.com"
                   required
@@ -45,7 +45,7 @@ export function LoginForm({
                     Forgot your password?
                   </a> */}
                 </div>
-                <Input id="password" type="password" required />
+                <Input name="password" type="password" required />
               </div>
               <Button type="submit" className="w-full">
                 Login

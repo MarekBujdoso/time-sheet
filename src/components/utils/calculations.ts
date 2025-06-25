@@ -27,10 +27,11 @@ export const calculateWorked = (
   config: ConfigContextType,
 ) => {
   const { interruptionHours, lunch } = updateTimes(interruptions, currentDay, config);
-  const lunchTime = lunch ? new Decimal(0.5) : new Decimal(0);
+  const isEmptyDay = workedHours.equals(new Decimal(0))
+  const lunchTime = !isEmptyDay && lunch ? new Decimal(0.5) : new Decimal(0);
   return {
     dayWorked: workedHours.minus(interruptionHours).minus(lunchTime),
-    lunch,
+    lunch: !isEmptyDay && lunch,
   }
 };
 

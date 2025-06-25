@@ -56,7 +56,7 @@ const SummaryBoard = ({
   return (
     <div className='grid auto-rows-min gap-[4px] md:grid-cols-6 grid-cols-4 border bg-white rounded-2xl shadow-md my-[5px] py-[15px] text-sm md:text-base'>
       {isDesktop && (<span></span>)}
-      <span className='justify-self-end font-semibold py-[6px]'>Meno:</span>
+      <span className='justify-self-end font-semibold md:py-[6px] self-center'>Meno:</span>
       <Input 
         id="user-name"
         name="userName"
@@ -64,40 +64,40 @@ const SummaryBoard = ({
         autoComplete='off'
         onChange={(e) => setUserName(e.target.value)} 
         />
-      <span className='justify-self-end font-semibold py-[6px]'>Časový fond:</span>
-      <span className='py-[6px]'>{config.officialWorkTime.toNumber()}h</span>
+      <span className='justify-self-end font-semibold md:py-[6px]'>Časový fond:</span>
+      <span className='md:py-[6px] self-center'>{config.officialWorkTime.toNumber()}h</span>
       {isDesktop && (<span></span>)}
       {isDesktop && (<span></span>)}
-      <span className='justify-self-end font-semibold py-[6px]'>Odprac.:</span>
-      <span className='py-[6px]'>
+      <span className='justify-self-end font-semibold md:py-[6px]'>Odprac.:</span>
+      <span className='md:py-[6px]'>
         {worked.toNumber()}h / {workedDays.toFixed(1)}d
       </span>
-      <span className='justify-self-end font-semibold py-[6px]'>Nadčasy:</span>
-      <span className='py-[6px]'>0h / 0.0d</span>
+      <span className='justify-self-end font-semibold md:py-[6px]'>Nadčasy:</span>
+      <span className='md:py-[6px]'>0h / 0.0d</span>
       {isDesktop && (<span></span>)}
-      <span className='justify-self-end font-semibold py-[6px]'>Dovolenka:</span>
-      <span className='py-[6px]'>
+      <span className='justify-self-end font-semibold md:py-[6px]'>Dovolenka:</span>
+      <span className='md:py-[6px]'>
         {vacation.toNumber()}h / {vacationDays.toFixed(1)}d
       </span>
       
-      <span className='justify-self-end font-semibold py-[6px]'>NV:</span>
-      <span className='py-[6px]'>
+      <span className='justify-self-end font-semibold md:py-[6px]'>NV:</span>
+      <span className='md:py-[6px]'>
         {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
       </span>
-      <span className='justify-self-end font-semibold py-[6px]'>P-čko:</span>
-      <span className='py-[6px]'>
+      <span className='justify-self-end font-semibold md:py-[6px]'>P-čko:</span>
+      <span className='md:py-[6px]'>
         {doctorsLeave.toNumber()}h / {doctorsLeaveDays.toFixed(1)}d
       </span>
-      <span className='justify-self-end font-semibold py-[6px]'>Doprovod:</span>
-      <span className='py-[6px]'>
+      <span className='justify-self-end font-semibold md:py-[6px]'>Doprovod:</span>
+      <span className='md:py-[6px]'>
         {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays.toFixed(1)}d
       </span>
-      <span className='justify-self-end font-semibold py-[6px]'>PN:</span>
-      <span className='py-[6px]'>
+      <span className='justify-self-end font-semibold md:py-[6px]'>PN:</span>
+      <span className='md:py-[6px]'>
         {sickLeave.toNumber()}h / {sickLeaveDays.toFixed(1)}d
       </span>
-      <span className='justify-self-end font-semibold py-[6px]'>OČR:</span>
-      <span className='py-[6px]'>
+      <span className='justify-self-end font-semibold md:py-[6px]'>OČR:</span>
+      <span className='md:py-[6px]'>
         {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays.toFixed(1)}d
       </span>
     </div>

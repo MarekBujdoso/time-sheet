@@ -8,7 +8,7 @@ import {
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
 import { differenceInMinutes } from 'date-fns/differenceInMinutes';
-import { format } from 'date-fns/format';
+// import { format } from 'date-fns/format';
 
 const LUNCH_THRESHOLD = 6;
 
@@ -138,12 +138,13 @@ export const updateTimes = (
         .minus(interruption.startTime.getTime() / 1000 / 60 / 60);
     }, new Decimal(0));
   }
+  interruptionHours = interruptionHours > config.officialWorkTime ? config.officialWorkTime : interruptionHours;
   const lunch = config.officialWorkTime.minus(interruptionHours).greaterThanOrEqualTo(LUNCH_THRESHOLD);
-  endTime =
-    !lunch &&
-    format(endTime, 'HH:mm') === `${config.defaultEndTime.hours}:${config.defaultEndTime.minutes}`
-      ? set(endTime, { minutes: 0 })
-      : endTime;
+  // endTime =
+  //   !lunch &&
+  //   format(endTime, 'HH:mm') === `${config.defaultEndTime.hours}:${config.defaultEndTime.minutes}`
+  //     ? set(endTime, { minutes: 0 })
+  //     : endTime;
 
   return { startTime, endTime, interruptionHours, lunch };
 };
@@ -151,15 +152,39 @@ export const updateTimes = (
 // TODO: Add JSDoc comments for all exported functions
 export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextType) => {
   const currentDay = new Date(workDay.startTime);
-  const { startTime, endTime, interruptionHours, lunch } = updateTimes(
+  const { startTime: calcStartTime, endTime, interruptionHours, lunch } = updateTimes(
     workDay.interruptions,
     currentDay,
     config,
   );
+  let startTime = calcStartTime
   const dayWorked = config.officialWorkTime.minus(interruptionHours);
   const compensatoryLeave = calculateInterruptions(
     workDay.interruptions.filter((interruption) => interruption.type === 'compensatoryLeave'),
   )
+
+  if (dayWorked.equals(0)) {
+    const docLeaveInterruptions = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'doctorsLeave'));
+    if (docLeaveInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
+      workDay.doctorsLeave = true;
+      startTime = set(currentDay, config.defaultStartTime);
+      
+    }
+    const docLeaveFamilyInterruptions = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'doctorsLeaveFamily'));
+    if (docLeaveFamilyInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
+      workDay.doctorsLeaveFamily = true;
+      startTime = set(currentDay, config.defaultStartTime);
+    }
+    const vacationInterruptions = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'vacation'));
+    if (vacationInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
+      workDay.vacation = true;
+      startTime = set(currentDay, config.defaultStartTime);
+    }
+  } else {
+    workDay.doctorsLeave = false;
+    workDay.doctorsLeaveFamily = false;
+    workDay.vacation = false;
+  }
 
   // const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
   const workFromHome = new Decimal(0);

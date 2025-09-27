@@ -57,7 +57,7 @@ describe('updateTimes', () => {
       startTime: createDate(10, 0, currentDay.getTime()),
       endTime: createDate(10, 0, currentDay.getTime()), // Same as start time
       time: new Decimal(0),
-      type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+      type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
     } as InterruptionTimeProps;
 
     const result = updateTimes([zeroDurationInterruption], currentDay, config);
@@ -79,7 +79,7 @@ describe('calculateInterruptions', () => {
         startTime: createDate(10, 0, currentDay.getTime()),
         endTime: createDate(12, 0, currentDay.getTime()),
         time: new Decimal(1),
-        type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+        type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
       }
     ] as InterruptionTimeProps[];
 
@@ -104,7 +104,7 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(10, 0, currentDay.getTime()),
           endTime: createDate(11, 0, currentDay.getTime()),
           time: new Decimal(1),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         }
       ] as InterruptionTimeProps[];
   
@@ -120,14 +120,14 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(10, 0, currentDay.getTime()),
           endTime: createDate(12, 0, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
         {
           id: '2',
           startTime: createDate(11, 0, currentDay.getTime()),
           endTime: createDate(13, 0, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE
+          type: InterruptionWithTimeType.DOCTORS_LEAVE
         }
       ] as InterruptionTimeProps[];
   
@@ -143,21 +143,21 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(7, 30, currentDay.getTime()),
           endTime: createDate(9, 30, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
         {
           id: '2',
           startTime: createDate(11, 0, currentDay.getTime()),
           endTime: createDate(13, 0, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE
+          type: InterruptionWithTimeType.DOCTORS_LEAVE
         }
       ] as InterruptionTimeProps[];
   
       const result = updateTimes(interruptions, currentDay, config);
       expect(result.interruptionHours.toNumber()).toBe(4); // 10:00-13:00 = 3 hours
       expect(result.startTime).toEqual(set(currentDay, { hours: 9, minutes: 30 }));
-      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
+      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
       expect(result.lunch).toBe(false);
     });
 
@@ -168,14 +168,14 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(7, 30, currentDay.getTime()),
           endTime: createDate(9, 30, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
         {
           id: '2',
           startTime: createDate(13, 30, currentDay.getTime()),
           endTime: createDate(15, 30, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE
+          type: InterruptionWithTimeType.DOCTORS_LEAVE
         }
       ] as InterruptionTimeProps[];
   
@@ -193,21 +193,21 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(7, 30, currentDay.getTime()),
           endTime: createDate(9, 30, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
         {
           id: '2',
           startTime: createDate(13, 30, currentDay.getTime()),
           endTime: createDate(15, 30, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE
+          type: InterruptionWithTimeType.DOCTORS_LEAVE
         },
         {
           id: '3',
           startTime: createDate(10, 30, currentDay.getTime()),
           endTime: createDate(11, 30, currentDay.getTime()),
           time: new Decimal(1),
-          type: InterruptionWithTimeType.SICK_LEAVE
+          type: InterruptionWithTimeType.DOCTORS_LEAVE
         }
       ] as InterruptionTimeProps[];
   
@@ -225,21 +225,21 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(7, 30, currentDay.getTime()),
           endTime: createDate(11, 30, currentDay.getTime()),
           time: new Decimal(4),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
         {
           id: '2',
           startTime: createDate(13, 30, currentDay.getTime()),
           endTime: createDate(15, 30, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE
+          type: InterruptionWithTimeType.DOCTORS_LEAVE
         },
         {
           id: '3',
           startTime: createDate(10, 30, currentDay.getTime()),
           endTime: createDate(11, 0, currentDay.getTime()),
           time: new Decimal(0.5),
-          type: InterruptionWithTimeType.SICK_LEAVE
+          type: InterruptionWithTimeType.DOCTORS_LEAVE
         }
       ] as InterruptionTimeProps[];
   
@@ -255,16 +255,16 @@ describe('updateTimes with interruptions', () => {
         {
           id: '1',
           startTime: createDate(7, 30, currentDay.getTime()),
-          endTime: createDate(15, 0, currentDay.getTime()),
-          time: new Decimal(7.5),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          endTime: createDate(15, 30, currentDay.getTime()),
+          time: new Decimal(8),
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
       ] as InterruptionTimeProps[];
   
       const result = updateTimes(interruptions, currentDay, config);
       expect(result.interruptionHours.toNumber()).toBe(7.5);
-      expect(result.startTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
-      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
+      expect(result.startTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
+      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
       expect(result.lunch).toBe(false);
     });
 
@@ -275,7 +275,7 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(2, 30, currentDay.getTime()),
           endTime: createDate(4, 0, currentDay.getTime()),
           time: new Decimal(1.5),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
       ] as InterruptionTimeProps[];
   
@@ -293,7 +293,7 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(7, 0, currentDay.getTime()),
           endTime: createDate(9, 0, currentDay.getTime()),
           time: new Decimal(2),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
       ] as InterruptionTimeProps[];
   
@@ -311,21 +311,21 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(7, 30, currentDay.getTime()),
           endTime: createDate(11, 0, currentDay.getTime()),
           time: new Decimal(3.5),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
         {
           id: '2',
           startTime: createDate(8, 0, currentDay.getTime()),
           endTime: createDate(12, 0, currentDay.getTime()),
           time: new Decimal(4),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
       ] as InterruptionTimeProps[];
   
       const result = updateTimes(interruptions, currentDay, config);
       expect(result.interruptionHours.toNumber()).toBe(4.5);
       expect(result.startTime).toEqual(set(currentDay, { hours: 12, minutes: 0 }));
-      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
+      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
       expect(result.lunch).toBe(false);
     });
 
@@ -336,7 +336,7 @@ describe('updateTimes with interruptions', () => {
           startTime: createDate(14, 0, currentDay.getTime()),
           endTime: createDate(15, 30, currentDay.getTime()),
           time: new Decimal(1.5),
-          type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+          type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
         },
       ] as InterruptionTimeProps[];
   
@@ -416,7 +416,7 @@ describe('recalculateWorkDay', () => {
       year: 2025,
     }, config);
     expect(result.startTime).toEqual(set(currentDay, { hours: 7, minutes: 30 }));
-    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
+    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
     expect(result.lunch).toBe(false);
     expect(result.dayWorked.toNumber()).toBe(3.5);
     expect(result.compensatoryLeave.toNumber()).toBe(4);
@@ -457,7 +457,7 @@ describe('recalculateWorkDay', () => {
       year: 2025,
     }, config);
     expect(result.startTime).toEqual(set(currentDay, { hours: 7, minutes: 30 }));
-    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
+    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
     expect(result.lunch).toBe(false);
     expect(result.dayWorked.toNumber()).toBe(3.5);
     expect(result.compensatoryLeave.toNumber()).toBe(4);
@@ -471,28 +471,28 @@ describe('recalculateWorkDay', () => {
         startTime: createDate(7, 30, currentDay.getTime()),
         endTime: createDate(11, 30, currentDay.getTime()),
         time: new Decimal(4),
-        type: InterruptionWithTimeType.SICK_LEAVE_FAMILY
+        type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
       },
       {
         id: '2',
         startTime: createDate(8, 30, currentDay.getTime()),
         endTime: createDate(10, 30, currentDay.getTime()),
         time: new Decimal(2),
-        type: InterruptionWithTimeType.SICK_LEAVE
+        type: InterruptionWithTimeType.DOCTORS_LEAVE
       },
       {
         id: '3',
         startTime: createDate(12, 30, currentDay.getTime()),
         endTime: createDate(13, 0, currentDay.getTime()),
         time: new Decimal(0.5),
-        type: InterruptionWithTimeType.SICK_LEAVE
+        type: InterruptionWithTimeType.DOCTORS_LEAVE
       }
     ] as InterruptionTimeProps[];
 
     const result = updateTimes(interruptions, currentDay, config);
     expect(result.interruptionHours.toNumber()).toBe(4.5); 
     expect(result.startTime).toEqual(set(currentDay, { hours: 11, minutes: 30 }));
-    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
+    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
     expect(result.lunch).toBe(false);
   });
 })

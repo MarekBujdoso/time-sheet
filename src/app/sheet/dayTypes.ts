@@ -268,8 +268,8 @@ export const identifyDayType = (
   if (day.doctorsLeave) return 'doctorsLeave';
   if (day.doctorsLeaveFamily) return 'doctorsLeaveFamily';
   if (day.compensatoryLeave.equals(officialWorkTime)) return 'compensatoryLeave';
-  if (day.dayWorked.greaterThan(0)) return 'workDay';
-  return undefined;
+  // if (day.dayWorked.greaterThan(0)) return 'workDay';
+  return 'workDay';
 };
 
 export const getIconByDayType = (dayType: DAY_TYPES_KEYS): LucideIcon | undefined => {

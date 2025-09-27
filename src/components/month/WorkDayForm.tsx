@@ -197,7 +197,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               {...interruption}
               remove={removeInterruption}
               update={updateInterruption}
-              isDisabled={isDisabled}
+              // isDisabled={isDisabled}
             />
           ))}
           <div>

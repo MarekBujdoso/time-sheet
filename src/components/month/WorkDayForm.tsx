@@ -245,11 +245,11 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
       <DrawerFooter>
         <DrawerClose asChild>
           <div className='flex justify-center space-x-2'>
-            <Button name='Save'>Uložiť</Button>
+            <Button name='SaveToEndOfMonth'>Uložiť do konca mesiaca</Button>
             <Button variant='outline' type='button'>
               Zrušiť
             </Button>
-            <Button name='SaveToEndOfMonth'>Uložiť do konca mesiaca</Button>
+            <Button name='Save'>Uložiť</Button>
           </div>
         </DrawerClose>
       </DrawerFooter>

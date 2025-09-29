@@ -12,9 +12,9 @@ function App() {
         officialWorkTime: new Decimal(7.5),
         lunchBreak: 0.5,
         officialStartTime: { hours: 7, minutes: 30 },
-        officialEndTime: { hours: 15, minutes: 30 },
+        officialEndTime: { hours: 15, minutes: 0 },
         defaultStartTime: { hours: 7, minutes: 30 },
-        defaultEndTime: { hours: 15, minutes: 30 },
+        defaultEndTime: { hours: 15, minutes: 0 },
       }}
     >
       <Sheet />

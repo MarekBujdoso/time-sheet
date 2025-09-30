@@ -8,6 +8,7 @@ import {
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
 import { differenceInMinutes } from 'date-fns/differenceInMinutes';
+import { addHours } from 'date-fns';
 // import { format } from 'date-fns/format';
 
 const LUNCH_THRESHOLD = 6;
@@ -16,58 +17,53 @@ export const calculateLunch = (workedHours: Decimal) => {
   return workedHours.greaterThanOrEqualTo(LUNCH_THRESHOLD) ? new Decimal(0.5) : new Decimal(0);
 };
 
-export const calculateInterruptions = (interruptions: InterruptionTimeProps[]): Decimal => {
-  return interruptions.reduce((acc, { time }) => acc.add(time), new Decimal(0));
-};
-
 export const calculateWorked = (
   workedHours: Decimal,
   currentDay: Date,
   interruptions: InterruptionTimeProps[] = [],
   config: ConfigContextType,
 ) => {
-  const { interruptionHours, lunch } = updateTimes(interruptions, currentDay, config);
+  const { interruptionHours, lunch, endTime } = updateTimes(interruptions, currentDay, config);
   const isEmptyDay = workedHours.equals(new Decimal(0))
-  const lunchTime = !isEmptyDay && lunch ? new Decimal(0.5) : new Decimal(0);
+
   return {
-    dayWorked: workedHours.minus(interruptionHours).minus(lunchTime),
+    dayWorked: config.officialWorkTime.minus(interruptionHours),
     lunch: !isEmptyDay && lunch,
+    endTime,
   }
 };
 
-// TODO: Consider using a more robust interval merging algorithm that handles all edge cases
-export const updateTimes = (
-  interruptions: InterruptionTimeProps[],
-  currentDay: Date,
-  config: ConfigContextType,
-) => {
-  let startTime = set(currentDay, config.defaultStartTime);
-  let endTime = set(currentDay, config.defaultEndTime);
+const processInterruptions = (interruptions: InterruptionTimeProps[], currentDay: Date, config: ConfigContextType) => {
+  const basicStartTime = set(currentDay, config.defaultStartTime);
+  const basicEndTime = set(currentDay, config.defaultEndTime);
+
   // TODO: Consider using date-fns/areIntervalsOverlapping for more reliable interval comparison
   const sortedInterruptions = interruptions
-    .map((a) => a)
-    .filter((a) => a.endTime.getTime() > a.startTime.getTime() && a.endTime.getTime() > startTime.getTime() && a.startTime.getTime() < endTime.getTime())
+    .map((a) => {
+      const startTime = a.startTime.getTime() < basicStartTime.getTime() ? basicStartTime : a.startTime;
+      const endTime = a.endTime.getTime() > basicEndTime.getTime() ? basicEndTime : a.endTime
+      const time = new Decimal(differenceInMinutes(endTime, startTime) / 60);
+      return { ...a, startTime, endTime, time }
+    })
+    .filter((a) => a.endTime.getTime() > a.startTime.getTime() && a.endTime.getTime() > basicStartTime.getTime() && a.startTime.getTime() < basicEndTime.getTime())
     .sort((b, a) => {
       const res = b.startTime.getTime() - a.startTime.getTime();
       return res === 0 ? b.endTime.getTime() - a.endTime.getTime() : res;
     });
 
+  // console.log('sortedInterruptions', sortedInterruptions);
+  const mergedTimes: Array<{ startTime: Date; endTime: Date }> = [];
   let interruptionHours = new Decimal(0);
   if (sortedInterruptions.length > 0) {
-    // sortedInterruptions.forEach((interruption) => {
-    //   interruption.time = new Decimal(differenceInMinutes(interruption.endTime, interruption.startTime) / 60);
-    //   console.log('interruption', interruption.id, 'time', interruption.time.toNumber())
-    // })
 
-    const mergedTimes: Array<{ startTime: Date; endTime: Date }> = [];
     let startIndex = 0;
     let endIndex = 1;
     let interruption = sortedInterruptions[startIndex];
-    let start = interruption.startTime.getTime() < startTime.getTime() ? startTime : interruption.startTime;
+    let start = interruption.startTime.getTime() < basicStartTime.getTime() ? basicStartTime : interruption.startTime;
     let end = interruption.endTime;
     while (endIndex < sortedInterruptions.length && startIndex < sortedInterruptions.length) {
       const nextInterruption = sortedInterruptions[endIndex];
-      const nextStart = nextInterruption.startTime.getTime() < startTime.getTime() ? startTime : nextInterruption.startTime;
+      const nextStart = nextInterruption.startTime.getTime() < basicStartTime.getTime() ? basicStartTime : nextInterruption.startTime;
       const nextEnd = nextInterruption.endTime;
       // TODO: Consider using date-fns/areIntervalsOverlapping for more reliable overlap detection
       // I don't differentiate between interruption types, so the type calculation can be wrong if the interruption is merged with another interruption
@@ -79,22 +75,10 @@ export const updateTimes = (
         // current interruption has next interruption inside 0 <= 2 && 10 >= 4  => <0; 10> with next <2; 4>
         // next interruption is useless and can be skipped
         nextInterruption.time = new Decimal(0);
-        console.log(
-          'nextInterruption',
-          nextInterruption.id,
-          'set to time = 0',
-          nextInterruption.time.toNumber(),
-        );
         endIndex++;
       } else if (nextStart <= start && nextEnd >= end) {
         // current interruption is useless and can be skipped
         interruption.time = new Decimal(0);
-        console.log(
-          'interruption',
-          interruption.id,
-          'set to time = 0',
-          interruption.time.toNumber(),
-        );
         startIndex = endIndex;
         interruption = sortedInterruptions[startIndex];
         start = interruption.startTime;
@@ -116,36 +100,50 @@ export const updateTimes = (
       mergedTimes.push({ startTime: start, endTime: end });
     }
 
-    mergedTimes.forEach((interruption) => {
-      if (
-        startTime.getTime() >= interruption.startTime.getTime() &&
-        endTime.getTime() >= interruption.endTime.getTime()
-      ) {
-        startTime = interruption.endTime;
-      }
-    });
-    mergedTimes.reverse().forEach((interruption) => {
-      if (
-        startTime.getTime() < interruption.startTime.getTime() &&
-        endTime.getTime() <= interruption.endTime.getTime()
-      ) {
-        endTime = interruption.startTime;
-      }
-    });
     interruptionHours = mergedTimes.reduce((acc, interruption) => {
       return acc
         .plus(interruption.endTime.getTime() / 1000 / 60 / 60)
         .minus(interruption.startTime.getTime() / 1000 / 60 / 60);
     }, new Decimal(0));
-  }
-  interruptionHours = interruptionHours > config.officialWorkTime ? config.officialWorkTime : interruptionHours;
-  const lunch = config.officialWorkTime.minus(interruptionHours).greaterThanOrEqualTo(LUNCH_THRESHOLD);
-  // endTime =
-  //   !lunch &&
-  //   format(endTime, 'HH:mm') === `${config.defaultEndTime.hours}:${config.defaultEndTime.minutes}`
-  //     ? set(endTime, { minutes: 0 })
-  //     : endTime;
+  } 
+  return { interruptionHours, mergedTimes };
+}
 
+
+// TODO: Consider using a more robust interval merging algorithm that handles all edge cases
+export const updateTimes = (
+  interruptions: InterruptionTimeProps[],
+  currentDay: Date,
+  config: ConfigContextType,
+) => {
+  let startTime = set(currentDay, config.defaultStartTime);
+  let endTime = set(currentDay, config.defaultEndTime);
+
+  const { interruptionHours: interruptionHrs, mergedTimes } = processInterruptions(interruptions, currentDay, config);
+
+  mergedTimes.forEach((interruption) => {
+    if (
+      startTime.getTime() >= interruption.startTime.getTime() &&
+      endTime.getTime() >= interruption.endTime.getTime()
+    ) {
+      startTime = interruption.endTime;
+    }
+  });
+  mergedTimes.reverse().forEach((interruption) => {
+    if (
+      startTime.getTime() < interruption.startTime.getTime() &&
+      endTime.getTime() <= interruption.endTime.getTime()
+    ) {
+      endTime = interruption.startTime;
+    }
+  });
+
+  
+  // console.log('interruptionHours', interruptionHrs.toNumber());
+  const interruptionHours = interruptionHrs > config.officialWorkTime ? config.officialWorkTime : interruptionHrs;
+  const workedHours = config.officialWorkTime.minus(interruptionHours);
+  const lunch = workedHours.greaterThanOrEqualTo(LUNCH_THRESHOLD);
+  endTime = endTime.getTime() === set(currentDay, config.officialEndTime).getTime() ? addHours(endTime, (lunch ? config.lunchBreak : 0)) : endTime;
   return { startTime, endTime, interruptionHours, lunch };
 };
 
@@ -159,23 +157,25 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
   );
   let startTime = calcStartTime
   const dayWorked = config.officialWorkTime.minus(interruptionHours);
-  const compensatoryLeave = calculateInterruptions(
+  const { interruptionHours: compensatoryLeave } = processInterruptions(
     workDay.interruptions.filter((interruption) => interruption.type === 'compensatoryLeave'),
+    currentDay,
+    config,
   )
 
   if (dayWorked.equals(0)) {
-    const docLeaveInterruptions = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'doctorsLeave'));
+    const { interruptionHours: docLeaveInterruptions } = processInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'doctorsLeave'), currentDay, config);
     if (docLeaveInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
       workDay.doctorsLeave = true;
       startTime = set(currentDay, config.defaultStartTime);
       
     }
-    const docLeaveFamilyInterruptions = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'doctorsLeaveFamily'));
+    const { interruptionHours: docLeaveFamilyInterruptions } = processInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'doctorsLeaveFamily'), currentDay, config);
     if (docLeaveFamilyInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
       workDay.doctorsLeaveFamily = true;
       startTime = set(currentDay, config.defaultStartTime);
     }
-    const vacationInterruptions = calculateInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'vacation'));
+    const { interruptionHours: vacationInterruptions } = processInterruptions(workDay.interruptions.filter((interruption) => interruption.type === 'vacation'), currentDay, config);
     if (vacationInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
       workDay.vacation = true;
       startTime = set(currentDay, config.defaultStartTime);

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { calculateInterruptions, calculateLunch, recalculateWorkDay, updateTimes } from './calculations';
+import { calculateLunch, recalculateWorkDay, updateTimes } from './calculations';
 import { InterruptionTimeProps, InterruptionWithTimeType } from '../../app/sheet/types';
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
@@ -10,10 +10,10 @@ import Decimal from 'decimal.js';
 const defaultConfig: ConfigContextType = {
   officialWorkTime: new Decimal(7.5),
   defaultStartTime: { hours: 7, minutes: 30 },
-  defaultEndTime: { hours: 15, minutes: 30 },
+  defaultEndTime: { hours: 15, minutes: 0 },
   lunchBreak: 0.5,
   officialStartTime: { hours: 7, minutes: 30 },
-  officialEndTime: { hours: 15, minutes: 30 },
+  officialEndTime: { hours: 15, minutes: 0 },
   userName: 'Janko Hrasko',
 }
 // Helper function to create a test date
@@ -40,7 +40,7 @@ describe('updateTimes', () => {
   let currentDay: Date;
 
   beforeEach(() => {
-    currentDay = new Date('2023-01-01');
+    currentDay = new Date('2023-10-01');
     config = defaultConfig;
   });
 
@@ -49,6 +49,7 @@ describe('updateTimes', () => {
     expect(result.startTime).toEqual(set(currentDay, { hours: 7, minutes: 30 }));
     expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
     expect(result.lunch).toBe(true);
+    expect(result.interruptionHours.toNumber()).toBe(0);
   });
 
   it('should filter out zero-duration interruptions', () => {
@@ -65,28 +66,28 @@ describe('updateTimes', () => {
   });
 });
 
-describe('calculateInterruptions', () => {
-  let currentDay: Date;
+// describe('calculateInterruptions', () => {
+//   let currentDay: Date;
 
-  beforeEach(() => {
-    currentDay = new Date('2023-01-01');
-  });
+//   beforeEach(() => {
+//     currentDay = new Date('2023-01-01');
+//   });
 
-  it('should calculate total interruption time', () => {
-    const interruptions: InterruptionTimeProps[] = [
-      {
-        id: '1',
-        startTime: createDate(10, 0, currentDay.getTime()),
-        endTime: createDate(12, 0, currentDay.getTime()),
-        time: new Decimal(1),
-        type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
-      }
-    ] as InterruptionTimeProps[];
+//   it('should calculate total interruption time', () => {
+//     const interruptions: InterruptionTimeProps[] = [
+//       {
+//         id: '1',
+//         startTime: createDate(10, 0, currentDay.getTime()),
+//         endTime: createDate(12, 0, currentDay.getTime()),
+//         time: new Decimal(1),
+//         type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY
+//       }
+//     ] as InterruptionTimeProps[];
 
-    const result = calculateInterruptions(interruptions);
-    expect(result.toNumber()).toBe(1);
-  });
-});
+//     const result = calculateInterruptions(interruptions);
+//     expect(result.toNumber()).toBe(1);
+//   });
+// });
 
 describe('updateTimes with interruptions', () => {
     let config: ConfigContextType;
@@ -157,7 +158,7 @@ describe('updateTimes with interruptions', () => {
       const result = updateTimes(interruptions, currentDay, config);
       expect(result.interruptionHours.toNumber()).toBe(4); // 10:00-13:00 = 3 hours
       expect(result.startTime).toEqual(set(currentDay, { hours: 9, minutes: 30 }));
-      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
+      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
       expect(result.lunch).toBe(false);
     });
 
@@ -180,7 +181,7 @@ describe('updateTimes with interruptions', () => {
       ] as InterruptionTimeProps[];
   
       const result = updateTimes(interruptions, currentDay, config);
-      expect(result.interruptionHours.toNumber()).toBe(4); // 10:00-13:00 = 3 hours
+      expect(result.interruptionHours.toNumber()).toBe(3.5); // 2h + 1,5h len do 15:00 ratam
       expect(result.startTime).toEqual(set(currentDay, { hours: 9, minutes: 30 }));
       expect(result.endTime).toEqual(set(currentDay, { hours: 13, minutes: 30 }));
       expect(result.lunch).toBe(false);
@@ -212,7 +213,7 @@ describe('updateTimes with interruptions', () => {
       ] as InterruptionTimeProps[];
   
       const result = updateTimes(interruptions, currentDay, config);
-      expect(result.interruptionHours.toNumber()).toBe(5); // 10:00-13:00 = 3 hours
+      expect(result.interruptionHours.toNumber()).toBe(4.5); // 10:00-13:00 = 3 hours
       expect(result.startTime).toEqual(set(currentDay, { hours: 9, minutes: 30 }));
       expect(result.endTime).toEqual(set(currentDay, { hours: 13, minutes: 30 }));
       expect(result.lunch).toBe(false);
@@ -244,7 +245,7 @@ describe('updateTimes with interruptions', () => {
       ] as InterruptionTimeProps[];
   
       const result = updateTimes(interruptions, currentDay, config);
-      expect(result.interruptionHours.toNumber()).toBe(6); // 10:00-13:00 = 3 hours
+      expect(result.interruptionHours.toNumber()).toBe(5.5); // till 15:00 count 5.5 hours
       expect(result.startTime).toEqual(set(currentDay, { hours: 11, minutes: 30 }));
       expect(result.endTime).toEqual(set(currentDay, { hours: 13, minutes: 30 }));
       expect(result.lunch).toBe(false);
@@ -263,8 +264,8 @@ describe('updateTimes with interruptions', () => {
   
       const result = updateTimes(interruptions, currentDay, config);
       expect(result.interruptionHours.toNumber()).toBe(7.5);
-      expect(result.startTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
-      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
+      expect(result.startTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
+      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
       expect(result.lunch).toBe(false);
     });
 
@@ -325,7 +326,7 @@ describe('updateTimes with interruptions', () => {
       const result = updateTimes(interruptions, currentDay, config);
       expect(result.interruptionHours.toNumber()).toBe(4.5);
       expect(result.startTime).toEqual(set(currentDay, { hours: 12, minutes: 0 }));
-      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
+      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
       expect(result.lunch).toBe(false);
     });
 
@@ -341,7 +342,7 @@ describe('updateTimes with interruptions', () => {
       ] as InterruptionTimeProps[];
   
       const result = updateTimes(interruptions, currentDay, config);
-      expect(result.interruptionHours.toNumber()).toBe(1.5);
+      expect(result.interruptionHours.toNumber()).toBe(1);
       expect(result.startTime).toEqual(set(currentDay, { hours: 7, minutes: 30 }));
       expect(result.endTime).toEqual(set(currentDay, { hours: 14, minutes: 0 }));
       expect(result.lunch).toBe(true);
@@ -416,7 +417,7 @@ describe('recalculateWorkDay', () => {
       year: 2025,
     }, config);
     expect(result.startTime).toEqual(set(currentDay, { hours: 7, minutes: 30 }));
-    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
+    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
     expect(result.lunch).toBe(false);
     expect(result.dayWorked.toNumber()).toBe(3.5);
     expect(result.compensatoryLeave.toNumber()).toBe(4);
@@ -457,7 +458,7 @@ describe('recalculateWorkDay', () => {
       year: 2025,
     }, config);
     expect(result.startTime).toEqual(set(currentDay, { hours: 7, minutes: 30 }));
-    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
+    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
     expect(result.lunch).toBe(false);
     expect(result.dayWorked.toNumber()).toBe(3.5);
     expect(result.compensatoryLeave.toNumber()).toBe(4);
@@ -492,7 +493,7 @@ describe('recalculateWorkDay', () => {
     const result = updateTimes(interruptions, currentDay, config);
     expect(result.interruptionHours.toNumber()).toBe(4.5); 
     expect(result.startTime).toEqual(set(currentDay, { hours: 11, minutes: 30 }));
-    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
+    expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
     expect(result.lunch).toBe(false);
   });
 })

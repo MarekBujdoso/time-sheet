@@ -20,6 +20,7 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { calculateWorked, calcVacation, recalculateWorkDay } from '../utils/calculations';
 import InterruptionTime from './InterruptionTime';
+import { numberToTimeStr } from './workDayUtils';
 
 interface WorkDayFormProps {
   workDay: WorkDayFull;
@@ -28,6 +29,7 @@ interface WorkDayFormProps {
 }
 
 const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormProps) => {
+  console.log(workDay);
   const config = useContext(ConfigContext);
   const { officialWorkTime, officialStartTime, officialEndTime } = config;
   const [oneDay, setOneDay] = React.useState<WorkDayFull>({
@@ -102,7 +104,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     const endTime = set(oneDay.endTime, officialEndTime);
     setOneDay((day) => ({
       ...DAY_TYPES[type](startTime, endTime, officialWorkTime),
-      month: day.month,
+      month: day.month + 1,
       year: day.year,
     }));
   };
@@ -164,14 +166,14 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
             <div className='flex items-center space-x-2'>
             <div className='text-sm font-medium leading-none'>Odpracované</div>
               <span className='text-lg font-semibold'>
-                {oneDay.dayWorked.toDecimalPlaces(3).toNumber()}
+                {numberToTimeStr(oneDay.dayWorked)}
               </span>
             </div>
             <div className='flex items-center space-x-2'>{oneDay.lunch && <Soup />}</div>
             <div className='flex items-center space-x-2'>
             <div className='text-sm font-medium leading-none'>Doma</div>
               <span className='text-lg font-semibold'>
-                {oneDay.workFromHome.toDecimalPlaces(3).toNumber()}
+                {numberToTimeStr(oneDay.workFromHome.toDecimalPlaces(3))}
               </span>
             </div>
           </div>
@@ -179,13 +181,13 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
             <div className='flex items-center space-x-2'>
             <div className='text-sm font-medium leading-none'>Dovolenka</div>
               <span className='text-lg font-semibold'>
-                {calcVacation([oneDay], config)[0].toDecimalPlaces(3).toNumber()}
+                {numberToTimeStr(calcVacation([oneDay], config)[0].toDecimalPlaces(3))}
               </span>
             </div>
             <div className='flex items-center space-x-2'>
             <div className='text-sm font-medium leading-none'>Náhradné voľno</div>
               <span className='text-lg font-semibold'>
-                {oneDay.compensatoryLeave.toDecimalPlaces(3).toNumber()}
+                {numberToTimeStr(oneDay.compensatoryLeave.toDecimalPlaces(3))}
               </span>
             </div>
           </div>

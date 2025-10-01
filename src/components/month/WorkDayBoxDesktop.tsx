@@ -16,7 +16,7 @@ import {
 } from '../ui/drawer';
 import useWorkDayBox from './useWorkDayBox';
 import WorkDayForm from './WorkDayForm';
-import { getBaseColor, WorkDayBoxProps } from './workDayUtils';
+import { getBaseColor, numberToTimeStr, WorkDayBoxProps } from './workDayUtils';
 
 export const InterruptionItem = ({
   hours,
@@ -33,7 +33,7 @@ export const InterruptionItem = ({
         {children}
         {name}
       </span>
-      <span className='text-lg px-[10px] justify-self-end text-gray-400'>{hours.toNumber()}h</span>
+      <span className='text-lg px-[10px] justify-self-end text-gray-400'>{numberToTimeStr(hours)}h</span>
     </>
   );
 };
@@ -99,7 +99,7 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDay
             {title}
           </span>
           <span className='text-2xl pr-[10px] font-semibold justify-self-end self-center'>
-            {dayWorked.greaterThan(0) ? dayWorked.toDecimalPlaces(3).toNumber() : ''}
+            {dayWorked.greaterThan(0) ? numberToTimeStr(dayWorked.toDecimalPlaces(3)) : ''}
           </span>
           {hasDisturbance && compensatoryLeave.greaterThan(0) && (
             <InterruptionItem hours={compensatoryLeave} name='NV'>

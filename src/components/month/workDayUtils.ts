@@ -55,3 +55,14 @@ export interface WorkDayBoxProps {
   saveWorkDay: (workDay: WorkDay) => void;
   saveTillEndOfMonth: (workDay: WorkDay) => void;
 }
+
+export const numberToTime = (hours: number) => {
+  const hoursInt = Math.floor(hours);
+  const minutes = Math.round((hours - hoursInt) * 60);
+  return { hours: hoursInt, minutes };
+}
+
+export const numberToTimeStr = (hours: Decimal) => {
+  const { hours: hoursInt, minutes } = numberToTime(hours.toNumber());
+  return `${hoursInt}:${minutes < 10 ? '0' : ''}${minutes}`;
+}

@@ -15,7 +15,7 @@ import {
 } from '../ui/drawer';
 import useWorkDayBox from './useWorkDayBox';
 import WorkDayForm from './WorkDayForm';
-import { getBaseColor, WorkDayBoxProps } from './workDayUtils';
+import { getBaseColor, numberToTimeStr, WorkDayBoxProps } from './workDayUtils';
 
 const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProps) => {
   const config = useContext(ConfigContext);
@@ -58,17 +58,17 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
         {hasDisturbance && (
           <div className='grid gap-1'>
             {compensatoryLeave.greaterThan(0) && (
-              <span className='text-s font-semibold'>NV: {compensatoryLeave.toNumber()}h</span>
+              <span className='text-s font-semibold'>NV: {numberToTimeStr(compensatoryLeave)}h</span>
             )}
             {vacationTime.greaterThan(0) && (
-              <span className='text-s font-semibold'>Dovolenka: {vacationTime.toNumber()}h</span>
+              <span className='text-s font-semibold'>Dovolenka: {numberToTimeStr(vacationTime)}h</span>
             )}
             {doctorsLeaveTime.greaterThan(0) && (
-              <span className='text-s font-semibold'>P-čko: {doctorsLeaveTime.toNumber()}h</span>
+              <span className='text-s font-semibold'>P-čko: {numberToTimeStr(doctorsLeaveTime)}h</span>
             )}
             {doctorsLeaveFamilyTime.greaterThan(0) && (
               <span className='text-s font-semibold'>
-                Doprovod: {doctorsLeaveFamilyTime.toNumber()}h
+                Doprovod: {numberToTimeStr(doctorsLeaveFamilyTime)}h
               </span>
             )}
           </div>
@@ -76,7 +76,7 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
         {lunch && <Soup />}
         {dayWorked.greaterThan(0) && (
           <div className='flex flex-col w-14'>
-            <span className='text-lg font-semibold'>{dayWorked.toDecimalPlaces(3).toNumber()}</span>
+            <span className='text-lg font-semibold'>{numberToTimeStr(dayWorked.toDecimalPlaces(3))}</span>
           </div>
         )}
         {!isWeekEnd && (

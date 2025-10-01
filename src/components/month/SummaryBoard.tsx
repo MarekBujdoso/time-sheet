@@ -12,6 +12,16 @@ import { WorkDay } from '../../app/sheet/types';
 import ConfigContext from '../../app/sheet/ConfigContext';
 import { Input } from '../ui/input';
 import { useMediaQuery } from 'react-responsive';
+import { numberToTimeStr } from './workDayUtils';
+import Decimal from 'decimal.js';
+
+const TimeCell = ({ hours, days }: { hours: Decimal; days: Decimal }) => {
+  return (
+    <span className='md:py-[6px]'>
+      {numberToTimeStr(hours)}h / {days.toFixed(1)}d
+    </span>
+  );
+};
 
 const SummaryBoard = ({
   monthData,
@@ -69,37 +79,23 @@ const SummaryBoard = ({
           <span className='justify-self-end col-span-2 font-semibold md:py-[6px]'>
             Odpracovaný čas:
           </span>
-          <span className='md:py-[6px]'>
-            {worked.toNumber()}h / {workedDays.toFixed(1)}d
-          </span>
+          <TimeCell hours={worked} days={workedDays} />
           <span className='justify-self-end font-semibold md:py-[6px]'>P-čko:</span>
-          <span className='md:py-[6px]'>
-            {doctorsLeave.toNumber()}h / {doctorsLeaveDays.toFixed(1)}d
-          </span>
+          <TimeCell hours={doctorsLeave} days={doctorsLeaveDays} />
           <span className='justify-self-end font-semibold md:py-[6px]'>Doprovod:</span>
-          <span className='md:py-[6px]'>
-            {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays.toFixed(1)}d
-          </span>
+          <TimeCell hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} />
           <span className='justify-self-end font-semibold md:py-[6px]'>Dovolenka:</span>
-          <span className='md:py-[6px]'>
-            {vacation.toNumber()}h / {vacationDays.toFixed(1)}d
-          </span>
+          <TimeCell hours={vacation} days={vacationDays} />
           <span className='justify-self-end font-semibold md:py-[6px]'>Nadčasy:</span>
-          <span className='md:py-[6px]'>0h / 0.0d</span>
+          <TimeCell hours={new Decimal(0)} days={new Decimal(0)} />
           <span className='justify-self-end font-semibold md:py-[6px]'>OČR:</span>
-          <span className='md:py-[6px]'>
-            {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays.toFixed(1)}d
-          </span>
+          <TimeCell hours={sickLeaveFamily} days={sickLeaveFamilyDays} />
           <span className='justify-self-end font-semibold md:py-[6px]'>PN:</span>
-          <span className='md:py-[3px]'>
-            {sickLeave.toNumber()}h / {sickLeaveDays.toFixed(1)}d
-          </span>
+          <TimeCell hours={sickLeave} days={sickLeaveDays} />
           <span className='justify-self-end font-semibold md:py-[6px] whitespace-nowrap overflow-hidden'>
             Náhradné voľno:
           </span>
-          <span className='md:py-[3px]'>
-            {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
-          </span>
+          <TimeCell hours={compensatoryLeave} days={compensatoryLeaveDays} />
           <span className='justify-self-end font-semibold md:py-[6px]'>Časový fond:</span>
           <span className='md:py-[3px] self-center'>{config.officialWorkTime.toNumber()}h</span>
         </div>
@@ -122,37 +118,23 @@ const SummaryBoard = ({
           </div>
           <div className='grid auto-rows-min gap-[4px] md:w-[calc(98vw-16px)] md:grid-cols-6 grid-cols-4'>
             <span className='justify-self-end font-semibold md:py-[6px]'>Odprac.:</span>
-            <span className='md:py-[6px]'>
-              {worked.toNumber()}h / {workedDays.toFixed(1)}d
-            </span>
+            <TimeCell hours={worked} days={workedDays} />
             <span className='justify-self-end font-semibold md:py-[6px]'>Nadčasy:</span>
-            <span className='md:py-[6px]'>0h / 0.0d</span>
+            <TimeCell hours={new Decimal(0)} days={new Decimal(0)} />
             <span className='justify-self-end font-semibold md:py-[6px]'>Dovolenka:</span>
-            <span className='md:py-[6px]'>
-              {vacation.toNumber()}h / {vacationDays.toFixed(1)}d
-            </span>
+            <TimeCell hours={vacation} days={vacationDays} />
             <span className='justify-self-end font-semibold md:py-[6px]'>
               {isDesktop ? 'Náhradné voľno:' : 'NV:'}
             </span>
-            <span className='md:py-[6px]'>
-              {compensatoryLeave.toNumber()}h / {compensatoryLeaveDays.toFixed(1)}d
-            </span>
+            <TimeCell hours={compensatoryLeave} days={compensatoryLeaveDays} />
             <span className='justify-self-end font-semibold md:py-[6px]'>P-čko:</span>
-            <span className='md:py-[6px]'>
-              {doctorsLeave.toNumber()}h / {doctorsLeaveDays.toFixed(1)}d
-            </span>
+            <TimeCell hours={doctorsLeave} days={doctorsLeaveDays} />
             <span className='justify-self-end font-semibold md:py-[6px]'>Doprovod:</span>
-            <span className='md:py-[6px]'>
-              {doctorsLeaveFamily.toNumber()}h / {doctorsLeaveFamilyDays.toFixed(1)}d
-            </span>
+            <TimeCell hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} />
             <span className='justify-self-end font-semibold md:py-[6px]'>PN:</span>
-            <span className='md:py-[6px]'>
-              {sickLeave.toNumber()}h / {sickLeaveDays.toFixed(1)}d
-            </span>
+            <TimeCell hours={sickLeave} days={sickLeaveDays} />
             <span className='justify-self-end font-semibold md:py-[6px]'>OČR:</span>
-            <span className='md:py-[6px]'>
-              {sickLeaveFamily.toNumber()}h / {sickLeaveFamilyDays.toFixed(1)}d
-            </span>
+            <TimeCell hours={sickLeaveFamily} days={sickLeaveFamilyDays} />
           </div>
         </>
       )}

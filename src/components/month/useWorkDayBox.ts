@@ -20,7 +20,7 @@ const useWorkDayBox = (workDay: WorkDay, config: ConfigContextType) => {
     holiday = false,
     interruptions = [],
   } = workDay;
-  const month = startTime.getMonth();
+  const month = startTime.getMonth() + 1;
   const year = startTime.getFullYear();
   const isWeekEnd = isWeekend(startTime);
   const title = getTitle(workDay, config);

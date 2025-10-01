@@ -7,6 +7,7 @@ const monthsMap: { [key: number]: string } = {
   6: 'Jún',
   7: 'Júl',
   8: 'August',
+  9: 'September',
   10: 'Október',
   11: 'November',
   12: 'December',

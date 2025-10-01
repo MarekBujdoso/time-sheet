@@ -102,8 +102,6 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     const endTime = set(oneDay.endTime, officialEndTime);
     setOneDay((day) => ({
       ...DAY_TYPES[type](startTime, endTime, officialWorkTime),
-      startTime,
-      endTime,
       month: day.month,
       year: day.year,
     }));

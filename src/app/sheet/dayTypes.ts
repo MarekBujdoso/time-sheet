@@ -1,13 +1,14 @@
+import { set } from 'date-fns/set';
 import Decimal from 'decimal.js';
+import { Cross, GraduationCap, Hospital, LucideIcon, Pickaxe, Pill, Sun, TentTree, TreePalm, UserRoundPlus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { InterruptionWithTimeType, WorkDayFull } from './types';
-import { GraduationCap, TreePalm, TentTree, Cross, Hospital, UserRoundPlus, Pickaxe, Pill, Sun, LucideIcon } from 'lucide-react';
 
 export const workDay = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
   month: 0,
   year: 0,
   startTime,
-  endTime,
+  endTime: set(endTime, { minutes: 30 }),
   lunch: true,
   workFromHome: new Decimal(0),
   sickLeave: false,

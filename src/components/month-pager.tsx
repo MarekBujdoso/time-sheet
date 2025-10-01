@@ -35,7 +35,7 @@ const MonthPager = ({ update }: MonthPagerProps) => {
           <PaginationItem>
             <PaginationPrevious size="lg" className="select-none px-8 border bg-white shadow-md" onClick={switchToPrevMonth} />
           </PaginationItem>
-          <div className="w-40 select-none font-semibold text-xl">
+          <div className="w-50 select-none font-semibold text-xl">
             {`${getMonthName(activeMonth)} ${activeYear}`}
           </div>
           <PaginationItem>

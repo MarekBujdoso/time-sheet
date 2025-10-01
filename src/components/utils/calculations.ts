@@ -14,7 +14,7 @@ import { addHours } from 'date-fns';
 const LUNCH_THRESHOLD = 6;
 
 export const calculateLunch = (workedHours: Decimal) => {
-  return workedHours.greaterThanOrEqualTo(LUNCH_THRESHOLD) ? new Decimal(0.5) : new Decimal(0);
+  return workedHours.greaterThan(LUNCH_THRESHOLD) ? new Decimal(0.5) : new Decimal(0);
 };
 
 export const calculateWorked = (
@@ -142,7 +142,7 @@ export const updateTimes = (
   // console.log('interruptionHours', interruptionHrs.toNumber());
   const interruptionHours = interruptionHrs > config.officialWorkTime ? config.officialWorkTime : interruptionHrs;
   const workedHours = config.officialWorkTime.minus(interruptionHours);
-  const lunch = workedHours.greaterThanOrEqualTo(LUNCH_THRESHOLD);
+  const lunch = workedHours.greaterThan(LUNCH_THRESHOLD);
   endTime = endTime.getTime() === set(currentDay, config.officialEndTime).getTime() ? addHours(endTime, (lunch ? config.lunchBreak : 0)) : endTime;
   return { startTime, endTime, interruptionHours, lunch };
 };

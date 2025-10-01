@@ -29,7 +29,6 @@ interface WorkDayFormProps {
 }
 
 const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormProps) => {
-  console.log(workDay);
   const config = useContext(ConfigContext);
   const { officialWorkTime, officialStartTime, officialEndTime } = config;
   const [oneDay, setOneDay] = React.useState<WorkDayFull>({

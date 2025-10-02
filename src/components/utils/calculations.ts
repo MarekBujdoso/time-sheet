@@ -18,19 +18,20 @@ export const calculateLunch = (workedHours: Decimal) => {
 };
 
 export const calculateWorked = (
-  workedHours: Decimal,
-  currentDay: Date,
-  interruptions: InterruptionTimeProps[] = [],
+  workDay: WorkDayFull,
   config: ConfigContextType,
 ) => {
-  const { interruptionHours, lunch, endTime } = updateTimes(interruptions, currentDay, config);
-  const isEmptyDay = workedHours.equals(new Decimal(0))
+  // TODO: NV is not calculated correctly, maybe it is calculated twice... change it to day and interruption type
+  const { startTime: workDayStartTime, interruptions, holiday } = workDay;
+  const currentDay = new Date(workDayStartTime);
+  const { interruptionHours, lunch, startTime, endTime } = updateTimes(interruptions, currentDay, config);
 
   return {
     dayWorked: config.officialWorkTime.minus(interruptionHours),
-    lunch: !isEmptyDay && lunch,
+    lunch: holiday ? false : lunch,
     endTime,
-  }
+    startTime,
+    }
 };
 
 const processInterruptions = (interruptions: InterruptionTimeProps[], currentDay: Date, config: ConfigContextType) => {

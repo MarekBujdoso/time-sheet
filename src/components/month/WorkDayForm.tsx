@@ -1,4 +1,3 @@
-import { differenceInMinutes } from 'date-fns/differenceInMinutes';
 import { format } from 'date-fns/format';
 import { set } from 'date-fns/set';
 import Decimal from 'decimal.js';
@@ -29,16 +28,12 @@ interface WorkDayFormProps {
 }
 
 const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormProps) => {
+  console.log('workDay', workDay);
   const config = useContext(ConfigContext);
   const { officialWorkTime, officialStartTime, officialEndTime } = config;
   const [oneDay, setOneDay] = React.useState<WorkDayFull>({
     ...workDay,
-    ...calculateWorked(
-      new Decimal(differenceInMinutes(workDay.endTime, workDay.startTime)).dividedBy(60),
-      new Date(workDay.startTime),
-      workDay.interruptions,
-      config,
-    ),
+    ...calculateWorked(workDay, config),
   });
 
   const changeDay = React.useCallback(
@@ -46,11 +41,9 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
       setOneDay((day) => {
         if ((key === 'startTime' || key === 'endTime') && typeof value === 'string') {
           const timeArray = value.split(':');
-          value = new Date(
-            day[key].setHours(Number(timeArray[0]), Number(timeArray[1])),
-          );
+          value = new Date(day[key].setHours(Number(timeArray[0]), Number(timeArray[1])));
         }
-        return recalculateWorkDay({ ...day, [key]: value }, config)
+        return recalculateWorkDay({ ...day, [key]: value }, config);
       });
     },
     [config],
@@ -108,7 +101,10 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     }));
   };
 
-  const isDisabled = React.useMemo(() => identifyDayType(oneDay, officialWorkTime) !== 'workDay', [oneDay, officialWorkTime]);
+  const isDisabled = React.useMemo(
+    () => identifyDayType(oneDay, officialWorkTime) !== 'workDay',
+    [oneDay, officialWorkTime],
+  );
 
   return (
     <form onSubmit={handleSubmit} name='workDayForm'>
@@ -122,17 +118,17 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
                 value={identifyDayType(oneDay, officialWorkTime)}
                 onValueChange={(value) => changeDayType(value as keyof typeof DAY_TYPES)}
               >
-                <SelectTrigger id='dayType' className="w-full" autoFocus>
+                <SelectTrigger id='dayType' className='w-full' autoFocus>
                   <SelectValue placeholder='Vyber si deň' />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(DAY_TYPES_KEYS)
                     .filter(([key]) => key !== 'weekend')
                     .map(([key, value]) => (
-                    <SelectItem key={key} value={key}>
-                      {value}
-                    </SelectItem>
-                  ))}
+                      <SelectItem key={key} value={key}>
+                        {value}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -163,14 +159,12 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
           </div>
           <div className='flex items-center space-x-2 col-span-2 justify-between'>
             <div className='flex items-center space-x-2'>
-            <div className='text-sm font-medium leading-none'>Odpracované</div>
-              <span className='text-lg font-semibold'>
-                {numberToTimeStr(oneDay.dayWorked)}
-              </span>
+              <div className='text-sm font-medium leading-none'>Odpracované</div>
+              <span className='text-lg font-semibold'>{numberToTimeStr(oneDay.dayWorked)}</span>
             </div>
             <div className='flex items-center space-x-2'>{oneDay.lunch && <Soup />}</div>
             <div className='flex items-center space-x-2'>
-            <div className='text-sm font-medium leading-none'>Doma</div>
+              <div className='text-sm font-medium leading-none'>Doma</div>
               <span className='text-lg font-semibold'>
                 {numberToTimeStr(oneDay.workFromHome.toDecimalPlaces(3))}
               </span>
@@ -178,13 +172,13 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
           </div>
           <div className='flex items-center space-x-2 col-span-2 justify-between'>
             <div className='flex items-center space-x-2'>
-            <div className='text-sm font-medium leading-none'>Dovolenka</div>
+              <div className='text-sm font-medium leading-none'>Dovolenka</div>
               <span className='text-lg font-semibold'>
                 {numberToTimeStr(calcVacation([oneDay], config)[0].toDecimalPlaces(3))}
               </span>
             </div>
             <div className='flex items-center space-x-2'>
-            <div className='text-sm font-medium leading-none'>Náhradné voľno</div>
+              <div className='text-sm font-medium leading-none'>Náhradné voľno</div>
               <span className='text-lg font-semibold'>
                 {numberToTimeStr(oneDay.compensatoryLeave.toDecimalPlaces(3))}
               </span>

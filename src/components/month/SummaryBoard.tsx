@@ -1,5 +1,4 @@
 import {
-  calcCompensatoryLeave,
   calcDoctorsLeave,
   calcDoctorsLeaveFamily,
   calcSickLeave,
@@ -14,14 +13,55 @@ import { Input } from '../ui/input';
 import { useMediaQuery } from 'react-responsive';
 import { numberToTimeStr } from './workDayUtils';
 import Decimal from 'decimal.js';
+import { CalendarDays, Hourglass } from 'lucide-react';
 
-const TimeCell = ({ hours, days }: { hours: Decimal; days: Decimal }) => {
-  return (
-    <span className='md:py-[6px]'>
-      {numberToTimeStr(hours)}h / {days.toFixed(1)}d
-    </span>
+const Hours = ({
+  hours,
+  color,
+  textColor,
+}: {
+  hours: Decimal;
+  color?: string;
+  textColor: string;
+}) => {
+  return color ? (
+    <div className={`flex items-center px-[5px] py-1.5 ${color} rounded-full shadow-sm`}>
+      <Hourglass size={16} color='gray' />{' '}
+      <span className={`font-semibold ${textColor}`}>{numberToTimeStr(hours)}h</span>
+    </div>
+  ) : (
+    <>
+      <Hourglass size={16} color='gray' />
+      <span className={`font-semibold ${textColor}`}>{numberToTimeStr(hours)}h</span>
+    </>
   );
 };
+
+const Days = ({ days, color, textColor }: { days: Decimal; color?: string; textColor: string }) => {
+  return color ? (
+    <div className={`flex items-center px-[5px] py-1.5 ${color} rounded-full shadow-sm`}>
+      <CalendarDays size={16} color='gray'/>{' '}
+      <span className={`font-semibold ${textColor}`}>{days.toFixed(1)}d</span>
+    </div>
+  ) : (
+    <>
+      &nbsp;<CalendarDays size={16} color='gray'/>
+      <span className={`font-semibold ${textColor}`}>{days.toFixed(1)}d</span>
+    </>
+  );
+};
+
+const SummaryItem = ({title,  color, hours, days, noBackground}: {title: string, hours: Decimal, days?: Decimal, color: string, noBackground?: boolean}) => {
+  return (
+    <>
+      <span className='justify-self-end font-semibold md:py-[6px]'>{title}</span>
+      <div className='flex items-center'>
+        <Hours hours={hours} color={noBackground ? undefined : `bg-${color}-50`} textColor={`text-${color}-700`} />
+        {days && <Days days={days} color={noBackground ? undefined : `bg-${color}-50`} textColor={`text-${color}-700`} />}
+      </div>
+    </>
+  )
+}
 
 const SummaryBoard = ({
   monthData,
@@ -58,46 +98,31 @@ const SummaryBoard = ({
     () => calcWorked(monthData, config),
     [monthData, config],
   );
-  const [compensatoryLeave, compensatoryLeaveDays] = React.useMemo(
-    () => calcCompensatoryLeave(monthData, config),
-    [monthData, config],
-  );
+  // const [compensatoryLeave, compensatoryLeaveDays] = React.useMemo(
+  //   () => calcCompensatoryLeave(monthData, config),
+  //   [monthData, config],
+  // );
 
   return (
     <div className='border bg-white rounded-2xl shadow-md my-[5px] text-sm md:text-base py-[15px]'>
       {isDesktop ? (
-        <div className='grid auto-rows-min gap-[4px] md:grid-cols-[2fr_2fr_3fr_2fr_3fr_2fr_3fr_2fr] my-[4px] justify-items-start items-center'>
+        <div className='grid auto-rows-min gap-[4px] md:grid-cols-[3fr_2fr_3fr_2fr_3fr__3fr] my-[4px] justify-items-start items-center'>
           <span className='justify-self-end font-semibold md:py-[6px] self-center'>Meno:</span>
           <Input
-            className='col-span-4 w-[98%]'
+            className='col-span-3 w-[98%]'
             id='user-name'
             name='userName'
             value={userName}
             autoComplete='off'
             onChange={(e) => setUserName(e.target.value)}
           />
-          <span className='justify-self-end col-span-2 font-semibold md:py-[6px]'>
-            Odpracovaný čas:
-          </span>
-          <TimeCell hours={worked} days={workedDays} />
-          <span className='justify-self-end font-semibold md:py-[6px]'>P-čko:</span>
-          <TimeCell hours={doctorsLeave} days={doctorsLeaveDays} />
-          <span className='justify-self-end font-semibold md:py-[6px]'>Doprovod:</span>
-          <TimeCell hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} />
-          <span className='justify-self-end font-semibold md:py-[6px]'>Dovolenka:</span>
-          <TimeCell hours={vacation} days={vacationDays} />
-          <span className='justify-self-end font-semibold md:py-[6px]'>Nadčasy:</span>
-          <TimeCell hours={new Decimal(0)} days={new Decimal(0)} />
-          <span className='justify-self-end font-semibold md:py-[6px]'>OČR:</span>
-          <TimeCell hours={sickLeaveFamily} days={sickLeaveFamilyDays} />
-          <span className='justify-self-end font-semibold md:py-[6px]'>PN:</span>
-          <TimeCell hours={sickLeave} days={sickLeaveDays} />
-          <span className='justify-self-end font-semibold md:py-[6px] whitespace-nowrap overflow-hidden'>
-            Náhradné voľno:
-          </span>
-          <TimeCell hours={compensatoryLeave} days={compensatoryLeaveDays} />
-          <span className='justify-self-end font-semibold md:py-[6px]'>Časový fond:</span>
-          <span className='md:py-[3px] self-center'>{config.officialWorkTime.toNumber()}h</span>
+          <SummaryItem title='Časový fond:' hours={config.officialWorkTime} color='stone' />
+          <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} color='green' />
+          <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} color='red' />
+          <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} color='blue' />
+          <SummaryItem title='P-čko:' hours={doctorsLeave} days={doctorsLeaveDays} color='red' />
+          <SummaryItem title='PN, OČR:' hours={sickLeaveFamily.plus(sickLeave)} days={sickLeaveFamilyDays.plus(sickLeaveDays)} color='red' />
+          <SummaryItem title='Odpracované:' hours={worked} days={workedDays} color='blue' />
         </div>
       ) : (
         <>
@@ -111,30 +136,15 @@ const SummaryBoard = ({
               autoComplete='off'
               onChange={(e) => setUserName(e.target.value)}
             />
-            <span className='justify-self-end font-semibold md:py-[6px]'>Časový fond:</span>
-            <span className='md:py-[6px] self-center col-span-2 md:col-span-1'>
-              {config.officialWorkTime.toNumber()}h
-            </span>
           </div>
           <div className='grid auto-rows-min gap-[4px] md:w-[calc(98vw-16px)] md:grid-cols-6 grid-cols-4'>
-            <span className='justify-self-end font-semibold md:py-[6px]'>Odprac.:</span>
-            <TimeCell hours={worked} days={workedDays} />
-            <span className='justify-self-end font-semibold md:py-[6px]'>Nadčasy:</span>
-            <TimeCell hours={new Decimal(0)} days={new Decimal(0)} />
-            <span className='justify-self-end font-semibold md:py-[6px]'>Dovolenka:</span>
-            <TimeCell hours={vacation} days={vacationDays} />
-            <span className='justify-self-end font-semibold md:py-[6px]'>
-              {isDesktop ? 'Náhradné voľno:' : 'NV:'}
-            </span>
-            <TimeCell hours={compensatoryLeave} days={compensatoryLeaveDays} />
-            <span className='justify-self-end font-semibold md:py-[6px]'>P-čko:</span>
-            <TimeCell hours={doctorsLeave} days={doctorsLeaveDays} />
-            <span className='justify-self-end font-semibold md:py-[6px]'>Doprovod:</span>
-            <TimeCell hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} />
-            <span className='justify-self-end font-semibold md:py-[6px]'>PN:</span>
-            <TimeCell hours={sickLeave} days={sickLeaveDays} />
-            <span className='justify-self-end font-semibold md:py-[6px]'>OČR:</span>
-            <TimeCell hours={sickLeaveFamily} days={sickLeaveFamilyDays} />
+            <SummaryItem title='P-čko:' hours={doctorsLeave} days={doctorsLeaveDays} color='red' noBackground />
+            <SummaryItem title='Fond:' hours={config.officialWorkTime} color='stone' noBackground />
+            <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} color='red' noBackground />
+            <SummaryItem title='Odprac.:' hours={worked} days={workedDays} color='blue' noBackground />
+            <SummaryItem title='PN, OČR:' hours={sickLeaveFamily.plus(sickLeave)} days={sickLeaveFamilyDays.plus(sickLeaveDays)} color='red' noBackground />
+            <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} color='blue' noBackground />
+            <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} color='green' noBackground />
           </div>
         </>
       )}

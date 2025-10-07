@@ -23,7 +23,7 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
     startTime,
     endTime,
     lunch = false,
-    compensatoryLeave = new Decimal(0),
+    compensatoryLeave = false,
     doctorsLeave = false,
     doctorsLeaveFamily = false,
     sickLeave = false,
@@ -41,7 +41,8 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
     doctorsLeaveTime,
     doctorsLeaveFamilyTime,
     vacationTime,
-  } = useWorkDayBox(workDay, config);
+    compensatoryLeaveTime,
+  } = useWorkDayBox(workDay);
 
   return (
     <>
@@ -57,8 +58,8 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
         </div>
         {hasDisturbance && (
           <div className='grid gap-1'>
-            {compensatoryLeave.greaterThan(0) && (
-              <span className='text-s font-semibold'>NV: {numberToTimeStr(compensatoryLeave)}h</span>
+            {compensatoryLeaveTime.greaterThan(0) && (
+              <span className='text-s font-semibold'>NV: {numberToTimeStr(compensatoryLeaveTime)}h</span>
             )}
             {vacationTime.greaterThan(0) && (
               <span className='text-s font-semibold'>Dovolenka: {numberToTimeStr(vacationTime)}h</span>

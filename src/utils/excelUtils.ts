@@ -182,10 +182,13 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   sheet.mergeCells('M5:M7'); //podpis zamestnanca
 
   monthData.forEach((data) => {
-    const title = getTitle(data, config);
+    const title = getTitle(data);
     const isWorkingDay = title === 'Práca';
     const negativeInterruptions = data.interruptions?.filter(
       (interruption) => interruption.type !== 'compensatoryLeave',
+    ) ?? [];
+    const compensatoryLeaveInterruptions = data.interruptions?.filter(
+      (interruption) => interruption.type === 'compensatoryLeave',
     ) ?? [];
     const vacationTime = data.interruptions?.filter(
       (interruption) => interruption.type === 'vacation',
@@ -209,17 +212,16 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
           ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
           .toNumber() ?? '' : '',
       overtime: '',
-      compensatory:
-        data.compensatoryLeave && data.compensatoryLeave.greaterThan(0)
-          ? data.compensatoryLeave.toNumber()
-          : '',
+      compensatory: data.vacation ? '' :
+        compensatoryLeaveInterruptions?.length > 0 ? compensatoryLeaveInterruptions
+          ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
+          .toNumber() ?? '' : '',
       vacation: data.vacation || vacationTime.greaterThan(0) ? vacationTime.toNumber() : '',
       home:
         data.workFromHome && data.workFromHome.greaterThan(0) ? data.workFromHome.toNumber() : '',
       workTime:
         data.dayWorked.toNumber() +
-        (data.interruptions ?? [])
-          .filter((interruption) => interruption.type === 'compensatoryLeave')
+        compensatoryLeaveInterruptions
           .reduce(
             (acc, interruption) => acc.plus(interruption?.time ?? new Decimal(0)),
             new Decimal(0),

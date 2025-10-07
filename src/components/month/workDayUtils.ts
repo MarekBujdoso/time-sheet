@@ -25,7 +25,7 @@ export const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
   if (sickLeave) return 'bg-rose-200';
   if (sickLeaveFamily) return 'bg-rose-200';
   if (holiday) return 'bg-emerald-100';
-  if (compensatoryLeave?.greaterThan(0)) return 'bg-blue-200';
+  if (compensatoryLeave) return 'bg-blue-200';
   if (vacation) return 'bg-emerald-100';
   if (dayWorked.equals(officialWorkTime)) return 'bg-blue-200';
   if (isWeekend(workDay.startTime)) return 'bg-emerald-100';

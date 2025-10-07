@@ -5,6 +5,7 @@ import {
   calcSickLeaveFamily,
   calcWorked,
   calcVacation,
+  calcCompensatoryLeave,
 } from '../../components/utils/calculations';
 import React, { useContext } from 'react';
 import { WorkDay } from '../../app/sheet/types';
@@ -94,14 +95,17 @@ const SummaryBoard = ({
     () => calcDoctorsLeaveFamily(monthData, config),
     [monthData, config],
   );
-  const [worked, workedDays] = React.useMemo(
-    () => calcWorked(monthData, config),
+  const [compensatoryLeave, compensatoryLeaveDays] = React.useMemo(
+    () => calcCompensatoryLeave(monthData, config),
     [monthData, config],
   );
-  // const [compensatoryLeave, compensatoryLeaveDays] = React.useMemo(
-  //   () => calcCompensatoryLeave(monthData, config),
-  //   [monthData, config],
-  // );
+  const [worked, workedDays] = React.useMemo(
+    () => {
+      const [wrk, wrkDays] = calcWorked(monthData, config)
+      return [wrk.plus(compensatoryLeave), wrkDays.plus(compensatoryLeaveDays)]
+    },
+    [monthData, config, compensatoryLeave, compensatoryLeaveDays],
+  );
 
   return (
     <div className='border bg-white rounded-2xl shadow-md my-[5px] text-sm md:text-base py-[15px]'>

@@ -13,7 +13,7 @@ export const workDay = (startTime: Date, endTime: Date, workTime: Decimal): Work
   workFromHome: new Decimal(0),
   sickLeave: false,
   sickLeaveFamily: false,
-  compensatoryLeave: new Decimal(0),
+  compensatoryLeave: false,
   doctorsLeave: false,
   doctorsLeaveFamily: false,
   dayWorked: workTime,
@@ -32,7 +32,7 @@ export const holiday = (startTime: Date, endTime: Date, workTime: Decimal): Work
   workFromHome: new Decimal(0),
   sickLeave: false,
   sickLeaveFamily: false,
-  compensatoryLeave: new Decimal(0),
+  compensatoryLeave: false,
   doctorsLeave: false,
   doctorsLeaveFamily: false,
   dayWorked: workTime,
@@ -51,7 +51,7 @@ export const vacation = (startTime: Date, endTime: Date, workTime: Decimal): Wor
   workFromHome: new Decimal(0),
   sickLeave: false,
   sickLeaveFamily: false,
-  compensatoryLeave: new Decimal(0),
+  compensatoryLeave: false,
   doctorsLeave: false,
   doctorsLeaveFamily: false,
   dayWorked: new Decimal(0),
@@ -76,7 +76,7 @@ export const sickLeave = (startTime: Date, endTime: Date, workTime: Decimal): Wo
   workFromHome: new Decimal(0),
   sickLeave: true,
   sickLeaveFamily: false,
-  compensatoryLeave: new Decimal(0),
+  compensatoryLeave: false,
   doctorsLeave: false,
   doctorsLeaveFamily: false,
   dayWorked: new Decimal(0),
@@ -101,7 +101,7 @@ export const sickLeaveFamily = (startTime: Date, endTime: Date, workTime: Decima
   workFromHome: new Decimal(0),
   sickLeave: false,
   sickLeaveFamily: true,
-  compensatoryLeave: new Decimal(0),
+  compensatoryLeave: false,
   doctorsLeave: false,
   doctorsLeaveFamily: false,
   dayWorked: new Decimal(0),
@@ -126,7 +126,7 @@ export const doctorsLeave = (startTime: Date, endTime: Date, workTime: Decimal):
   workFromHome: new Decimal(0),
   sickLeave: false,
   sickLeaveFamily: false,
-  compensatoryLeave: new Decimal(0),
+  compensatoryLeave: false,
   doctorsLeave: true,
   doctorsLeaveFamily: false,
   dayWorked: new Decimal(0),
@@ -151,7 +151,7 @@ export const doctorsLeaveFamily = (startTime: Date, endTime: Date, workTime: Dec
   workFromHome: new Decimal(0),
   sickLeave: false,
   sickLeaveFamily: false,
-  compensatoryLeave: new Decimal(0),
+  compensatoryLeave: false,
   doctorsLeave: false,
   doctorsLeaveFamily: true,
   dayWorked: new Decimal(0),
@@ -176,13 +176,19 @@ export const compensatoryLeave = (startTime: Date, endTime: Date, workTime: Deci
   workFromHome: new Decimal(0),
   sickLeave: false,
   sickLeaveFamily: false,
-  compensatoryLeave: workTime,
+  compensatoryLeave: true,
   doctorsLeave: false,
   doctorsLeaveFamily: false,
-  dayWorked: workTime,
+  dayWorked: new Decimal(0),
   holiday: false,
   vacation: false,
-  interruptions: [],
+  interruptions: [{
+    id: uuidv4(),
+    type: InterruptionWithTimeType.COMPENSATORY_LEAVE,
+    startTime,
+    endTime,
+    time: workTime,
+  }],
   typeIcon: Pickaxe,
 });
 
@@ -195,7 +201,7 @@ export const weekend = (startTime: Date, endTime: Date): WorkDayFull => ({
   workFromHome: new Decimal(0),
   sickLeave: false,
   sickLeaveFamily: false,
-  compensatoryLeave: new Decimal(0),
+  compensatoryLeave: false,
   doctorsLeave: false,
   doctorsLeaveFamily: false,
   dayWorked: new Decimal(0),
@@ -214,7 +220,7 @@ export const emptyDay = (startTime: Date, endTime: Date): WorkDayFull => ({
   workFromHome: new Decimal(0),
   sickLeave: false,
   sickLeaveFamily: false,
-  compensatoryLeave: new Decimal(0),
+  compensatoryLeave: false,
   doctorsLeave: false,
   doctorsLeaveFamily: false,
   dayWorked: new Decimal(0),
@@ -260,7 +266,6 @@ export enum DAY_INTERRUPTIONS_KEYS {
 
 export const identifyDayType = (
   day: WorkDayFull,
-  officialWorkTime: Decimal,
 ): keyof typeof DAY_TYPES | undefined => {
   if (day.holiday) return 'holiday';
   if (day.vacation) return 'vacation';
@@ -268,7 +273,7 @@ export const identifyDayType = (
   if (day.sickLeaveFamily) return 'sickLeaveFamily';
   if (day.doctorsLeave) return 'doctorsLeave';
   if (day.doctorsLeaveFamily) return 'doctorsLeaveFamily';
-  if (day.compensatoryLeave.equals(officialWorkTime)) return 'compensatoryLeave';
+  if (day.compensatoryLeave) return 'compensatoryLeave';
   // if (day.dayWorked.greaterThan(0)) return 'workDay';
   return 'workDay';
 };

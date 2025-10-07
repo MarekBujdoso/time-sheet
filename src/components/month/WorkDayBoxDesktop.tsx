@@ -44,7 +44,7 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDay
     startTime,
     endTime,
     lunch = false,
-    compensatoryLeave = new Decimal(0),
+    compensatoryLeave = false,
     doctorsLeave = false,
     doctorsLeaveFamily = false,
     sickLeave = false,
@@ -62,7 +62,8 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDay
     doctorsLeaveTime,
     doctorsLeaveFamilyTime,
     vacationTime,
-  } = useWorkDayBox(workDay, config);
+    compensatoryLeaveTime,
+  } = useWorkDayBox(workDay);
 
   const MainIcon = getIconByDayType(title as DAY_TYPES_KEYS);
 
@@ -101,8 +102,8 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDay
           <span className='text-2xl pr-[10px] font-semibold justify-self-end self-center'>
             {dayWorked.greaterThan(0) ? numberToTimeStr(dayWorked.toDecimalPlaces(3)) : ''}
           </span>
-          {hasDisturbance && compensatoryLeave.greaterThan(0) && (
-            <InterruptionItem hours={compensatoryLeave} name='NV'>
+          {hasDisturbance && compensatoryLeaveTime.greaterThan(0) && (
+            <InterruptionItem hours={compensatoryLeaveTime} name='NV'>
               <Pickaxe className='mr-[10px]' />
             </InterruptionItem>
           )}

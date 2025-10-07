@@ -17,7 +17,7 @@ import { DrawerClose, DrawerFooter } from '../ui/drawer';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { calculateWorked, calcVacation, recalculateWorkDay } from '../utils/calculations';
+import { calcCompensatoryLeave, calculateWorked, calcVacation, recalculateWorkDay } from '../utils/calculations';
 import InterruptionTime from './InterruptionTime';
 import { numberToTimeStr } from './workDayUtils';
 
@@ -101,8 +101,8 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
   };
 
   const isDisabled = React.useMemo(
-    () => identifyDayType(oneDay, officialWorkTime) !== 'workDay',
-    [oneDay, officialWorkTime],
+    () => identifyDayType(oneDay) !== 'workDay',
+    [oneDay],
   );
 
   return (
@@ -114,7 +114,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
             <div className='flex gap-2 flex-wrap justify-between'>
               <Select
                 name='dayType'
-                value={identifyDayType(oneDay, officialWorkTime)}
+                value={identifyDayType(oneDay)}
                 onValueChange={(value) => changeDayType(value as keyof typeof DAY_TYPES)}
               >
                 <SelectTrigger id='dayType' className='w-full' autoFocus>
@@ -179,7 +179,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
             <div className='flex items-center space-x-2'>
               <div className='text-sm font-medium leading-none'>Náhradné voľno</div>
               <span className='text-lg font-semibold'>
-                {numberToTimeStr(oneDay.compensatoryLeave.toDecimalPlaces(3))}
+                {numberToTimeStr(calcCompensatoryLeave([oneDay], config)[0].toDecimalPlaces(3))}
               </span>
             </div>
           </div>

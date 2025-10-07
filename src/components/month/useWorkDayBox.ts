@@ -1,15 +1,14 @@
 import Decimal from 'decimal.js';
 import { isWeekend } from 'date-fns/fp/isWeekend';
-import { getTitle, isFullDay } from '../utils/workDay';
+import { getTitle } from '../utils/workDay';
 import { WorkDay } from '../../app/sheet/types';
-import { ConfigContextType } from '../../app/sheet/ConfigContext';
 
-const useWorkDayBox = (workDay: WorkDay, config: ConfigContextType) => {
+const useWorkDayBox = (workDay: WorkDay) => {
   const {
     startTime,
     endTime,
     lunch = false,
-    compensatoryLeave = new Decimal(0),
+    compensatoryLeave = false,
     doctorsLeave = false,
     doctorsLeaveFamily = false,
     sickLeave = false,
@@ -23,15 +22,15 @@ const useWorkDayBox = (workDay: WorkDay, config: ConfigContextType) => {
   const month = startTime.getMonth() + 1;
   const year = startTime.getFullYear();
   const isWeekEnd = isWeekend(startTime);
-  const title = getTitle(workDay, config);
+  const title = getTitle(workDay);
   const hasDisturbance =
-    !isFullDay(compensatoryLeave, config.officialWorkTime) &&
+    !compensatoryLeave &&
     !doctorsLeave &&
     !doctorsLeaveFamily &&
     !sickLeave &&
     !sickLeaveFamily &&
     !vacation &&
-    (compensatoryLeave.greaterThan(0) || interruptions.length > 0);
+    interruptions.length > 0;
   const doctorsLeaveTime = interruptions
     .filter((interruption) => interruption.type === 'doctorsLeave')
     .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
@@ -40,6 +39,9 @@ const useWorkDayBox = (workDay: WorkDay, config: ConfigContextType) => {
     .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
   const vacationTime = interruptions
     .filter((interruption) => interruption.type === 'vacation')
+    .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
+  const compensatoryLeaveTime = interruptions
+    .filter((interruption) => interruption.type === 'compensatoryLeave')
     .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
 
   return {
@@ -64,6 +66,7 @@ const useWorkDayBox = (workDay: WorkDay, config: ConfigContextType) => {
     doctorsLeaveTime,
     doctorsLeaveFamilyTime,
     vacationTime,
+    compensatoryLeaveTime,
   };
 };
 

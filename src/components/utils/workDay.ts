@@ -1,6 +1,5 @@
 import { isWeekend } from 'date-fns';
 import Decimal from 'decimal.js';
-import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { WorkDay } from '../../app/sheet/types';
 import { DAY_TYPES_KEYS } from '../../app/sheet/dayTypes';
 
@@ -8,12 +7,12 @@ export const isFullDay = (hours: Decimal | undefined, workTime: Decimal): boolea
   return hours?.equals(workTime) ?? false;
 };
 
-export const getTitle = (workDay: WorkDay, config: ConfigContextType): string => {
+export const getTitle = (workDay: WorkDay): string => {
   const {
     startTime,
     // endTime,
     // lunch = false,
-    compensatoryLeave = new Decimal(0),
+    compensatoryLeave = false,
     doctorsLeave = false,
     doctorsLeaveFamily = false,
     sickLeave = false,
@@ -25,10 +24,9 @@ export const getTitle = (workDay: WorkDay, config: ConfigContextType): string =>
     // interruptions = []
   } = workDay;
   const isWeekEnd = isWeekend(startTime);
-  const isFullCompensatoryLeave = isFullDay(compensatoryLeave, config.officialWorkTime);
   const isWorkingDay =
     !isWeekEnd &&
-    !isFullCompensatoryLeave &&
+    !compensatoryLeave &&
     !doctorsLeave &&
     !doctorsLeaveFamily &&
     !sickLeave &&
@@ -37,7 +35,7 @@ export const getTitle = (workDay: WorkDay, config: ConfigContextType): string =>
     !holiday &&
     dayWorked.greaterThan(0);
 
-  if (isFullCompensatoryLeave) return DAY_TYPES_KEYS.compensatoryLeave;
+  if (compensatoryLeave) return DAY_TYPES_KEYS.compensatoryLeave;
   if (doctorsLeave) return DAY_TYPES_KEYS.doctorsLeave;
   if (doctorsLeaveFamily) return DAY_TYPES_KEYS.doctorsLeaveFamily;
   if (sickLeave) return DAY_TYPES_KEYS.sickLeave;

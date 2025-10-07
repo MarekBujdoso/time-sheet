@@ -10,7 +10,7 @@ export interface WorkDay {
     workFromHome?: Decimal, // Praca doma
     sickLeave?: boolean, // PN
     sickLeaveFamily?: boolean, // OCR
-    compensatoryLeave?: Decimal, // NV
+    compensatoryLeave?: boolean, // NV
     doctorsLeave?: boolean, // P-cko cely den
     doctorsLeaveFamily?: boolean, // P-doprovod cely den
     dayWorked: Decimal, // Odpracovane za den
@@ -25,7 +25,7 @@ export interface WorkDayFull extends WorkDay {
     workFromHome: Decimal, // Praca doma
     sickLeave: boolean, // PN
     sickLeaveFamily: boolean, // OCR
-    compensatoryLeave: Decimal, // NV
+    compensatoryLeave: boolean, // NV
     doctorsLeave: boolean, // P-cko cely den
     doctorsLeaveFamily: boolean, // P-doprovod cely den
     holiday: boolean, // Sviatok

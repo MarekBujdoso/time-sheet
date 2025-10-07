@@ -73,29 +73,42 @@ const Sheet = () => {
     });
   }, []);
 
-  const saveTillEndOfMonth = React.useCallback((workDay: WorkDay) => {
-    setMonthData((month) => {
-      const lastIndex = month.length - 1;
-      const dayIndex = month.findIndex(
-        (data) => data.startTime.getDate() === workDay.startTime.getDate(),
-      );
-      if (dayIndex !== -1) {
-        month[dayIndex] = workDay;
-        for (let i = dayIndex + 1; i <= lastIndex; i++) {
-          const isWeekEnd = isWeekend(month[i].startTime);
-          if (!isWeekEnd) {
-            month[i] = {
-              ...workDay,
-              startTime: set(month[i].startTime, config.defaultStartTime),
-              endTime: set(month[i].endTime, config.defaultEndTime),
-            };
+  const saveTillEndOfMonth = React.useCallback(
+    (workDay: WorkDay) => {
+      setMonthData((month) => {
+        const lastIndex = month.length - 1;
+        const dayIndex = month.findIndex(
+          (data) => data.startTime.getDate() === workDay.startTime.getDate(),
+        );
+        if (dayIndex !== -1) {
+          month[dayIndex] = workDay;
+          for (let i = dayIndex + 1; i <= lastIndex; i++) {
+            const isWeekEnd = isWeekend(month[i].startTime);
+            if (!isWeekEnd) {
+              month[i] = {
+                ...workDay,
+                startTime: set(month[i].startTime, config.defaultStartTime),
+                endTime: set(month[i].endTime, config.defaultEndTime),
+                interruptions: workDay.interruptions?.map((interruption) => ({
+                  ...interruption,
+                  startTime: set(month[i].startTime, {
+                    hours: interruption.startTime.getHours(),
+                    minutes: interruption.startTime.getMinutes(),
+                  }),
+                  endTime: set(month[i].endTime, {
+                    hours: interruption.endTime.getHours(),
+                    minutes: interruption.endTime.getMinutes(),
+                  }),
+                })),
+              };
+            }
           }
         }
-      }
-      return [...month];
-    });
-  }, [config.defaultEndTime, config.defaultStartTime]);
-    
+        return [...month];
+      });
+    },
+    [config.defaultEndTime, config.defaultStartTime],
+  );
 
   const updateMonthData = React.useCallback(
     (activeMonth: number, activeYear: number) => {

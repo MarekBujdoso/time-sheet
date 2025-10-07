@@ -51,13 +51,13 @@ const Days = ({ days, color, textColor }: { days: Decimal; color?: string; textC
   );
 };
 
-const SummaryItem = ({title,  color, hours, days, noBackground}: {title: string, hours: Decimal, days?: Decimal, color: string, noBackground?: boolean}) => {
+const SummaryItem = ({title,  textColor, backgroundColor, hours, days, noBackground}: {title: string, hours: Decimal, days?: Decimal, textColor: string, backgroundColor?: string, noBackground?: boolean}) => {
   return (
     <>
       <span className='justify-self-end font-semibold md:py-[6px]'>{title}</span>
       <div className='flex items-center'>
-        <Hours hours={hours} color={noBackground ? undefined : `bg-${color}-50`} textColor={`text-${color}-700`} />
-        {days && <Days days={days} color={noBackground ? undefined : `bg-${color}-50`} textColor={`text-${color}-700`} />}
+        <Hours hours={hours} color={noBackground ? undefined : backgroundColor} textColor={textColor} />
+        {days && <Days days={days} color={noBackground ? undefined : backgroundColor} textColor={textColor} />}
       </div>
     </>
   )
@@ -116,13 +116,13 @@ const SummaryBoard = ({
             autoComplete='off'
             onChange={(e) => setUserName(e.target.value)}
           />
-          <SummaryItem title='Časový fond:' hours={config.officialWorkTime} color='stone' />
-          <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} color='green' />
-          <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} color='red' />
-          <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} color='blue' />
-          <SummaryItem title='P-čko:' hours={doctorsLeave} days={doctorsLeaveDays} color='red' />
-          <SummaryItem title='PN, OČR:' hours={sickLeaveFamily.plus(sickLeave)} days={sickLeaveFamilyDays.plus(sickLeaveDays)} color='red' />
-          <SummaryItem title='Odpracované:' hours={worked} days={workedDays} color='blue' />
+          <SummaryItem title='Časový fond:' hours={config.officialWorkTime} textColor='text-stone-700' backgroundColor='bg-stone-50' />
+          <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} textColor='text-green-700' backgroundColor='bg-green-50' />
+          <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} textColor='text-red-700' backgroundColor='bg-red-50' />
+          <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} textColor='text-blue-700' backgroundColor='bg-blue-50' />
+          <SummaryItem title='P-čko:' hours={doctorsLeave} days={doctorsLeaveDays} textColor='text-red-700' backgroundColor='bg-red-50' />
+          <SummaryItem title='PN, OČR:' hours={sickLeaveFamily.plus(sickLeave)} days={sickLeaveFamilyDays.plus(sickLeaveDays)} textColor='text-red-700' backgroundColor='bg-red-50' />
+          <SummaryItem title='Odpracované:' hours={worked} days={workedDays} textColor='text-blue-700' backgroundColor='bg-blue-50' />
         </div>
       ) : (
         <>
@@ -138,13 +138,13 @@ const SummaryBoard = ({
             />
           </div>
           <div className='grid auto-rows-min gap-[4px] md:w-[calc(98vw-16px)] md:grid-cols-6 grid-cols-4'>
-            <SummaryItem title='P-čko:' hours={doctorsLeave} days={doctorsLeaveDays} color='red' noBackground />
-            <SummaryItem title='Fond:' hours={config.officialWorkTime} color='stone' noBackground />
-            <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} color='red' noBackground />
-            <SummaryItem title='Odprac.:' hours={worked} days={workedDays} color='blue' noBackground />
-            <SummaryItem title='PN, OČR:' hours={sickLeaveFamily.plus(sickLeave)} days={sickLeaveFamilyDays.plus(sickLeaveDays)} color='red' noBackground />
-            <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} color='blue' noBackground />
-            <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} color='green' noBackground />
+            <SummaryItem title='P-čko:' hours={doctorsLeave} days={doctorsLeaveDays} textColor='text-red-700' noBackground />
+            <SummaryItem title='Fond:' hours={config.officialWorkTime} textColor='text-stone-700' noBackground />
+            <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} textColor='text-red-700' noBackground />
+            <SummaryItem title='Odprac.:' hours={worked} days={workedDays} textColor='text-blue-700' noBackground />
+            <SummaryItem title='PN, OČR:' hours={sickLeaveFamily.plus(sickLeave)} days={sickLeaveFamilyDays.plus(sickLeaveDays)} textColor='text-red-700' noBackground />
+            <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} textColor='text-blue-700' noBackground />
+            <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} textColor='text-green-700' noBackground />
           </div>
         </>
       )}

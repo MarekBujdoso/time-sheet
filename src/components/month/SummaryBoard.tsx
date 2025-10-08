@@ -14,7 +14,7 @@ import { Input } from '../ui/input';
 import { useMediaQuery } from 'react-responsive';
 import { numberToTimeStr } from './workDayUtils';
 import Decimal from 'decimal.js';
-import { CalendarDays, Hourglass } from 'lucide-react';
+import { CalendarDays, Timer } from 'lucide-react';
 
 const Hours = ({
   hours,
@@ -26,13 +26,13 @@ const Hours = ({
   textColor: string;
 }) => {
   return color ? (
-    <div className={`flex items-center px-[5px] py-1.5 ${color} rounded-full shadow-sm`}>
-      <Hourglass size={16} color='gray' />{' '}
+    <div className={`flex items-center align-center px-[5px] py-1.5 ${color} rounded-full shadow-sm`}>
+      <Timer size={16} color='gray' />{' '}
       <span className={`font-semibold ${textColor}`}>{numberToTimeStr(hours)}h</span>
     </div>
   ) : (
     <>
-      <Hourglass size={16} color='gray' />
+      <Timer size={16} color='gray' />
       <span className={`font-semibold ${textColor}`}>{numberToTimeStr(hours)}h</span>
     </>
   );
@@ -110,7 +110,7 @@ const SummaryBoard = ({
   return (
     <div className='border bg-white rounded-2xl shadow-md my-[5px] text-sm md:text-base py-[15px]'>
       {isDesktop ? (
-        <div className='grid auto-rows-min gap-[4px] md:grid-cols-[3fr_2fr_3fr_2fr_3fr__3fr] my-[4px] justify-items-start items-center'>
+        <div className='grid auto-rows-min gap-[4px] md:grid-cols-[3fr_2fr_3fr_2fr_3fr_3fr] my-[4px] justify-items-start items-center'>
           <span className='justify-self-end font-semibold md:py-[6px] self-center'>Meno:</span>
           <Input
             className='col-span-3 w-[98%]'
@@ -130,10 +130,10 @@ const SummaryBoard = ({
         </div>
       ) : (
         <>
-          <div className='grid auto-rows-min gap-[4px] md:grid-cols-5 grid-cols-3 my-[4px]'>
+          <div className='grid auto-rows-min gap-[4px] grid-cols-[1fr_4fr] my-[4px]'>
             <span className='justify-self-end font-semibold md:py-[6px] self-center'>Meno:</span>
             <Input
-              className='col-span-2 w-[95%] md:w-auto'
+              className=' w-[95%] md:w-auto'
               id='user-name'
               name='userName'
               value={userName}
@@ -141,7 +141,7 @@ const SummaryBoard = ({
               onChange={(e) => setUserName(e.target.value)}
             />
           </div>
-          <div className='grid auto-rows-min gap-[4px] md:w-[calc(98vw-16px)] md:grid-cols-6 grid-cols-4'>
+          <div className='grid auto-rows-min gap-[4px] md:w-[calc(98vw-16px)] grid-cols-[2fr_3fr_2fr_3fr]'>
             <SummaryItem title='P-čko:' hours={doctorsLeave} days={doctorsLeaveDays} textColor='text-red-700' noBackground />
             <SummaryItem title='Fond:' hours={config.officialWorkTime} textColor='text-stone-700' noBackground />
             <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} textColor='text-red-700' noBackground />

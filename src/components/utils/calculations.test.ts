@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { calculateLunch, recalculateWorkDay, updateTimes } from './calculations';
-import { InterruptionTimeProps, InterruptionWithTimeType } from '../../app/sheet/types';
+import { DayType, InterruptionTimeProps, InterruptionWithTimeType } from '../../app/sheet/types';
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
 import { toDate } from 'date-fns/toDate';
@@ -24,8 +24,8 @@ const createDate = (hours: number, minutes: number, timestamp: number) => {
 };
 
 describe('calculateLunch', () => {
-  it('should return 0.5 when worked hours >= 6', () => {
-    expect(calculateLunch(new Decimal(6)).toNumber()).toBe(0.5);
+  it('should return 0.5 when worked hours > 6', () => {
+    expect(calculateLunch(new Decimal(6)).toNumber()).toBe(0);
     expect(calculateLunch(new Decimal(7)).toNumber()).toBe(0.5);
   });
 
@@ -301,8 +301,8 @@ describe('updateTimes with interruptions', () => {
       const result = updateTimes(interruptions, currentDay, config);
       expect(result.interruptionHours.toNumber()).toBe(1.5);
       expect(result.startTime).toEqual(set(currentDay, { hours: 9, minutes: 0 }));
-      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
-      expect(result.lunch).toBe(true);
+      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
+      expect(result.lunch).toBe(false);
     });
 
     it('start out of day 2 interruptions', () => {
@@ -364,16 +364,10 @@ describe('recalculateWorkDay', () => {
       startTime: currentDay,
       endTime: currentDay,
       interruptions: [],
-      sickLeave: false,
-      sickLeaveFamily: false,
-      compensatoryLeave: false, 
-      vacation: false,
+      dayType: DayType.WORK_DAY,
       workFromHome: new Decimal(0),
       dayWorked: new Decimal(0),
       lunch: false,
-      doctorsLeave: false,
-      doctorsLeaveFamily: false,
-      holiday: false,
       month: 5,
       year: 2025,
     }, config);
@@ -403,16 +397,10 @@ describe('recalculateWorkDay', () => {
           type: InterruptionWithTimeType.COMPENSATORY_LEAVE
         }
       ],
-      sickLeave: false,
-      sickLeaveFamily: false,
-      compensatoryLeave: false,
-      vacation: false,
+      dayType: DayType.WORK_DAY,
       workFromHome: new Decimal(0),
       dayWorked: new Decimal(0),
       lunch: false,
-      doctorsLeave: false,
-      doctorsLeaveFamily: false,
-      holiday: false,
       month: 5,
       year: 2025,
     }, config);
@@ -421,7 +409,7 @@ describe('recalculateWorkDay', () => {
     expect(result.lunch).toBe(false);
     expect(result.dayWorked.toNumber()).toBe(3.5);
     // expect(result.compensatoryLeave.toNumber()).toBe(4);
-    expect(result.vacation).toBe(false);
+    // expect(result.vacation).toBe(false);
   });
 
   it('should handle interruptions', () => {
@@ -444,16 +432,10 @@ describe('recalculateWorkDay', () => {
           type: InterruptionWithTimeType.COMPENSATORY_LEAVE
         }
       ],
-      sickLeave: false,
-      sickLeaveFamily: false,
-      compensatoryLeave: false,
-      vacation: false,
+      dayType: DayType.WORK_DAY,
       workFromHome: new Decimal(0),
       dayWorked: new Decimal(0),
       lunch: false,
-      doctorsLeave: false,
-      doctorsLeaveFamily: false,
-      holiday: false,
       month: 5,
       year: 2025,
     }, config);
@@ -462,7 +444,7 @@ describe('recalculateWorkDay', () => {
     expect(result.lunch).toBe(false);
     expect(result.dayWorked.toNumber()).toBe(3.5);
     // expect(result.compensatoryLeave.toNumber()).toBe(4);
-    expect(result.vacation).toBe(false);
+    // expect(result.vacation).toBe(false);
   });
 
   it('should combine 3 interruptions', () => {

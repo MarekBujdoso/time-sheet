@@ -23,12 +23,12 @@ const addMissingDays = (
   const data: WorkDay[] = loadedData.filter(
     (data) => data.month === activeMonth && data.year === activeYear,
   );
-  const dateInActiveMonth = new Date(activeYear, activeMonth - 1);
+  const dateInActiveMonth = new Date(activeYear, activeMonth);
   const daysInMonth = getDaysInMonth(dateInActiveMonth);
   const days = data.map((data) => data.startTime.getDate());
   for (let i = 1; i <= daysInMonth; i++) {
     if (!days.includes(i)) {
-      const currentDay = new Date(activeYear, activeMonth - 1, i);
+      const currentDay = new Date(activeYear, activeMonth, i);
       if (isBefore(currentDay, new Date()) && !isWeekend(currentDay)) {
         data.push({
           ...DAY_TYPES.workDay(
@@ -57,7 +57,7 @@ const Sheet = () => {
   // TODO: add cache to store changes and store only list of changes
   const [userName, setUserName] = React.useState(config.userName);
   const [monthData, setMonthData] = React.useState<WorkDay[]>(
-    addMissingDays(new Date().getFullYear(), new Date().getMonth() + 1, config),
+    addMissingDays(new Date().getFullYear(), new Date().getMonth(), config),
   );
   const isDesktop = useMediaQuery({ minWidth: 767 });
 
@@ -87,8 +87,8 @@ const Sheet = () => {
             if (!isWeekEnd) {
               month[i] = {
                 ...workDay,
-                startTime: set(month[i].startTime, config.defaultStartTime),
-                endTime: set(month[i].endTime, config.defaultEndTime),
+                startTime: set(month[i].startTime, {hours: workDay.startTime.getHours(), minutes: workDay.startTime.getMinutes()}),
+                endTime: set(month[i].endTime, {hours: workDay.endTime.getHours(), minutes: workDay.endTime.getMinutes()}),
                 interruptions: workDay.interruptions?.map((interruption) => ({
                   ...interruption,
                   startTime: set(month[i].startTime, {
@@ -107,7 +107,7 @@ const Sheet = () => {
         return [...month];
       });
     },
-    [config.defaultEndTime, config.defaultStartTime],
+    [],
   );
 
   const updateMonthData = React.useCallback(

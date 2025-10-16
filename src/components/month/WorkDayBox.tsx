@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import Decimal from 'decimal.js';
 import { Soup } from 'lucide-react';
 import { useContext } from 'react';
 import ConfigContext from '../../app/sheet/ConfigContext';
@@ -21,20 +20,8 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
   const config = useContext(ConfigContext);
   const {
     startTime,
-    endTime,
     lunch = false,
-    compensatoryLeave = false,
-    doctorsLeave = false,
-    doctorsLeaveFamily = false,
-    sickLeave = false,
-    sickLeaveFamily = false,
     dayWorked,
-    workFromHome = new Decimal(0),
-    vacation = false,
-    holiday = false,
-    interruptions = [],
-    month,
-    year,
     isWeekEnd,
     title,
     hasDisturbance,
@@ -92,23 +79,7 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
                   <DrawerDescription>Nastav si svoj deň.</DrawerDescription>
                 </DrawerHeader>
                 <WorkDayForm
-                  workDay={{
-                    month,
-                    year,
-                    startTime,
-                    endTime,
-                    lunch,
-                    compensatoryLeave,
-                    doctorsLeave,
-                    doctorsLeaveFamily,
-                    sickLeave,
-                    sickLeaveFamily,
-                    dayWorked,
-                    workFromHome,
-                    vacation,
-                    interruptions,
-                    holiday,
-                  }}
+                  workDay={workDay}
                   saveWorkDay={saveWorkDay}
                   saveTillEndOfMonth={saveTillEndOfMonth}
                 />

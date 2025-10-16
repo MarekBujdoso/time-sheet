@@ -1,17 +1,20 @@
 const monthsMap: { [key: number]: string } = {
-  1: 'Január',
-  2: 'Február',
-  3: 'Marec',
-  4: 'Apríl',
-  5: 'Máj',
-  6: 'Jún',
-  7: 'Júl',
-  8: 'August',
-  9: 'September',
-  10: 'Október',
-  11: 'November',
-  12: 'December',
+  0: 'Január',
+  1: 'Február',
+  2: 'Marec',
+  3: 'Apríl',
+  4: 'Máj',
+  5: 'Jún',
+  6: 'Júl',
+  7: 'August',
+  8: 'September',
+  9: 'Október',
+  10: 'November',
+  11: 'December',
 };
+
+export const MAX_MONTH = 11
+export const MIN_MONTH = 0
 
 export const getMonthName = (month: number) => {
   return monthsMap[month] || '';

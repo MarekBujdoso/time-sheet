@@ -1,62 +1,54 @@
 import Decimal from 'decimal.js';
 import { isWeekend } from 'date-fns/fp/isWeekend';
 import { getTitle } from '../utils/workDay';
-import { WorkDay } from '../../app/sheet/types';
+import { DayType, InterruptionWithTimeType, WorkDay } from '../../app/sheet/types';
 
 const useWorkDayBox = (workDay: WorkDay) => {
   const {
     startTime,
     endTime,
     lunch = false,
-    compensatoryLeave = false,
-    doctorsLeave = false,
-    doctorsLeaveFamily = false,
-    sickLeave = false,
-    sickLeaveFamily = false,
+    dayType,
     dayWorked,
     workFromHome = new Decimal(0),
-    vacation = false,
-    holiday = false,
     interruptions = [],
   } = workDay;
-  const month = startTime.getMonth() + 1;
+  const month = startTime.getMonth();
   const year = startTime.getFullYear();
   const isWeekEnd = isWeekend(startTime);
   const title = getTitle(workDay);
   const hasDisturbance =
-    !compensatoryLeave &&
-    !doctorsLeave &&
-    !doctorsLeaveFamily &&
-    !sickLeave &&
-    !sickLeaveFamily &&
-    !vacation &&
+    dayType !== DayType.COMPENSATORY_LEAVE &&
+    dayType !== DayType.DOCTORS_LEAVE &&
+    dayType !== DayType.DOCTORS_LEAVE_FAMILY &&
+    dayType !== DayType.SICK_LEAVE &&
+    dayType !== DayType.SICK_LEAVE_FAMILY &&
+    dayType !== DayType.VACATION &&
+    dayType !== DayType.SICK_DAY &&
     interruptions.length > 0;
   const doctorsLeaveTime = interruptions
-    .filter((interruption) => interruption.type === 'doctorsLeave')
+    .filter((interruption) => interruption.type === InterruptionWithTimeType.DOCTORS_LEAVE)
     .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
   const doctorsLeaveFamilyTime = interruptions
-    .filter((interruption) => interruption.type === 'doctorsLeaveFamily')
+    .filter((interruption) => interruption.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY)
     .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
   const vacationTime = interruptions
-    .filter((interruption) => interruption.type === 'vacation')
+    .filter((interruption) => interruption.type === InterruptionWithTimeType.VACATION)
     .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
   const compensatoryLeaveTime = interruptions
-    .filter((interruption) => interruption.type === 'compensatoryLeave')
+    .filter((interruption) => interruption.type === InterruptionWithTimeType.COMPENSATORY_LEAVE)
+    .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
+  const sickDayTime = interruptions
+    .filter((interruption) => interruption.type === InterruptionWithTimeType.SICK_DAY)
     .reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0));
 
   return {
     startTime,
     endTime,
     lunch,
-    compensatoryLeave,
-    doctorsLeave,
-    doctorsLeaveFamily,
-    sickLeave,
-    sickLeaveFamily,
+    dayType,
     dayWorked,
     workFromHome,
-    vacation,
-    holiday,
     interruptions,
     month,
     year,
@@ -67,6 +59,7 @@ const useWorkDayBox = (workDay: WorkDay) => {
     doctorsLeaveFamilyTime,
     vacationTime,
     compensatoryLeaveTime,
+    sickDayTime,
   };
 };
 

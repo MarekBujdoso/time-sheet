@@ -1,9 +1,9 @@
 import Decimal from 'decimal.js';
 import {
+  DayType,
   InterruptionTimeProps,
   InterruptionWithTimeType,
   WorkDay,
-  WorkDayFull,
 } from '../../app/sheet/types';
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
@@ -17,9 +17,32 @@ export const calculateLunch = (workedHours: Decimal) => {
   return workedHours.greaterThan(LUNCH_THRESHOLD) ? new Decimal(0.5) : new Decimal(0);
 };
 
-export const calculateWorked = (workDay: WorkDayFull, config: ConfigContextType) => {
+export const calculateCustomDay = (workDay: WorkDay, config?: ConfigContextType) => {
+  const { startTime, endTime } = workDay;
+  console.log(workDay, config)
+  // const currentDay = new Date(startTime);
+  // const { interruptionHours } = updateTimes(
+  //   interruptions,
+  //   currentDay,
+  //   config,
+  //   startTime,
+  //   endTime,
+  // );
+
+  const dayWorked = new Decimal(differenceInMinutes(endTime, startTime) / 60);
+
+  return {
+    dayWorked,
+    lunch: calculateLunch(dayWorked).greaterThan(0),
+  };
+};
+
+export const calculateWorked = (workDay: WorkDay, config: ConfigContextType) => {
   // TODO: NV is not calculated correctly, maybe it is calculated twice... change it to day and interruption type
-  const { startTime: workDayStartTime, interruptions, holiday } = workDay;
+  const { startTime: workDayStartTime, interruptions, dayType } = workDay;
+  if (dayType === DayType.CUSTOM_DAY) {
+    return calculateCustomDay(workDay, config);
+  }
   const currentDay = new Date(workDayStartTime);
   const { interruptionHours, lunch, startTime, endTime } = updateTimes(
     interruptions,
@@ -28,8 +51,8 @@ export const calculateWorked = (workDay: WorkDayFull, config: ConfigContextType)
   );
 
   return {
-    dayWorked: config.officialWorkTime.minus(interruptionHours),
-    lunch: holiday ? false : lunch,
+    dayWorked: dayType === DayType.EMPTY_DAY ? new Decimal(0) : config.officialWorkTime.minus(interruptionHours),
+    lunch: dayType === DayType.HOLIDAY || dayType === DayType.EMPTY_DAY ? false : lunch,
     endTime,
     startTime,
   };
@@ -131,9 +154,11 @@ export const updateTimes = (
   interruptions: InterruptionTimeProps[],
   currentDay: Date,
   config: ConfigContextType,
+  workDayStartTime?: Date,
+  workDayEndTime?: Date,
 ) => {
-  let startTime = set(currentDay, config.defaultStartTime);
-  let endTime = set(currentDay, config.defaultEndTime);
+  let startTime = workDayStartTime ?? set(currentDay, config.defaultStartTime);
+  let endTime = workDayEndTime ?? set(currentDay, config.defaultEndTime);
 
   const { interruptionHours: interruptionHrs, mergedTimes } = processInterruptions(
     interruptions,
@@ -161,7 +186,9 @@ export const updateTimes = (
   // console.log('interruptionHours', interruptionHrs.toNumber());
   const interruptionHours =
     interruptionHrs > config.officialWorkTime ? config.officialWorkTime : interruptionHrs;
-  const workedHours = config.officialWorkTime.minus(interruptionHours);
+  const workTime = workDayStartTime && workDayEndTime ? new Decimal(differenceInMinutes(workDayEndTime, workDayStartTime) / 60) : config.officialWorkTime;
+  const workedHours = workTime.minus(interruptionHours);
+  // console.log('workedHours', workedHours.toNumber());
   const lunch = workedHours.greaterThan(LUNCH_THRESHOLD);
   endTime =
     endTime.getTime() === set(currentDay, config.officialEndTime).getTime()
@@ -171,8 +198,14 @@ export const updateTimes = (
 };
 
 // TODO: Add JSDoc comments for all exported functions
-export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextType) => {
+export const recalculateWorkDay = (workDay: WorkDay, config: ConfigContextType) => {
   const currentDay = new Date(workDay.startTime);
+  if (workDay.dayType === DayType.CUSTOM_DAY) {
+    return {
+      ...workDay,
+      ...calculateCustomDay(workDay, config),
+    };
+  }
   const {
     startTime: calcStartTime,
     endTime,
@@ -189,7 +222,7 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
       config,
     );
     if (docLeaveInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
-      workDay.doctorsLeave = true;
+      workDay.dayType = DayType.DOCTORS_LEAVE
       startTime = set(currentDay, config.defaultStartTime);
     }
     const { interruptionHours: docLeaveFamilyInterruptions } = processInterruptions(
@@ -198,7 +231,7 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
       config,
     );
     if (docLeaveFamilyInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
-      workDay.doctorsLeaveFamily = true;
+      workDay.dayType = DayType.DOCTORS_LEAVE_FAMILY;
       startTime = set(currentDay, config.defaultStartTime);
     }
     const { interruptionHours: vacationInterruptions } = processInterruptions(
@@ -207,7 +240,7 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
       config,
     );
     if (vacationInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
-      workDay.vacation = true;
+      workDay.dayType = DayType.VACATION;
       startTime = set(currentDay, config.defaultStartTime);
     }
     const { interruptionHours: compensatoryLeaveInterruptions } = processInterruptions(
@@ -216,14 +249,14 @@ export const recalculateWorkDay = (workDay: WorkDayFull, config: ConfigContextTy
       config,
     );
     if (compensatoryLeaveInterruptions.greaterThanOrEqualTo(config.officialWorkTime)) {
-      workDay.compensatoryLeave = true;
+      workDay.dayType = DayType.COMPENSATORY_LEAVE;
       startTime = set(currentDay, config.defaultStartTime);
     }
-  } else {
-    workDay.doctorsLeave = false;
-    workDay.doctorsLeaveFamily = false;
-    workDay.vacation = false;
-    workDay.compensatoryLeave = false;
+  // } else {
+  //   workDay.doctorsLeave = false;
+  //   workDay.doctorsLeaveFamily = false;
+  //   workDay.vacation = false;
+  //   workDay.compensatoryLeave = false;
   }
 
   // const workFromHome = worked.greaterThan(0) ? worked : new Decimal(0)
@@ -242,7 +275,7 @@ export const calcSickLeave = (monthData: WorkDay[], config: ConfigContextType) =
   const sickLeave = monthData
     .filter(
       (data) =>
-        data.sickLeave ||
+        data.dayType === DayType.SICK_LEAVE ||
         data.interruptions?.some((i) => i.type === InterruptionWithTimeType.SICK_LEAVE),
     )
     .reduce(
@@ -262,7 +295,7 @@ export const calcDoctorsLeave = (monthData: WorkDay[], config: ConfigContextType
   const doctorsLeave = monthData
     .filter(
       (data) =>
-        data.doctorsLeave ||
+        data.dayType === DayType.DOCTORS_LEAVE ||
         data.interruptions?.some((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE),
     )
     .reduce(
@@ -282,7 +315,7 @@ export const calcDoctorsLeaveFamily = (monthData: WorkDay[], config: ConfigConte
   const doctorsLeaveFamily = monthData
     .filter(
       (data) =>
-        data.doctorsLeaveFamily ||
+        data.dayType === DayType.DOCTORS_LEAVE_FAMILY ||
         data.interruptions?.some((i) => i.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY),
     )
     .reduce(
@@ -310,7 +343,7 @@ export const calcCompensatoryLeave = (monthData: WorkDay[], config: ConfigContex
   const calcCompensatoryLeave = monthData
     .filter(
       (data) =>
-        data.compensatoryLeave ||
+        data.dayType === DayType.COMPENSATORY_LEAVE ||
         data.interruptions?.some((i) => i.type === InterruptionWithTimeType.COMPENSATORY_LEAVE),
     )
     .reduce(
@@ -333,7 +366,7 @@ export const calcSickLeaveFamily = (monthData: WorkDay[], config: ConfigContextT
   const sickLeaveFamily = monthData
     .filter(
       (data) =>
-        data.sickLeaveFamily ||
+        data.dayType === DayType.SICK_LEAVE_FAMILY ||
         data.interruptions?.some((i) => i.type === InterruptionWithTimeType.SICK_LEAVE_FAMILY),
     )
     .reduce(
@@ -349,9 +382,31 @@ export const calcSickLeaveFamily = (monthData: WorkDay[], config: ConfigContextT
   return [sickLeaveFamily, sickLeaveFamilyDays];
 };
 
+export const calcSickDay = (monthData: WorkDay[], config: ConfigContextType) => {
+  const sickDay = monthData
+    .filter(
+      (data) =>
+        data.dayType === DayType.SICK_DAY ||
+        data.interruptions?.some((i) => i.type === InterruptionWithTimeType.SICK_DAY),
+    )
+    .reduce(
+      (acc, data) =>
+        acc.plus(
+          data.interruptions
+            ?.filter((i) => i.type === InterruptionWithTimeType.SICK_DAY)
+            .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0),
+        ),
+      new Decimal(0),
+    );
+  const sickDayDays = sickDay.dividedBy(config.officialWorkTime);
+  return [sickDay, sickDayDays];
+};
+
 export const calcVacation = (monthData: WorkDay[], config: ConfigContextType) => {
   const calcVacation = monthData
-    .filter((data) => data.interruptions?.some((i) => i.type === InterruptionWithTimeType.VACATION))
+    .filter((data) => 
+      data.dayType === DayType.VACATION ||
+      data.interruptions?.some((i) => i.type === InterruptionWithTimeType.VACATION))
     .reduce(
       (acc, data) =>
         acc.plus(
@@ -361,9 +416,15 @@ export const calcVacation = (monthData: WorkDay[], config: ConfigContextType) =>
         ),
       new Decimal(0),
     );
-  const vacation = calcVacation.greaterThan(config.officialWorkTime)
+  const vacationDays = calcVacation.dividedBy(config.officialWorkTime);
+  return [calcVacation, vacationDays];
+};
+
+export const calcVacationOneDay = (workDay: WorkDay, config: ConfigContextType) => {
+  const [timeVacation] = calcVacation([workDay], config);
+  const vacation = timeVacation.greaterThan(config.officialWorkTime)
     ? config.officialWorkTime
-    : calcVacation;
+    : timeVacation;
   const vacationDays = vacation.dividedBy(config.officialWorkTime);
   return [vacation, vacationDays];
 };

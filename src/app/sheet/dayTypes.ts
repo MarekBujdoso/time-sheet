@@ -1,62 +1,44 @@
 import { set } from 'date-fns/set';
 import Decimal from 'decimal.js';
-import { Cross, GraduationCap, Hospital, LucideIcon, Pickaxe, Pill, Sun, TentTree, TreePalm, UserRoundPlus } from 'lucide-react';
+import { TriangleAlert, Cross, GraduationCap, Hospital, Pickaxe, Pill, Sun, TentTree, TrafficCone, TreePalm, UserRoundPlus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { InterruptionWithTimeType, WorkDayFull } from './types';
+import { DayType, InterruptionWithTimeType, WorkDay } from './types';
 
-export const workDay = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
+export const workDay = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime: set(endTime, { minutes: 30 }),
   lunch: true,
   workFromHome: new Decimal(0),
-  sickLeave: false,
-  sickLeaveFamily: false,
-  compensatoryLeave: false,
-  doctorsLeave: false,
-  doctorsLeaveFamily: false,
+  dayType: DayType.WORK_DAY,
   dayWorked: workTime,
-  holiday: false,
-  vacation: false,
   interruptions: [],
   typeIcon: GraduationCap,
 });
 
-export const holiday = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
+export const holiday = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
   lunch: false,
   workFromHome: new Decimal(0),
-  sickLeave: false,
-  sickLeaveFamily: false,
-  compensatoryLeave: false,
-  doctorsLeave: false,
-  doctorsLeaveFamily: false,
+  dayType: DayType.HOLIDAY,
   dayWorked: workTime,
-  holiday: true,
-  vacation: false,
   interruptions: [],
   typeIcon: TentTree,
 });
 
-export const vacation = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
+export const vacation = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
   lunch: false,
   workFromHome: new Decimal(0),
-  sickLeave: false,
-  sickLeaveFamily: false,
-  compensatoryLeave: false,
-  doctorsLeave: false,
-  doctorsLeaveFamily: false,
+  dayType: DayType.VACATION,
   dayWorked: new Decimal(0),
-  holiday: false,
-  vacation: true,
   interruptions: [{
     id: uuidv4(),
     type: InterruptionWithTimeType.VACATION,
@@ -67,21 +49,15 @@ export const vacation = (startTime: Date, endTime: Date, workTime: Decimal): Wor
   typeIcon: TreePalm,
 });
 
-export const sickLeave = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
+export const sickLeave = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
   lunch: false,
   workFromHome: new Decimal(0),
-  sickLeave: true,
-  sickLeaveFamily: false,
-  compensatoryLeave: false,
-  doctorsLeave: false,
-  doctorsLeaveFamily: false,
+  dayType: DayType.SICK_LEAVE,
   dayWorked: new Decimal(0),
-  holiday: false,
-  vacation: false,
   interruptions: [{
     id: uuidv4(),
     type: InterruptionWithTimeType.SICK_LEAVE,
@@ -92,21 +68,15 @@ export const sickLeave = (startTime: Date, endTime: Date, workTime: Decimal): Wo
   typeIcon: Pill,
 });
 
-export const sickLeaveFamily = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
+export const sickLeaveFamily = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
   lunch: false,
   workFromHome: new Decimal(0),
-  sickLeave: false,
-  sickLeaveFamily: true,
-  compensatoryLeave: false,
-  doctorsLeave: false,
-  doctorsLeaveFamily: false,
+  dayType: DayType.SICK_LEAVE_FAMILY,
   dayWorked: new Decimal(0),
-  holiday: false,
-  vacation: false,
   interruptions: [{
     id: uuidv4(),
     type: InterruptionWithTimeType.SICK_LEAVE_FAMILY,
@@ -117,21 +87,15 @@ export const sickLeaveFamily = (startTime: Date, endTime: Date, workTime: Decima
   typeIcon: Hospital,
 });
 
-export const doctorsLeave = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
+export const doctorsLeave = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
   lunch: false,
   workFromHome: new Decimal(0),
-  sickLeave: false,
-  sickLeaveFamily: false,
-  compensatoryLeave: false,
-  doctorsLeave: true,
-  doctorsLeaveFamily: false,
+  dayType: DayType.DOCTORS_LEAVE,
   dayWorked: new Decimal(0),
-  holiday: false,
-  vacation: false,
   interruptions: [{
     id: uuidv4(),
     type: InterruptionWithTimeType.DOCTORS_LEAVE,
@@ -142,21 +106,15 @@ export const doctorsLeave = (startTime: Date, endTime: Date, workTime: Decimal):
   typeIcon: Cross,
 });
 
-export const doctorsLeaveFamily = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
+export const doctorsLeaveFamily = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
   lunch: false,
   workFromHome: new Decimal(0),
-  sickLeave: false,
-  sickLeaveFamily: false,
-  compensatoryLeave: false,
-  doctorsLeave: false,
-  doctorsLeaveFamily: true,
+  dayType: DayType.DOCTORS_LEAVE_FAMILY,
   dayWorked: new Decimal(0),
-  holiday: false,
-  vacation: false,
   interruptions: [{
     id: uuidv4(),
     type: InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY,
@@ -167,21 +125,15 @@ export const doctorsLeaveFamily = (startTime: Date, endTime: Date, workTime: Dec
   typeIcon: UserRoundPlus,
 });
 
-export const compensatoryLeave = (startTime: Date, endTime: Date, workTime: Decimal): WorkDayFull => ({
+export const compensatoryLeave = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
   lunch: false,
   workFromHome: new Decimal(0),
-  sickLeave: false,
-  sickLeaveFamily: false,
-  compensatoryLeave: true,
-  doctorsLeave: false,
-  doctorsLeaveFamily: false,
+  dayType: DayType.COMPENSATORY_LEAVE,
   dayWorked: new Decimal(0),
-  holiday: false,
-  vacation: false,
   interruptions: [{
     id: uuidv4(),
     type: InterruptionWithTimeType.COMPENSATORY_LEAVE,
@@ -192,42 +144,61 @@ export const compensatoryLeave = (startTime: Date, endTime: Date, workTime: Deci
   typeIcon: Pickaxe,
 });
 
-export const weekend = (startTime: Date, endTime: Date): WorkDayFull => ({
+export const weekend = (startTime: Date, endTime: Date): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
   lunch: false,
   workFromHome: new Decimal(0),
-  sickLeave: false,
-  sickLeaveFamily: false,
-  compensatoryLeave: false,
-  doctorsLeave: false,
-  doctorsLeaveFamily: false,
+  dayType: DayType.WEEKEND,
   dayWorked: new Decimal(0),
-  holiday: false,
-  vacation: false,
   interruptions: [],
   typeIcon: Sun,
 });
 
-export const emptyDay = (startTime: Date, endTime: Date): WorkDayFull => ({
+export const emptyDay = (startTime: Date, endTime: Date): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
   lunch: false,
   workFromHome: new Decimal(0),
-  sickLeave: false,
-  sickLeaveFamily: false,
-  compensatoryLeave: false,
-  doctorsLeave: false,
-  doctorsLeaveFamily: false,
+  dayType: DayType.EMPTY_DAY,
   dayWorked: new Decimal(0),
-  holiday: false,
-  vacation: false,
   interruptions: [],
-  typeIcon: undefined,
+});
+
+export const customDay = (startTime: Date, endTime: Date): WorkDay => ({
+  month: 0,
+  year: 0,
+  startTime,
+  endTime,
+  lunch: false,
+  workFromHome: new Decimal(0),
+  dayType: DayType.CUSTOM_DAY,
+  dayWorked: new Decimal(0),
+  interruptions: [],
+  typeIcon: TriangleAlert
+});
+
+export const sickDay = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
+  month: 0,
+  year: 0,
+  startTime,
+  endTime,
+  lunch: false,
+  workFromHome: new Decimal(0),
+  dayType: DayType.SICK_DAY,
+  dayWorked: new Decimal(0),
+  interruptions: [{
+    id: uuidv4(),
+    type: InterruptionWithTimeType.SICK_DAY,
+    startTime,
+    endTime,
+    time: workTime,
+  }],
+  typeIcon: TrafficCone,
 });
 
 export const DAY_TYPES = {
@@ -241,6 +212,8 @@ export const DAY_TYPES = {
   compensatoryLeave,
   weekend,
   emptyDay,
+  customDay,
+  sickDay,
 };
 
 export enum DAY_TYPES_KEYS {
@@ -253,6 +226,9 @@ export enum DAY_TYPES_KEYS {
   doctorsLeaveFamily = 'Doprovod celý deň',
   compensatoryLeave = 'Náhradné voľno',
   weekend = 'Víkend',
+  customDay = 'Iný deň',
+  emptyDay = 'Prázdny deň',
+  sickDay = 'Pracovné voľno',
 };
 
 export enum DAY_INTERRUPTIONS_KEYS {
@@ -262,43 +238,32 @@ export enum DAY_INTERRUPTIONS_KEYS {
   vacation = 'Dovolenka',
   sickLeave = 'PN',
   sickLeaveFamily = 'OČR',
+  sickDay = 'PV',
 };
 
-export const identifyDayType = (
-  day: WorkDayFull,
-): keyof typeof DAY_TYPES | undefined => {
-  if (day.holiday) return 'holiday';
-  if (day.vacation) return 'vacation';
-  if (day.sickLeave) return 'sickLeave';
-  if (day.sickLeaveFamily) return 'sickLeaveFamily';
-  if (day.doctorsLeave) return 'doctorsLeave';
-  if (day.doctorsLeaveFamily) return 'doctorsLeaveFamily';
-  if (day.compensatoryLeave) return 'compensatoryLeave';
-  // if (day.dayWorked.greaterThan(0)) return 'workDay';
-  return 'workDay';
-};
-
-export const getIconByDayType = (dayType: DAY_TYPES_KEYS): LucideIcon | undefined => {
-  switch (dayType) {
-    case DAY_TYPES_KEYS.holiday:
-      return TentTree;
-    case DAY_TYPES_KEYS.vacation:
-      return TreePalm;
-    case DAY_TYPES_KEYS.sickLeave:
-      return Pill;
-    case DAY_TYPES_KEYS.sickLeaveFamily:
-      return Hospital;
-    case DAY_TYPES_KEYS.doctorsLeave:
-      return Cross;
-    case DAY_TYPES_KEYS.doctorsLeaveFamily:
-      return UserRoundPlus;
-    case DAY_TYPES_KEYS.compensatoryLeave:
-      return Pickaxe;
-    case DAY_TYPES_KEYS.weekend:
-      return Sun;
-    case DAY_TYPES_KEYS.workDay:
-      return GraduationCap;
-    default:
-      return undefined;
-  }
-}
+// export const getIconByDayType = (dayType: DAY_TYPES_KEYS): LucideIcon | undefined => {
+//   switch (dayType) {
+//     case DAY_TYPES_KEYS.holiday:
+//       return TentTree;
+//     case DAY_TYPES_KEYS.vacation:
+//       return TreePalm;
+//     case DAY_TYPES_KEYS.sickLeave:
+//       return Pill;
+//     case DAY_TYPES_KEYS.sickLeaveFamily:
+//       return Hospital;
+//     case DAY_TYPES_KEYS.doctorsLeave:
+//       return Cross;
+//     case DAY_TYPES_KEYS.doctorsLeaveFamily:
+//       return UserRoundPlus;
+//     case DAY_TYPES_KEYS.compensatoryLeave:
+//       return Pickaxe;
+//     case DAY_TYPES_KEYS.weekend:
+//       return Sun;
+//     case DAY_TYPES_KEYS.workDay:
+//       return GraduationCap;
+//     case DAY_TYPES_KEYS.customDay:
+//       return GraduationCap;
+//     default:
+//       return undefined;
+//   }
+// }

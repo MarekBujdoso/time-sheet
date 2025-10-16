@@ -1,32 +1,20 @@
 import { isWeekend } from 'date-fns/fp/isWeekend';
 import Decimal from 'decimal.js';
-import { InterruptionWithTimeType, type WorkDay } from '../../app/sheet/types';
-
-// const calcPercentage = (part: Decimal, whole: Decimal): string => {
-//   console.log(part, whole);
-//   const perc = part.div(whole).times(100).toNumber().toFixed(0);
-//   console.log(perc);
-//   return '50';
-// }
+import { DayType, InterruptionWithTimeType, type WorkDay } from '../../app/sheet/types';
 
 export const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
   const {
-    compensatoryLeave,
-    doctorsLeave,
-    doctorsLeaveFamily,
-    sickLeave,
-    sickLeaveFamily,
-    vacation,
-    holiday,
+    dayType,
     dayWorked,
   } = workDay;
-  if (doctorsLeave) return 'bg-rose-200';
-  if (doctorsLeaveFamily) return 'bg-rose-200';
-  if (sickLeave) return 'bg-rose-200';
-  if (sickLeaveFamily) return 'bg-rose-200';
-  if (holiday) return 'bg-emerald-100';
-  if (compensatoryLeave) return 'bg-blue-200';
-  if (vacation) return 'bg-emerald-100';
+  if (dayType === DayType.DOCTORS_LEAVE) return 'bg-rose-200';
+  if (dayType === DayType.DOCTORS_LEAVE_FAMILY) return 'bg-rose-200';
+  if (dayType === DayType.SICK_LEAVE) return 'bg-rose-200';
+  if (dayType === DayType.SICK_LEAVE_FAMILY) return 'bg-rose-200';
+  if (dayType === DayType.HOLIDAY) return 'bg-emerald-100';
+  if (dayType === DayType.COMPENSATORY_LEAVE) return 'bg-blue-200';
+  if (dayType === DayType.SICK_DAY) return 'bg-blue-200';
+  if (dayType === DayType.VACATION) return 'bg-emerald-100';
   if (dayWorked.equals(officialWorkTime)) return 'bg-blue-200';
   if (isWeekend(workDay.startTime)) return 'bg-emerald-100';
   if (dayWorked.greaterThan(0)) {

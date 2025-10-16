@@ -1,18 +1,18 @@
 import React from "react"
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination"
-import { getMonthName } from "../utils/skUtils"
+import { getMonthName, MAX_MONTH, MIN_MONTH } from "../utils/skUtils"
 
 interface MonthPagerProps {
   update: (month: number, year: number) => void
 }
 
 const MonthPager = ({ update }: MonthPagerProps) => {
-  const [activeMonth, setActiveMonth] = React.useState(new Date().getMonth() + 1)
+  const [activeMonth, setActiveMonth] = React.useState(new Date().getMonth())
   const [activeYear, setActiveYear] = React.useState(new Date().getFullYear())
   const switchToPrevMonth = React.useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    const month = activeMonth === 1 ? 12 : activeMonth - 1
-    const year = activeMonth === 1 ? activeYear - 1 : activeYear
+    const month = activeMonth === MIN_MONTH ? MAX_MONTH : activeMonth - 1
+    const year = activeMonth === MIN_MONTH ? activeYear - 1 : activeYear
     setActiveMonth(month)
     setActiveYear(year)
     update(month, year)
@@ -20,8 +20,8 @@ const MonthPager = ({ update }: MonthPagerProps) => {
 
   const switchToNextMonth = React.useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    const month = activeMonth === 12 ? 1 : activeMonth + 1
-    const year = activeMonth === 12 ? activeYear + 1 : activeYear
+    const month = activeMonth === MAX_MONTH ? MIN_MONTH : activeMonth + 1
+    const year = activeMonth === MAX_MONTH ? activeYear + 1 : activeYear
     setActiveMonth(month)
     setActiveYear(year)
     update(month, year)

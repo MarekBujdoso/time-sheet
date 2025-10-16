@@ -3,7 +3,6 @@ import Decimal from 'decimal.js';
 import { Cross, Pickaxe, Soup, TreePalm, UserRoundPlus } from 'lucide-react';
 import { useContext } from 'react';
 import ConfigContext from '../../app/sheet/ConfigContext';
-import { DAY_TYPES_KEYS, getIconByDayType } from '../../app/sheet/dayTypes';
 import { getDayNameFromDate } from '../../utils/skUtils';
 import { Button } from '../ui/button';
 import {
@@ -42,20 +41,8 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDay
   const config = useContext(ConfigContext);
   const {
     startTime,
-    endTime,
     lunch = false,
-    compensatoryLeave = false,
-    doctorsLeave = false,
-    doctorsLeaveFamily = false,
-    sickLeave = false,
-    sickLeaveFamily = false,
     dayWorked,
-    workFromHome = new Decimal(0),
-    vacation = false,
-    holiday = false,
-    interruptions = [],
-    month,
-    year,
     isWeekEnd,
     title,
     hasDisturbance,
@@ -65,7 +52,7 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDay
     compensatoryLeaveTime,
   } = useWorkDayBox(workDay);
 
-  const MainIcon = getIconByDayType(title as DAY_TYPES_KEYS);
+  const MainIcon = workDay.typeIcon;
 
   return (
     <>
@@ -143,23 +130,7 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDay
                   <DrawerDescription>Nastav si svoj deň.</DrawerDescription>
                 </DrawerHeader>
                 <WorkDayForm
-                  workDay={{
-                    month,
-                    year,
-                    startTime,
-                    endTime,
-                    lunch,
-                    compensatoryLeave,
-                    doctorsLeave,
-                    doctorsLeaveFamily,
-                    sickLeave,
-                    sickLeaveFamily,
-                    dayWorked,
-                    workFromHome,
-                    vacation,
-                    interruptions,
-                    holiday,
-                  }}
+                  workDay={workDay}
                   saveWorkDay={saveWorkDay}
                   saveTillEndOfMonth={saveTillEndOfMonth}
                 />

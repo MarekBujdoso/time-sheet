@@ -6,6 +6,7 @@ import {
   calcWorked,
   calcVacation,
   calcCompensatoryLeave,
+  calcSickDay,
 } from '../../components/utils/calculations';
 import React, { useContext } from 'react';
 import { WorkDay } from '../../app/sheet/types';
@@ -99,6 +100,10 @@ const SummaryBoard = ({
     () => calcCompensatoryLeave(monthData, config),
     [monthData, config],
   );
+  const [sickDay, sickDayDays] = React.useMemo(
+    () => calcSickDay(monthData, config),
+    [monthData, config],
+  );
   const [worked, workedDays] = React.useMemo(
     () => {
       const [wrk, wrkDays] = calcWorked(monthData, config)
@@ -113,7 +118,7 @@ const SummaryBoard = ({
         <div className='grid auto-rows-min gap-[4px] md:grid-cols-[3fr_2fr_3fr_2fr_3fr_3fr] my-[4px] justify-items-start items-center'>
           <span className='justify-self-end font-semibold md:py-[6px] self-center'>Meno:</span>
           <Input
-            className='col-span-3 w-[98%]'
+            className='w-[98%]'
             id='user-name'
             name='userName'
             value={userName}
@@ -121,6 +126,7 @@ const SummaryBoard = ({
             onChange={(e) => setUserName(e.target.value)}
           />
           <SummaryItem title='Časový fond:' hours={config.officialWorkTime} textColor='text-stone-700' backgroundColor='bg-stone-50' />
+          <SummaryItem title='Prac. volno:' hours={sickDay} days={sickDayDays} textColor='text-blue-700' backgroundColor='bg-blue-50' />
           <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} textColor='text-green-700' backgroundColor='bg-green-50' />
           <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} textColor='text-red-700' backgroundColor='bg-red-50' />
           <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} textColor='text-blue-700' backgroundColor='bg-blue-50' />
@@ -149,6 +155,7 @@ const SummaryBoard = ({
             <SummaryItem title='PN, OČR:' hours={sickLeaveFamily.plus(sickLeave)} days={sickLeaveFamilyDays.plus(sickLeaveDays)} textColor='text-red-700' noBackground />
             <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} textColor='text-blue-700' noBackground />
             <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} textColor='text-green-700' noBackground />
+            <SummaryItem title='Prac. volno:' hours={sickDay} days={sickDayDays} textColor='text-blue-700' noBackground />
           </div>
         </>
       )}

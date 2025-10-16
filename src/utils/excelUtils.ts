@@ -2,10 +2,11 @@ import { format } from 'date-fns/format';
 import Decimal from 'decimal.js';
 import ExcelJS from 'exceljs';
 import { ConfigContextType } from '../app/sheet/ConfigContext';
-import { WorkDay } from '../app/sheet/types';
+import { DayType, WorkDay } from '../app/sheet/types';
 import {
   calcDoctorsLeave,
   calcDoctorsLeaveFamily,
+  calcSickDay,
   calcSickLeave,
   calcSickLeaveFamily,
 } from '../components/utils/calculations';
@@ -36,28 +37,29 @@ const borderCell = (cell: ExcelJS.Cell) => {
 
 export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], userName: string) => {
   console.log('generate EPC');
-  const month = monthData[0].month + 1;
+  const month = monthData[0].month;
   const year = monthData[0].year;
   const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet(`${getMonthName(month)}`,{
-    pageSetup:{paperSize: 9, orientation:'portrait'}
+  const sheet = workbook.addWorksheet(`${getMonthName(month)}`, {
+    pageSetup: { paperSize: 9, orientation: 'portrait' },
   });
   sheet.columns = [
     { key: 'day', width: 3 },
-    { key: 'startTime', width: 8 },
-    { key: 'endTime', width: 8 },
-    { key: 'lunch', width: 8 },
+    { key: 'startTime', width: 7 },
+    { key: 'endTime', width: 7 },
+    { key: 'lunch', width: 7 },
     { key: 'intFrom', width: 6 },
     { key: 'intTo', width: 6 },
     { key: 'intTime', width: 5 },
     { key: 'overtime', width: 5 },
     { key: 'compensatory', width: 5 },
+    { key: 'sickDay', width: 5 },
     { key: 'vacation', width: 5 },
     { key: 'home', width: 5 },
     { key: 'workTime', width: 7 },
     { key: 'signature', width: 9 },
   ];
-  let row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '']);
+  let row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
   row.eachCell((cell) => {
     cell.font = { size: 10 };
   });
@@ -74,6 +76,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'obdobie:',
     null,
     `${getMonthName(month)} ${year}`,
+    null,
     null,
   ]);
   row.eachCell((cell, collNumber) => {
@@ -93,11 +96,12 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     userName,
     null,
+    null,
   ]);
   row.eachCell((cell) => {
     cell.font = { size: 10, bold: true };
   });
-  row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '']);
+  row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
   row.eachCell((cell) => {
     cell.font = { size: 10 };
   });
@@ -112,6 +116,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     '',
     'Nadčasová práca',
     'Čerpanie NV',
+    'Prac. voľno (PV)',
     'Dovolenka DOV',
     'práca doma (PZ)',
     'celkom odpracovaný pracovný čas',
@@ -123,7 +128,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       vertical: 'middle',
       horizontal: 'center',
       wrapText: true,
-      textRotation: [1, 8, 9, 10, 11, 12, 13].includes(collNumber) ? 90 : 0,
+      textRotation: [1, 8, 9, 10, 11, 12, 13, 14].includes(collNumber) ? 90 : 0,
     };
     fillCell(cell, GREEN_COLOR);
     borderCell(cell);
@@ -134,6 +139,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     '',
     'z toho prestávku v čase od 11:30 do 14:30',
     'lekárske ošetrenie, sprevádzanie s členom rodiny na ošetrenie',
+    '',
     '',
     '',
     '',
@@ -162,6 +168,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'čas /h/',
     'čas /h/',
     'čas /h/',
+    'čas /h/',
     '',
   ]);
   row.eachCell((cell) => {
@@ -176,57 +183,63 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   sheet.mergeCells('E6:G6');
   sheet.mergeCells('H5:H6'); //Nadčasové práca
   sheet.mergeCells('I5:I6'); //Čerpanie NV
-  sheet.mergeCells('J5:J6'); //Dovolenka DOV
-  sheet.mergeCells('K5:K6'); //práca doma (PZ)
-  sheet.mergeCells('L5:L6'); //celkom odpracovaný pracovný čas
-  sheet.mergeCells('M5:M7'); //podpis zamestnanca
+  sheet.mergeCells('J5:J6'); //Prac. voľno (PV)
+  sheet.mergeCells('K5:K6'); //Dovolenka DOV
+  sheet.mergeCells('L5:L6'); //práca doma (PZ)
+  sheet.mergeCells('M5:M7'); //celkom odpracovaný pracovný čas
+  sheet.mergeCells('N5:N7'); //podpis zamestnanca
 
   monthData.forEach((data) => {
     const title = getTitle(data);
     const isWorkingDay = title === 'Práca';
-    const negativeInterruptions = data.interruptions?.filter(
-      (interruption) => interruption.type !== 'compensatoryLeave',
-    ) ?? [];
-    const compensatoryLeaveInterruptions = data.interruptions?.filter(
-      (interruption) => interruption.type === 'compensatoryLeave',
-    ) ?? [];
-    const vacationTime = data.interruptions?.filter(
-      (interruption) => interruption.type === 'vacation',
-    )?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0)) ?? new Decimal(0);
+    const negativeInterruptions =
+      data.interruptions?.filter(
+        (interruption) =>
+          interruption.type !== 'compensatoryLeave' && interruption.type !== 'sickDay' && interruption.type !== 'vacation',
+      ) ?? [];
+    const compensatoryLeaveTime =
+      data.interruptions
+        ?.filter((interruption) => interruption.type === 'compensatoryLeave')
+        ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0)) ??
+      new Decimal(0);
+    const vacationTime =
+      data.interruptions
+        ?.filter((interruption) => interruption.type === 'vacation')
+        ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0)) ??
+      new Decimal(0);
+    const sickDayTime =
+      data.interruptions
+        ?.filter((interruption) => interruption.type === 'sickDay')
+        ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0)) ??
+      new Decimal(0);
 
     const row = sheet.addRow({
       day: data.startTime.getDate(),
       startTime: isWorkingDay ? format(data.startTime, 'HH: mm') : title,
       endTime: isWorkingDay ? format(data.endTime, 'HH:mm') : '',
       lunch: data.lunch ? 0.5 : '',
-      intFrom: data.vacation ? '' : 
+      intFrom:
         negativeInterruptions
           ?.map((interruption) => format(interruption.startTime, 'HH:mm'))
           .join('\r\n') ?? '',
-      intTo: data.vacation ? '' : 
+      intTo:
         negativeInterruptions
           ?.map((interruption) => format(interruption.endTime, 'HH:mm'))
           .join('\r\n') ?? '',
-      intTime: data.vacation ? '' : 
-        negativeInterruptions?.length > 0 ? negativeInterruptions
-          ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
-          .toNumber() ?? '' : '',
+      intTime:
+        negativeInterruptions?.length > 0
+          ? (negativeInterruptions
+              ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
+              .toNumber() ?? '')
+            : '',
       overtime: '',
-      compensatory: data.vacation ? '' :
-        compensatoryLeaveInterruptions?.length > 0 ? compensatoryLeaveInterruptions
-          ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
-          .toNumber() ?? '' : '',
-      vacation: data.vacation || vacationTime.greaterThan(0) ? vacationTime.toNumber() : '',
+      compensatory:
+        data.dayType === DayType.COMPENSATORY_LEAVE ? compensatoryLeaveTime.toNumber() : '',
+      sickDay: data.dayType === DayType.SICK_DAY ? sickDayTime.toNumber() : '',
+      vacation: data.dayType === DayType.VACATION ? vacationTime.toNumber() : '',
       home:
         data.workFromHome && data.workFromHome.greaterThan(0) ? data.workFromHome.toNumber() : '',
-      workTime:
-        data.dayWorked.toNumber() +
-        compensatoryLeaveInterruptions
-          .reduce(
-            (acc, interruption) => acc.plus(interruption?.time ?? new Decimal(0)),
-            new Decimal(0),
-          )
-          .toNumber(),
+      workTime: data.dayWorked.plus(compensatoryLeaveTime).plus(sickDayTime).toNumber(),
       signature: '',
     });
     row.height = 10; //* (data.interruptions?.length ?? 1);
@@ -236,7 +249,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       cell.font = { size: 10 };
       cell.alignment = { horizontal: 'center' };
       borderCell(cell);
-      if (title === 'Víkend' || [8, 12].includes(colNumber)) {
+      if (title === 'Víkend' || [8, 13].includes(colNumber)) {
         fillCell(cell, GREEN_COLOR);
       }
     });
@@ -255,8 +268,9 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     { formula: `SUM(H8:H${sheet.rowCount})` },
     { formula: `SUM(I8:I${sheet.rowCount})` },
     { formula: `SUM(J8:J${sheet.rowCount})` },
+    { formula: `SUM(K8:K${sheet.rowCount})` },
     '',
-    { formula: `SUM(L8:L${sheet.rowCount})` },
+    { formula: `SUM(M8:M${sheet.rowCount})` },
     '',
   ]);
   row.eachCell((cell) => {
@@ -274,6 +288,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   const [doctorsLeaveFamily] = calcDoctorsLeaveFamily(monthData, config);
   const [sickLeave] = calcSickLeave(monthData, config);
   const [sickLeaveFamily] = calcSickLeaveFamily(monthData, config);
+  const [sickDay] = calcSickDay(monthData, config);
   row = sheet.addRow([
     '',
     '',
@@ -284,6 +299,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     '',
     '',
     'Rekapitulácia',
+    null,
     null,
     null,
     'dni',
@@ -297,7 +313,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       fillCell(cell, GRAY_COLOR);
     }
   });
-  sheet.mergeCells(`I${sheet.rowCount}:K${sheet.rowCount}`);
+  sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
   row = sheet.addRow([
     'Schválil:......................................',
     null,
@@ -310,8 +326,9 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'odpracované/čistý čas',
     null,
     null,
-    { formula: `M${sheet.rowCount + 1}/H2` },
-    { formula: `L${sheet.rowCount - 2}` },
+    null,
+    { formula: `N${sheet.rowCount + 1}/H2` },
+    { formula: `M${sheet.rowCount - 2}-J${sheet.rowCount - 2}` },
   ]);
   row.eachCell((cell, collNumber) => {
     cell.font = { size: 10 };
@@ -320,7 +337,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       borderCell(cell);
     }
   });
-  sheet.mergeCells(`I${sheet.rowCount}:K${sheet.rowCount}`);
+  sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
   row = sheet.addRow([
     '',
     '',
@@ -333,7 +350,8 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'nadčasy',
     null,
     null,
-    { formula: `M${sheet.rowCount + 1}/H2` },
+    null,
+    { formula: `N${sheet.rowCount + 1}/H2` },
     { formula: `H${sheet.rowCount - 3}` },
   ]);
   row.eachCell((cell, collNumber) => {
@@ -343,7 +361,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       borderCell(cell);
     }
   });
-  sheet.mergeCells(`I${sheet.rowCount}:K${sheet.rowCount}`);
+  sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
   row = sheet.addRow([
     'Kontroloval:............................',
     null,
@@ -356,8 +374,9 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'dovolenka',
     null,
     null,
-    { formula: `M${sheet.rowCount + 1}/H2` },
-    { formula: `J${sheet.rowCount - 4}` },
+    null,
+    { formula: `N${sheet.rowCount + 1}/H2` },
+    { formula: `K${sheet.rowCount - 4}` },
   ]);
   row.eachCell((cell, collNumber) => {
     cell.font = { size: 10 };
@@ -366,7 +385,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       borderCell(cell);
     }
   });
-  sheet.mergeCells(`I${sheet.rowCount}:K${sheet.rowCount}`);
+  sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
   row = sheet.addRow([
     '',
     '',
@@ -379,7 +398,8 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'PN, OČR',
     null,
     null,
-    { formula: `M${sheet.rowCount + 1}/H2` },
+    null,
+    { formula: `N${sheet.rowCount + 1}/H2` },
     sickLeave.plus(sickLeaveFamily).toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
@@ -389,7 +409,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       borderCell(cell);
     }
   });
-  sheet.mergeCells(`I${sheet.rowCount}:K${sheet.rowCount}`);
+  sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
   row = sheet.addRow([
     '',
     '',
@@ -402,7 +422,8 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'SČR na O ("péčko")',
     null,
     null,
-    { formula: `M${sheet.rowCount + 1}/H2` },
+    null,
+    { formula: `N${sheet.rowCount + 1}/H2` },
     doctorsLeaveFamily.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
@@ -412,7 +433,31 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       borderCell(cell);
     }
   });
-  sheet.mergeCells(`I${sheet.rowCount}:K${sheet.rowCount}`);
+  sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
+  row = sheet.addRow([
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    'prekážka v práci (prac. voľno)',
+    null,
+    null,
+    null,
+    { formula: `N${sheet.rowCount + 1}/H2` },
+    sickDay.toNumber(),
+  ]);
+  row.eachCell((cell, collNumber) => {
+    cell.font = { size: 10 };
+    cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
+    if (collNumber > 8) {
+      borderCell(cell);
+    }
+  });
+  sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
   row = sheet.addRow([
     '',
     '',
@@ -425,7 +470,8 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'lekárske ošetrenie ("péčko")',
     null,
     null,
-    { formula: `M${sheet.rowCount + 1}/H2` },
+    null,
+    { formula: `N${sheet.rowCount + 1}/H2` },
     doctorsLeave.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
@@ -438,8 +484,8 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       borderCell(cell);
     }
   });
-  sheet.mergeCells(`I${sheet.rowCount}:K${sheet.rowCount}`);
-  row = sheet.addRow(['', null, null, null, null, null, null, null, null, null, null, null]);
+  sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
+  row = sheet.addRow(['', null, null, null, null, null, null, null, null, null, null, null, null]);
   row.eachCell((cell) => {
     cell.font = { size: 10 };
   });
@@ -456,14 +502,15 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    { formula: `SUM(M${sheet.rowCount - 6}:M${sheet.rowCount - 1})` },
+    null,
+    { formula: `SUM(N${sheet.rowCount - 6}:N${sheet.rowCount - 1})` },
   ]);
   row.eachCell((cell) => {
     cell.font = { size: 10, bold: true };
     borderCell(cell);
     fillCell(cell, GRAY_COLOR);
   });
-  sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`); // spolu
+  sheet.mergeCells(`I${sheet.rowCount}:M${sheet.rowCount}`); // spolu
 
   workbook.xlsx.writeBuffer().then((buffer) => {
     const blob = new Blob([buffer], {

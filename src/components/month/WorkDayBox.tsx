@@ -14,7 +14,7 @@ import WorkDayDrawerContent from './WorkDayDrawerContent';
 
 const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProps) => {
   const config = useContext(ConfigContext);
-  const { startTime, lunch = false, dayWorked, vacation, compensatoryLeave } = workDay;
+  const { startTime, lunch = false, dayWorked, vacation, compensatoryLeave, workFromHome } = workDay;
   const isWeekEnd = isWeekend(startTime);
   const title = getTitle(workDay);
   const hasDisturb = hasDisturbance(workDay);
@@ -53,6 +53,11 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
                 Doprovod: {numberToTimeStr(doctorsLeaveFamilyTime)}h
               </span>
             )}
+            {workFromHome.greaterThan(0) && (
+            <span className='text-s font-semibold'>
+              Doma: {numberToTimeStr(workFromHome)}h
+            </span>
+          )}
           </div>
         )}
         {lunch && <Soup />}

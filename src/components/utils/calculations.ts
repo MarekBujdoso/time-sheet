@@ -17,9 +17,8 @@ export const calculateLunch = (workedHours: Decimal) => {
   return workedHours.greaterThan(LUNCH_THRESHOLD) ? new Decimal(0.5) : new Decimal(0);
 };
 
-export const calculateCustomDay = (workDay: WorkDay, config?: ConfigContextType) => {
+export const calculateCustomDay = (workDay: WorkDay) => {
   // const { startTime, endTime } = workDay;
-  console.log(workDay, config);
   // const currentDay = new Date(startTime);
   // const { interruptionHours } = updateTimes(
   //   interruptions,
@@ -41,7 +40,7 @@ export const calculateWorked = (workDay: WorkDay, config: ConfigContextType) => 
   // TODO: NV is not calculated correctly, maybe it is calculated twice... change it to day and interruption type
   const { startTime: workDayStartTime, dayType } = workDay;
   if (dayType === DayType.CUSTOM_DAY) {
-    return calculateCustomDay(workDay, config);
+    return calculateCustomDay(workDay);
   }
   const currentDay = new Date(workDayStartTime);
   const { lunch, startTime, endTime, workedHours } = updateTimes(workDay, currentDay, config);
@@ -203,11 +202,10 @@ export const updateTimes = (
 // TODO: Add JSDoc comments for all exported functions
 export const recalculateWorkDay = (workDay: WorkDay, config: ConfigContextType) => {
   const currentDay = new Date(workDay.startTime);
-  console.log(workDay)
   if (workDay.dayType === DayType.CUSTOM_DAY) {
     return {
       ...workDay,
-      ...calculateCustomDay(workDay, config),
+      ...calculateCustomDay(workDay),
     };
   }
   const {

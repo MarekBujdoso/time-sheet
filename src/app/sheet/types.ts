@@ -20,8 +20,12 @@ export interface WorkDay {
     year: number, // Rok
     startTime: Date, // Začiatok
     endTime: Date, // Koniec
+    noWorkTime: boolean, // Bez práce
     lunch: boolean, // Obed
     workFromHome: Decimal, // Praca doma
+    vacation: Decimal, // Dovolenka
+    compensatoryLeave: Decimal, // Náhradné voľno
+    sickDay?: Decimal, // Pracovné voľno
     dayType: DayType,
     dayWorked: Decimal, // Odpracovane za den
     interruptions: InterruptionTimeProps[], // Prerusenia
@@ -31,8 +35,8 @@ export interface WorkDay {
 export enum InterruptionWithTimeType {
     DOCTORS_LEAVE = 'doctorsLeave',
     DOCTORS_LEAVE_FAMILY = 'doctorsLeaveFamily',
-    VACATION = 'vacation',
-    COMPENSATORY_LEAVE = 'compensatoryLeave',
+    // VACATION = 'vacation',
+    // COMPENSATORY_LEAVE = 'compensatoryLeave',
     SICK_LEAVE = 'sickLeave',
     SICK_LEAVE_FAMILY = 'sickLeaveFamily',
     SICK_DAY = 'sickDay',

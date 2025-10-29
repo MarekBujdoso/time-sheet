@@ -10,14 +10,10 @@ export const isFullDay = (hours: Decimal | undefined, workTime: Decimal): boolea
 export const getTitle = (workDay: WorkDay): string => {
   const {
     startTime,
-    // endTime,
-    // lunch = false,
     dayType,
     dayWorked,
-    // workFromHome = new Decimal(0),
-    // interruptions = []
   } = workDay;
-  const isWeekEnd = isWeekend(startTime);
+  const isWeekEnd = isWeekend(startTime); 
   const isWorkingDay =
     !isWeekEnd &&
     dayType !== DayType.COMPENSATORY_LEAVE &&
@@ -37,10 +33,10 @@ export const getTitle = (workDay: WorkDay): string => {
   if (dayType === DayType.SICK_LEAVE_FAMILY) return DAY_TYPES_KEYS.sickLeaveFamily;
   if (dayType === DayType.VACATION) return DAY_TYPES_KEYS.vacation;
   if (dayType === DayType.HOLIDAY) return DAY_TYPES_KEYS.holiday;
-  if (dayType === DayType.CUSTOM_DAY) return DAY_TYPES_KEYS.customDay;
   if (dayType === DayType.SICK_DAY) return DAY_TYPES_KEYS.sickDay;
   if (isWeekEnd) return DAY_TYPES_KEYS.weekend;
   if (isWorkingDay) return DAY_TYPES_KEYS.workDay;
+  if (dayType === DayType.CUSTOM_DAY) return DAY_TYPES_KEYS.customDay;
   return '';
 };
 

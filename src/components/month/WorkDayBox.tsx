@@ -1,35 +1,25 @@
 import { format } from 'date-fns';
+import { isWeekend } from 'date-fns/fp/isWeekend';
 import { Soup } from 'lucide-react';
 import { useContext } from 'react';
 import ConfigContext from '../../app/sheet/ConfigContext';
+import { hasDisturbance } from '../../app/sheet/dayTypes';
 import { getDayNameFromDate } from '../../utils/skUtils';
 import { Button } from '../ui/button';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '../ui/drawer';
-import useWorkDayBox from './useWorkDayBox';
-import WorkDayForm from './WorkDayForm';
+import { Drawer, DrawerTrigger } from '../ui/drawer';
+import { calcDoctorsLeave, calcDoctorsLeaveFamily } from '../utils/calculations';
+import { getTitle } from '../utils/workDay';
 import { getBaseColor, numberToTimeStr, WorkDayBoxProps } from './workDayUtils';
+import WorkDayDrawerContent from './WorkDayDrawerContent';
 
 const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProps) => {
   const config = useContext(ConfigContext);
-  const {
-    startTime,
-    lunch = false,
-    dayWorked,
-    isWeekEnd,
-    title,
-    hasDisturbance,
-    doctorsLeaveTime,
-    doctorsLeaveFamilyTime,
-    vacationTime,
-    compensatoryLeaveTime,
-  } = useWorkDayBox(workDay);
+  const { startTime, lunch = false, dayWorked, vacation, compensatoryLeave } = workDay;
+  const isWeekEnd = isWeekend(startTime);
+  const title = getTitle(workDay);
+  const hasDisturb = hasDisturbance(workDay);
+  const doctorsLeaveTime = calcDoctorsLeave([workDay], config)[0];
+  const doctorsLeaveFamilyTime = calcDoctorsLeaveFamily([workDay], config)[0];
 
   return (
     <>
@@ -43,16 +33,20 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
         <div className='flex flex-col grow'>
           <span className='text-lg font-semibold self-start'>{title}</span>
         </div>
-        {hasDisturbance && (
+        {hasDisturb && (
           <div className='grid gap-1'>
-            {compensatoryLeaveTime.greaterThan(0) && (
-              <span className='text-s font-semibold'>NV: {numberToTimeStr(compensatoryLeaveTime)}h</span>
+            {compensatoryLeave.greaterThan(0) && (
+              <span className='text-s font-semibold'>
+                NV: {numberToTimeStr(compensatoryLeave)}h
+              </span>
             )}
-            {vacationTime.greaterThan(0) && (
-              <span className='text-s font-semibold'>Dovolenka: {numberToTimeStr(vacationTime)}h</span>
+            {vacation.greaterThan(0) && (
+              <span className='text-s font-semibold'>Dovolenka: {numberToTimeStr(vacation)}h</span>
             )}
             {doctorsLeaveTime.greaterThan(0) && (
-              <span className='text-s font-semibold'>P-čko: {numberToTimeStr(doctorsLeaveTime)}h</span>
+              <span className='text-s font-semibold'>
+                P-čko: {numberToTimeStr(doctorsLeaveTime)}h
+              </span>
             )}
             {doctorsLeaveFamilyTime.greaterThan(0) && (
               <span className='text-s font-semibold'>
@@ -64,7 +58,9 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
         {lunch && <Soup />}
         {dayWorked.greaterThan(0) && (
           <div className='flex flex-col w-14'>
-            <span className='text-lg font-semibold'>{numberToTimeStr(dayWorked.toDecimalPlaces(3))}</span>
+            <span className='text-lg font-semibold'>
+              {numberToTimeStr(dayWorked.toDecimalPlaces(3))}
+            </span>
           </div>
         )}
         {!isWeekEnd && (
@@ -72,19 +68,11 @@ const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProp
             <DrawerTrigger asChild>
               <Button variant='outline'>Zmeniť</Button>
             </DrawerTrigger>
-            <DrawerContent>
-              <div className='mx-auto w-full max-w-sm'>
-                <DrawerHeader>
-                  <DrawerTitle>Denný súhrn ({format(startTime, 'dd.MM.')})</DrawerTitle>
-                  <DrawerDescription>Nastav si svoj deň.</DrawerDescription>
-                </DrawerHeader>
-                <WorkDayForm
-                  workDay={workDay}
-                  saveWorkDay={saveWorkDay}
-                  saveTillEndOfMonth={saveTillEndOfMonth}
-                />
-              </div>
-            </DrawerContent>
+            <WorkDayDrawerContent
+              workDay={workDay}
+              saveWorkDay={saveWorkDay}
+              saveTillEndOfMonth={saveTillEndOfMonth}
+            />
           </Drawer>
         )}
       </div>

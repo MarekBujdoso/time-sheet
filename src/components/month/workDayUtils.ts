@@ -3,10 +3,7 @@ import Decimal from 'decimal.js';
 import { DayType, InterruptionWithTimeType, type WorkDay } from '../../app/sheet/types';
 
 export const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
-  const {
-    dayType,
-    dayWorked,
-  } = workDay;
+  const { dayType, dayWorked } = workDay;
   if (dayType === DayType.DOCTORS_LEAVE) return 'bg-rose-200';
   if (dayType === DayType.DOCTORS_LEAVE_FAMILY) return 'bg-rose-200';
   if (dayType === DayType.SICK_LEAVE) return 'bg-rose-200';
@@ -19,12 +16,7 @@ export const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
   if (isWeekend(workDay.startTime)) return 'bg-emerald-100';
   if (dayWorked.greaterThan(0)) {
     // if (compensatoryLeave?.greaterThan(0)) return 'bg-gradient-to-r from-blue-200 to-rose-200';
-    if (
-      workDay.interruptions?.some(
-        (interruption) => interruption.type === InterruptionWithTimeType.VACATION,
-      )
-    )
-      return `bg-gradient-to-r from-blue-200 to-emerald-100`;
+    if (workDay.vacation.greaterThan(0)) return `bg-gradient-to-r from-blue-200 to-emerald-100`;
     if (
       workDay.interruptions?.some(
         (interruption) =>
@@ -48,9 +40,15 @@ export const numberToTime = (hours: number) => {
   const hoursInt = Math.floor(hours);
   const minutes = Math.round((hours - hoursInt) * 60);
   return { hours: hoursInt, minutes };
-}
+};
 
 export const numberToTimeStr = (hours: Decimal) => {
   const { hours: hoursInt, minutes } = numberToTime(hours.toNumber());
   return `${hoursInt}:${minutes < 10 ? '0' : ''}${minutes}`;
-}
+};
+
+export const decimalToTimeStr = (time: Decimal) => {
+  const hours = Math.floor(time.toNumber());
+  const minutes = Math.round((time.toNumber() - hours) * 60);
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};

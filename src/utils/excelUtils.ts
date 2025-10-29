@@ -190,23 +190,14 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   sheet.mergeCells('N5:N7'); //podpis zamestnanca
 
   monthData.forEach((data) => {
+    console.log(data);
     const title = getTitle(data);
-    const isWorkingDay = title === 'Práca';
+    const isWorkingDay = data.dayType === DayType.WORK_DAY;
+    const isCustomDay = data.dayType === DayType.CUSTOM_DAY;
     const negativeInterruptions =
-      data.interruptions?.filter(
-        (interruption) =>
-          interruption.type !== 'compensatoryLeave' && interruption.type !== 'sickDay' && interruption.type !== 'vacation',
-      ) ?? [];
-    const compensatoryLeaveTime =
-      data.interruptions
-        ?.filter((interruption) => interruption.type === 'compensatoryLeave')
-        ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0)) ??
-      new Decimal(0);
-    const vacationTime =
-      data.interruptions
-        ?.filter((interruption) => interruption.type === 'vacation')
-        ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0)) ??
-      new Decimal(0);
+      data.interruptions?.filter((interruption) => interruption.type !== 'sickDay') ?? [];
+    const compensatoryLeaveTime = data.compensatoryLeave;
+    const vacationTime = data.vacation;
     const sickDayTime =
       data.interruptions
         ?.filter((interruption) => interruption.type === 'sickDay')
@@ -215,8 +206,12 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
 
     const row = sheet.addRow({
       day: data.startTime.getDate(),
-      startTime: isWorkingDay ? format(data.startTime, 'HH: mm') : title,
-      endTime: isWorkingDay ? format(data.endTime, 'HH:mm') : '',
+      startTime:
+        isWorkingDay || (isCustomDay && !data.noWorkTime)
+          ? format(data.startTime, 'HH: mm')
+          : title,
+      endTime:
+        isWorkingDay || (isCustomDay && !data.noWorkTime) ? format(data.endTime, 'HH:mm') : '',
       lunch: data.lunch ? 0.5 : '',
       intFrom:
         negativeInterruptions
@@ -231,15 +226,21 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
           ? (negativeInterruptions
               ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
               .toNumber() ?? '')
-            : '',
+          : '',
       overtime: '',
       compensatory:
-        data.dayType === DayType.COMPENSATORY_LEAVE ? compensatoryLeaveTime.toNumber() : '',
+        data.compensatoryLeave && data.compensatoryLeave.greaterThan(0)
+          ? data.compensatoryLeave.toNumber()
+          : '',
       sickDay: data.dayType === DayType.SICK_DAY ? sickDayTime.toNumber() : '',
-      vacation: data.dayType === DayType.VACATION ? vacationTime.toNumber() : '',
+      vacation: data.vacation && vacationTime.greaterThan(0) ? vacationTime.toNumber() : '',
       home:
         data.workFromHome && data.workFromHome.greaterThan(0) ? data.workFromHome.toNumber() : '',
-      workTime: data.dayWorked.plus(compensatoryLeaveTime).plus(sickDayTime).toNumber(),
+      workTime: data.dayWorked
+        .plus(compensatoryLeaveTime)
+        .plus(sickDayTime)
+        .plus(data.workFromHome)
+        .toNumber(),
       signature: '',
     });
     row.height = 10; //* (data.interruptions?.length ?? 1);
@@ -253,7 +254,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
         fillCell(cell, GREEN_COLOR);
       }
     });
-    if (!isWorkingDay) {
+    if (!isWorkingDay && !isCustomDay) {
       sheet.mergeCells(`B${sheet.rowCount}:C${sheet.rowCount}`); //Základný pracovný čas
     }
   });
@@ -503,7 +504,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    { formula: `SUM(N${sheet.rowCount - 6}:N${sheet.rowCount - 1})` },
+    { formula: `SUM(N${sheet.rowCount - 7}:N${sheet.rowCount - 1})` },
   ]);
   row.eachCell((cell) => {
     cell.font = { size: 10, bold: true };

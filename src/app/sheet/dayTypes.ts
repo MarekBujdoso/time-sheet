@@ -9,8 +9,11 @@ export const workDay = (startTime: Date, endTime: Date, workTime: Decimal): Work
   year: 0,
   startTime,
   endTime: set(endTime, { minutes: 30 }),
+  noWorkTime: false,
   lunch: true,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.WORK_DAY,
   dayWorked: workTime,
   interruptions: [],
@@ -22,8 +25,11 @@ export const holiday = (startTime: Date, endTime: Date, workTime: Decimal): Work
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.HOLIDAY,
   dayWorked: workTime,
   interruptions: [],
@@ -35,17 +41,14 @@ export const vacation = (startTime: Date, endTime: Date, workTime: Decimal): Wor
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: workTime,
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.VACATION,
   dayWorked: new Decimal(0),
-  interruptions: [{
-    id: uuidv4(),
-    type: InterruptionWithTimeType.VACATION,
-    startTime,
-    endTime,
-    time: workTime,
-  }],
+  interruptions: [],
   typeIcon: TreePalm,
 });
 
@@ -54,8 +57,11 @@ export const sickLeave = (startTime: Date, endTime: Date, workTime: Decimal): Wo
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.SICK_LEAVE,
   dayWorked: new Decimal(0),
   interruptions: [{
@@ -73,8 +79,11 @@ export const sickLeaveFamily = (startTime: Date, endTime: Date, workTime: Decima
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.SICK_LEAVE_FAMILY,
   dayWorked: new Decimal(0),
   interruptions: [{
@@ -92,8 +101,11 @@ export const doctorsLeave = (startTime: Date, endTime: Date, workTime: Decimal):
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.DOCTORS_LEAVE,
   dayWorked: new Decimal(0),
   interruptions: [{
@@ -111,8 +123,11 @@ export const doctorsLeaveFamily = (startTime: Date, endTime: Date, workTime: Dec
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.DOCTORS_LEAVE_FAMILY,
   dayWorked: new Decimal(0),
   interruptions: [{
@@ -130,17 +145,14 @@ export const compensatoryLeave = (startTime: Date, endTime: Date, workTime: Deci
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: workTime,
   dayType: DayType.COMPENSATORY_LEAVE,
   dayWorked: new Decimal(0),
-  interruptions: [{
-    id: uuidv4(),
-    type: InterruptionWithTimeType.COMPENSATORY_LEAVE,
-    startTime,
-    endTime,
-    time: workTime,
-  }],
+  interruptions: [],
   typeIcon: Pickaxe,
 });
 
@@ -149,8 +161,11 @@ export const weekend = (startTime: Date, endTime: Date): WorkDay => ({
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.WEEKEND,
   dayWorked: new Decimal(0),
   interruptions: [],
@@ -162,22 +177,28 @@ export const emptyDay = (startTime: Date, endTime: Date): WorkDay => ({
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.EMPTY_DAY,
   dayWorked: new Decimal(0),
   interruptions: [],
 });
 
-export const customDay = (startTime: Date, endTime: Date): WorkDay => ({
+export const customDay = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
   endTime,
-  lunch: false,
+  noWorkTime: false,
+  lunch: workTime.greaterThan(new Decimal(6)),
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.CUSTOM_DAY,
-  dayWorked: new Decimal(0),
+  dayWorked: workTime,
   interruptions: [],
   typeIcon: TriangleAlert
 });
@@ -187,8 +208,11 @@ export const sickDay = (startTime: Date, endTime: Date, workTime: Decimal): Work
   year: 0,
   startTime,
   endTime,
+  noWorkTime: false,
   lunch: false,
   workFromHome: new Decimal(0),
+  vacation: new Decimal(0),
+  compensatoryLeave: new Decimal(0),
   dayType: DayType.SICK_DAY,
   dayWorked: new Decimal(0),
   interruptions: [{
@@ -220,22 +244,22 @@ export enum DAY_TYPES_KEYS {
   workDay = 'Práca',
   vacation = 'Dovolenka',
   doctorsLeave = 'P-čko celý deň',
-  holiday = 'Štátny sviatok',
+  doctorsLeaveFamily = 'Doprovod celý deň',
   sickLeave = 'PN',
   sickLeaveFamily = 'OČR',
-  doctorsLeaveFamily = 'Doprovod celý deň',
   compensatoryLeave = 'Náhradné voľno',
-  weekend = 'Víkend',
-  customDay = 'Iný deň',
-  emptyDay = 'Prázdny deň',
   sickDay = 'Pracovné voľno',
+  weekend = 'Víkend',
+  holiday = 'Štátny sviatok',
+  emptyDay = 'Prázdny deň',
+  customDay = 'Iný deň',
 };
 
 export enum DAY_INTERRUPTIONS_KEYS {
   doctorsLeave = 'P-čko',
   doctorsLeaveFamily = 'Doprovod',
-  compensatoryLeave = 'NV',
-  vacation = 'Dovolenka',
+  // compensatoryLeave = 'NV',
+  // vacation = 'Dovolenka',
   sickLeave = 'PN',
   sickLeaveFamily = 'OČR',
   sickDay = 'PV',
@@ -267,3 +291,11 @@ export enum DAY_INTERRUPTIONS_KEYS {
 //       return undefined;
 //   }
 // }
+
+export const hasDisturbance = (workDay: WorkDay): boolean => {
+  return (workDay.dayType === DayType.WORK_DAY ||
+    workDay.dayType === DayType.CUSTOM_DAY) &&
+    (workDay.vacation.greaterThan(0) ||
+    workDay.compensatoryLeave.greaterThan(0) ||
+    workDay.interruptions.length > 0);
+}

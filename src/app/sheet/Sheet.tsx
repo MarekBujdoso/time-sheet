@@ -119,8 +119,10 @@ const Sheet = () => {
 
   return (
     <div className='flex flex-col min-w-[320px] w-[98vw] min-h-svh justify-top p-2 rounded-lg'>
-      <MonthPager update={updateMonthData} />
-      <SummaryBoard monthData={monthData} setUserName={setUserName} userName={userName} />
+      <div className='sticky top-0 mt-2 z-10 bg-gray-100'>
+        <MonthPager update={updateMonthData} />
+        <SummaryBoard monthData={monthData} setUserName={setUserName} userName={userName} />
+      </div>
       <div>
         <div className='grid auto-rows-min gap-1 md:grid-cols-[repeat(auto-fit,_minmax(260px,_1fr))] md:gap-y-11 md:my-[30px] md:justify-items-center'>
           {monthData.map((data) => {

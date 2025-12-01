@@ -23,7 +23,7 @@ export const getTitle = (workDay: WorkDay): string => {
     dayType !== DayType.SICK_LEAVE_FAMILY &&
     dayType !== DayType.VACATION &&
     dayType !== DayType.HOLIDAY &&
-    dayType !== DayType.SICK_DAY &&
+    dayType !== DayType.WORK_FREE_DAY &&
     dayWorked.greaterThan(0);
 
   if (dayType === DayType.COMPENSATORY_LEAVE) return DAY_TYPES_KEYS.compensatoryLeave;
@@ -33,7 +33,7 @@ export const getTitle = (workDay: WorkDay): string => {
   if (dayType === DayType.SICK_LEAVE_FAMILY) return DAY_TYPES_KEYS.sickLeaveFamily;
   if (dayType === DayType.VACATION) return DAY_TYPES_KEYS.vacation;
   if (dayType === DayType.HOLIDAY) return DAY_TYPES_KEYS.holiday;
-  if (dayType === DayType.SICK_DAY) return DAY_TYPES_KEYS.sickDay;
+  if (dayType === DayType.WORK_FREE_DAY) return DAY_TYPES_KEYS.workFreeDay;
   if (isWeekEnd) return DAY_TYPES_KEYS.weekend;
   if (isWorkingDay) return DAY_TYPES_KEYS.workDay;
   if (dayType === DayType.CUSTOM_DAY) return DAY_TYPES_KEYS.customDay;

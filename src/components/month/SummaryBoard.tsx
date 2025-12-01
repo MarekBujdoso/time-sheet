@@ -6,7 +6,8 @@ import {
   calcWorked,
   calcVacation,
   calcCompensatoryLeave,
-  calcSickDay,
+  calcWorkFreeDay,
+  calcWorkFromHome,
 } from '../../components/utils/calculations';
 import React, { useContext } from 'react';
 import { WorkDay } from '../../app/sheet/types';
@@ -16,6 +17,8 @@ import { useMediaQuery } from 'react-responsive';
 import { numberToTimeStr } from './workDayUtils';
 import Decimal from 'decimal.js';
 import { CalendarDays, Timer } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
 const Hours = ({
   hours,
@@ -27,7 +30,9 @@ const Hours = ({
   textColor: string;
 }) => {
   return color ? (
-    <div className={`flex items-center align-center px-[5px] py-1.5 ${color} rounded-full shadow-sm`}>
+    <div
+      className={`flex items-center align-center px-[5px] py-1.5 ${color} rounded-full shadow-sm`}
+    >
       <Timer size={16} color='gray' />{' '}
       <span className={`font-semibold ${textColor}`}>{numberToTimeStr(hours)}h</span>
     </div>
@@ -42,28 +47,55 @@ const Hours = ({
 const Days = ({ days, color, textColor }: { days: Decimal; color?: string; textColor: string }) => {
   return color ? (
     <div className={`flex items-center px-[5px] py-1.5 ${color} rounded-full shadow-sm`}>
-      <CalendarDays size={16} color='gray'/>{' '}
+      <CalendarDays size={16} color='gray' />{' '}
       <span className={`font-semibold ${textColor}`}>{days.toFixed(1)}d</span>
     </div>
   ) : (
     <>
-      &nbsp;<CalendarDays size={16} color='gray'/>
+      &nbsp;
+      <CalendarDays size={16} color='gray' />
       <span className={`font-semibold ${textColor}`}>{days.toFixed(1)}d</span>
     </>
   );
 };
 
-const SummaryItem = ({title,  textColor, backgroundColor, hours, days, noBackground}: {title: string, hours: Decimal, days?: Decimal, textColor: string, backgroundColor?: string, noBackground?: boolean}) => {
+const SummaryItem = ({
+  title,
+  textColor,
+  backgroundColor,
+  hours,
+  days,
+  noBackground,
+  className,
+}: {
+  title?: string;
+  hours: Decimal;
+  days?: Decimal;
+  textColor: string;
+  backgroundColor?: string;
+  noBackground?: boolean;
+  className?: string;
+}) => {
   return (
     <>
-      <span className='justify-self-end font-semibold md:py-[6px]'>{title}</span>
-      <div className='flex items-center'>
-        <Hours hours={hours} color={noBackground ? undefined : backgroundColor} textColor={textColor} />
-        {days && <Days days={days} color={noBackground ? undefined : backgroundColor} textColor={textColor} />}
+      {title && <span className='justify-self-end font-semibold md:py-[6px]'>{title}</span>}
+      <div className={`flex gap-1 items-center ${className}`}>
+        <Hours
+          hours={hours}
+          color={noBackground ? undefined : backgroundColor}
+          textColor={textColor}
+        />
+        {days && (
+          <Days
+            days={days}
+            color={noBackground ? undefined : backgroundColor}
+            textColor={textColor}
+          />
+        )}
       </div>
     </>
-  )
-}
+  );
+};
 
 const SummaryBoard = ({
   monthData,
@@ -76,6 +108,7 @@ const SummaryBoard = ({
 }) => {
   const config = useContext(ConfigContext);
   const isDesktop = useMediaQuery({ minWidth: 767 });
+  const [isOpen, setIsOpen] = React.useState(false);
   const [vacation, vacationDays] = React.useMemo(
     () => calcVacation(monthData, config),
     [monthData, config],
@@ -100,43 +133,124 @@ const SummaryBoard = ({
     () => calcCompensatoryLeave(monthData, config),
     [monthData, config],
   );
-  const [sickDay, sickDayDays] = React.useMemo(
-    () => calcSickDay(monthData, config),
+  const [workFreeDay, workFreeDayDays] = React.useMemo(
+    () => calcWorkFreeDay(monthData, config),
     [monthData, config],
   );
-  const [worked, workedDays] = React.useMemo(
-    () => {
-      const [wrk, wrkDays] = calcWorked(monthData, config)
-      return [wrk.plus(compensatoryLeave), wrkDays.plus(compensatoryLeaveDays)]
-    },
-    [monthData, config, compensatoryLeave, compensatoryLeaveDays],
+  const [workFromHome, workFromHomeDays] = React.useMemo(
+    () => calcWorkFromHome(monthData, config),
+    [monthData, config],
   );
+  const [worked, workedDays] = React.useMemo(() => {
+    const [wrk, wrkDays] = calcWorked(monthData, config);
+    return [wrk.plus(compensatoryLeave).plus(workFreeDay).plus(workFromHome), wrkDays.plus(compensatoryLeaveDays).plus(workFreeDayDays).plus(workFromHomeDays)];
+  }, [monthData, config, compensatoryLeave, compensatoryLeaveDays, workFreeDay, workFreeDayDays, workFromHome, workFromHomeDays]);
+
+  const totalHours = worked.plus(doctorsLeave).plus(doctorsLeaveFamily).plus(sickLeave).plus(sickLeaveFamily).plus(vacation);
+  const totalDays = workedDays.plus(doctorsLeaveDays).plus(doctorsLeaveFamilyDays).plus(sickLeaveDays).plus(sickLeaveFamilyDays).plus(vacationDays);
 
   return (
-    <div className='border bg-white rounded-2xl shadow-md my-[5px] text-sm md:text-base py-[15px]'>
+    <div className='border bg-white rounded-2xl shadow-md mt-[5px] text-sm md:text-base py-[15px]'>
       {isDesktop ? (
-        <div className='grid auto-rows-min gap-[4px] md:grid-cols-[3fr_2fr_3fr_2fr_3fr_3fr] my-[4px] justify-items-start items-center'>
-          <span className='justify-self-end font-semibold md:py-[6px] self-center'>Meno:</span>
-          <Input
-            className='w-[98%]'
-            id='user-name'
-            name='userName'
-            value={userName}
-            autoComplete='off'
-            onChange={(e) => setUserName(e.target.value)}
-          />
-          <SummaryItem title='Časový fond:' hours={config.officialWorkTime} textColor='text-stone-700' backgroundColor='bg-stone-50' />
-          <SummaryItem title='Prac. volno:' hours={sickDay} days={sickDayDays} textColor='text-blue-700' backgroundColor='bg-blue-50' />
-          <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} textColor='text-green-700' backgroundColor='bg-green-50' />
-          <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} textColor='text-red-700' backgroundColor='bg-red-50' />
-          <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} textColor='text-blue-700' backgroundColor='bg-blue-50' />
-          <SummaryItem title='P-čko:' hours={doctorsLeave} days={doctorsLeaveDays} textColor='text-red-700' backgroundColor='bg-red-50' />
-          <SummaryItem title='PN, OČR:' hours={sickLeaveFamily.plus(sickLeave)} days={sickLeaveFamilyDays.plus(sickLeaveDays)} textColor='text-red-700' backgroundColor='bg-red-50' />
-          <SummaryItem title='Odpracované:' hours={worked} days={workedDays} textColor='text-blue-700' backgroundColor='bg-blue-50' />
-        </div>
+        <Collapsible
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          // className="flex w-[350px] flex-col gap-2"
+        >
+          <div className='grid auto-rows-min gap-[4px] md:grid-cols-[2fr_3fr_3fr_3fr_2fr_3fr] my-[4px] justify-items-start items-center'>
+            <span className='justify-self-end font-semibold md:py-[6px] self-center'>Meno:</span>
+            <Input
+              className='w-[98%]'
+              id='user-name'
+              name='userName'
+              value={userName}
+              autoComplete='off'
+              onChange={(e) => setUserName(e.target.value)}
+            />
+            <SummaryItem
+              title='Spolu:'
+              hours={totalHours}
+              days={totalDays}
+              textColor='text-stone-700'
+              backgroundColor='bg-stone-100'
+            />
+            <div className='flex items-center justify-self-end'>
+              <SummaryItem
+                title='Fond:'
+                className='justify-self-end'
+                hours={config.officialWorkTime}
+                textColor='text-stone-700'
+                backgroundColor='bg-stone-50'
+              />
+              </div>
+            <CollapsibleTrigger asChild className='justify-self-center'>
+              <Button variant='outline' size='sm'>
+                Detaily
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+          <CollapsibleContent className='grid auto-rows-min gap-[4px] md:grid-cols-[2fr_3fr_3fr_3fr_2fr_3fr] my-[4px] justify-items-start items-center'>
+            <SummaryItem
+              title='Práca:'
+              hours={worked}
+              days={workedDays}
+              textColor='text-blue-700'
+              backgroundColor='bg-blue-50'
+            />
+            <SummaryItem
+              title='Nadčasy:'
+              hours={new Decimal(0)}
+              days={new Decimal(0)}
+              textColor='text-blue-700'
+              backgroundColor='bg-blue-50'
+            />
+            <SummaryItem
+              title='Dovolenka:'
+              hours={vacation}
+              days={vacationDays}
+              textColor='text-green-700'
+              backgroundColor='bg-green-50'
+            />
+            <SummaryItem
+              title='P-čko:'
+              hours={doctorsLeave}
+              days={doctorsLeaveDays}
+              textColor='text-red-700'
+              backgroundColor='bg-red-50'
+            />
+            {/* <SummaryItem
+              title='Prac. volno:'
+              hours={workFreeDay}
+              days={workFreeDayDays}
+              textColor='text-blue-700'
+              backgroundColor='bg-blue-50'
+            /> */}
+            <SummaryItem
+              title='Doprovod:'
+              hours={doctorsLeaveFamily}
+              days={doctorsLeaveFamilyDays}
+              textColor='text-red-700'
+              backgroundColor='bg-red-50'
+            />
+            <SummaryItem
+              title='PN, OČR:'
+              hours={sickLeaveFamily.plus(sickLeave)}
+              days={sickLeaveFamilyDays.plus(sickLeaveDays)}
+              textColor='text-red-700'
+              backgroundColor='bg-red-50'
+            />
+            {/* <SummaryItem
+              title='Náhradné voľno:'
+              hours={compensatoryLeave}
+              days={compensatoryLeaveDays}
+              textColor='text-blue-700'
+              backgroundColor='bg-blue-50'
+            /> */}
+          </CollapsibleContent>
+        </Collapsible>
       ) : (
         <>
-          <div className='grid auto-rows-min gap-[4px] grid-cols-[1fr_4fr] my-[4px]'>
+          <div className='grid auto-rows-min gap-[4px] grid-cols-[1fr_5fr_1fr_2fr] my-[4px] items-center'>
             <span className='justify-self-end font-semibold md:py-[6px] self-center'>Meno:</span>
             <Input
               className=' w-[95%] md:w-auto'
@@ -146,16 +260,70 @@ const SummaryBoard = ({
               autoComplete='off'
               onChange={(e) => setUserName(e.target.value)}
             />
+            <SummaryItem
+              title='Fond:'
+              hours={config.officialWorkTime}
+              textColor='text-stone-700'
+              noBackground
+            />
           </div>
           <div className='grid auto-rows-min gap-[4px] md:w-[calc(98vw-16px)] grid-cols-[2fr_3fr_2fr_3fr]'>
-            <SummaryItem title='P-čko:' hours={doctorsLeave} days={doctorsLeaveDays} textColor='text-red-700' noBackground />
-            <SummaryItem title='Fond:' hours={config.officialWorkTime} textColor='text-stone-700' noBackground />
-            <SummaryItem title='Doprovod:' hours={doctorsLeaveFamily} days={doctorsLeaveFamilyDays} textColor='text-red-700' noBackground />
-            <SummaryItem title='Odprac.:' hours={worked} days={workedDays} textColor='text-blue-700' noBackground />
-            <SummaryItem title='PN, OČR:' hours={sickLeaveFamily.plus(sickLeave)} days={sickLeaveFamilyDays.plus(sickLeaveDays)} textColor='text-red-700' noBackground />
-            <SummaryItem title='Nadčasy:' hours={new Decimal(0)} days={new Decimal(0)} textColor='text-blue-700' noBackground />
-            <SummaryItem title='Dovolenka:' hours={vacation} days={vacationDays} textColor='text-green-700' noBackground />
-            <SummaryItem title='Prac. volno:' hours={sickDay} days={sickDayDays} textColor='text-blue-700' noBackground />
+            <SummaryItem
+              title='P-čko:'
+              hours={doctorsLeave}
+              days={doctorsLeaveDays}
+              textColor='text-red-700'
+              noBackground
+            />
+            <SummaryItem
+              title='Spolu:'
+              hours={totalHours}
+              days={totalDays}
+              textColor='text-blue-700'
+              noBackground
+            />
+            <SummaryItem
+              title='Doprovod:'
+              hours={doctorsLeaveFamily}
+              days={doctorsLeaveFamilyDays}
+              textColor='text-red-700'
+              noBackground
+            />
+            <SummaryItem
+              title='Odprac.:'
+              hours={worked}
+              days={workedDays}
+              textColor='text-blue-700'
+              noBackground
+            />
+            <SummaryItem
+              title='PN, OČR:'
+              hours={sickLeaveFamily.plus(sickLeave)}
+              days={sickLeaveFamilyDays.plus(sickLeaveDays)}
+              textColor='text-red-700'
+              noBackground
+            />
+            <SummaryItem
+              title='Nadčasy:'
+              hours={new Decimal(0)}
+              days={new Decimal(0)}
+              textColor='text-blue-700'
+              noBackground
+            />
+            <SummaryItem
+              title='Dovolenka:'
+              hours={vacation}
+              days={vacationDays}
+              textColor='text-green-700'
+              noBackground
+            />
+            {/* <SummaryItem
+              title='Prac. volno:'
+              hours={workFreeDay}
+              days={workFreeDayDays}
+              textColor='text-blue-700'
+              noBackground
+            /> */}
           </div>
         </>
       )}

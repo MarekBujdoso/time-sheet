@@ -369,24 +369,24 @@ export const calcSickLeaveFamily = (monthData: WorkDay[], config: ConfigContextT
   return [sickLeaveFamily, sickLeaveFamilyDays];
 };
 
-export const calcSickDay = (monthData: WorkDay[], config: ConfigContextType) => {
-  const sickDay = monthData
+export const calcWorkFreeDay = (monthData: WorkDay[], config: ConfigContextType) => {
+  const workFreeDay = monthData
     .filter(
       (data) =>
-        data.dayType === DayType.SICK_DAY ||
-        data.interruptions?.some((i) => i.type === InterruptionWithTimeType.SICK_DAY),
+        data.dayType === DayType.WORK_FREE_DAY ||
+        data.interruptions?.some((i) => i.type === InterruptionWithTimeType.WORK_FREE_DAY),
     )
     .reduce(
       (acc, data) =>
         acc.plus(
           data.interruptions
-            ?.filter((i) => i.type === InterruptionWithTimeType.SICK_DAY)
+            ?.filter((i) => i.type === InterruptionWithTimeType.WORK_FREE_DAY)
             .reduce((acc, i) => acc.plus(i.time), new Decimal(0)) ?? new Decimal(0),
         ),
       new Decimal(0),
     );
-  const sickDayDays = sickDay.dividedBy(config.officialWorkTime);
-  return [sickDay, sickDayDays];
+  const workFreeDayDays = workFreeDay.dividedBy(config.officialWorkTime);
+  return [workFreeDay, workFreeDayDays];
 };
 
 export const calcVacation = (monthData: WorkDay[], config: ConfigContextType) => {
@@ -404,4 +404,12 @@ export const calcVacationOneDay = (workDay: WorkDay, config: ConfigContextType) 
     : timeVacation;
   const vacationDays = vacation.dividedBy(config.officialWorkTime);
   return [vacation, vacationDays];
+};
+
+export const calcWorkFromHome = (monthData: WorkDay[], config: ConfigContextType) => {
+  const workFromHome = monthData
+    .filter((data) => data.workFromHome.greaterThan(0))
+    .reduce((acc, data) => acc.plus(data.workFromHome), new Decimal(0));
+  const workFromHomeDays = workFromHome.dividedBy(config.officialWorkTime);
+  return [workFromHome, workFromHomeDays];
 };

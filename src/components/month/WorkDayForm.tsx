@@ -219,7 +219,6 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               value={decimalToTimeStr(oneDay.workFromHome)}
               onChange={(e) => {
                 const [hours, minutes] = e.target.value.split(':').map(Number);
-                console.log(hours, minutes);
                 changeDay('workFromHome', new Decimal(hours).plus(minutes / 60));
               }}
             />
@@ -329,12 +328,3 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
 };
 
 export default WorkDayForm;
-
-/*
-ak je praca tak je len praca
-upravit aby sa spravne zobrazovali prerusenia ked nejake su.
-
-urobit pracovny den tak aby sa dal menit aj cas, a fungovala kalkulacia, a aby sa Doma prepocitavalo automaticky
-no a neriesit preporcty Pcok a ich dopad na pracovny cas, lebo toto to zbytocne komplikuje ale vypocitat rozdiel
-koniec-start, zistit obed, tak odratat nahradne volno a doplnit do velkosti fondu toto doma.
-*/

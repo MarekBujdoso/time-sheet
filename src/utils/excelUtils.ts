@@ -6,7 +6,7 @@ import { DayType, WorkDay } from '../app/sheet/types';
 import {
   calcDoctorsLeave,
   calcDoctorsLeaveFamily,
-  calcSickDay,
+  calcWorkFreeDay,
   calcSickLeave,
   calcSickLeaveFamily,
 } from '../components/utils/calculations';
@@ -53,7 +53,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     { key: 'intTime', width: 5 },
     { key: 'overtime', width: 5 },
     { key: 'compensatory', width: 5 },
-    { key: 'sickDay', width: 5 },
+    { key: 'workFreeDay', width: 5 },
     { key: 'vacation', width: 5 },
     { key: 'home', width: 5 },
     { key: 'workTime', width: 7 },
@@ -195,12 +195,12 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     const isWorkingDay = data.dayType === DayType.WORK_DAY;
     const isCustomDay = data.dayType === DayType.CUSTOM_DAY;
     const negativeInterruptions =
-      data.interruptions?.filter((interruption) => interruption.type !== 'sickDay') ?? [];
+      data.interruptions?.filter((interruption) => interruption.type !== 'workFreeDay') ?? [];
     const compensatoryLeaveTime = data.compensatoryLeave;
     const vacationTime = data.vacation;
-    const sickDayTime =
+    const workFreeDayTime =
       data.interruptions
-        ?.filter((interruption) => interruption.type === 'sickDay')
+        ?.filter((interruption) => interruption.type === 'workFreeDay')
         ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0)) ??
       new Decimal(0);
 
@@ -232,13 +232,13 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
         data.compensatoryLeave && data.compensatoryLeave.greaterThan(0)
           ? data.compensatoryLeave.toNumber()
           : '',
-      sickDay: data.dayType === DayType.SICK_DAY ? sickDayTime.toNumber() : '',
+      workFreeDay: data.dayType === DayType.WORK_FREE_DAY ? workFreeDayTime.toNumber() : '',
       vacation: data.vacation && vacationTime.greaterThan(0) ? vacationTime.toNumber() : '',
       home:
         data.workFromHome && data.workFromHome.greaterThan(0) ? data.workFromHome.toNumber() : '',
       workTime: data.dayWorked
         .plus(compensatoryLeaveTime)
-        .plus(sickDayTime)
+        .plus(workFreeDayTime)
         .plus(data.workFromHome)
         .toNumber(),
       signature: '',
@@ -289,7 +289,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   const [doctorsLeaveFamily] = calcDoctorsLeaveFamily(monthData, config);
   const [sickLeave] = calcSickLeave(monthData, config);
   const [sickLeaveFamily] = calcSickLeaveFamily(monthData, config);
-  const [sickDay] = calcSickDay(monthData, config);
+  const [workFreeDay] = calcWorkFreeDay(monthData, config);
   row = sheet.addRow([
     '',
     '',
@@ -449,7 +449,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     { formula: `N${sheet.rowCount + 1}/H2` },
-    sickDay.toNumber(),
+    workFreeDay.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
     cell.font = { size: 10 };

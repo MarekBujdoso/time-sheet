@@ -13,7 +13,7 @@ export enum DayType {
     WEEKEND = 'weekend', // Víkend
     EMPTY_DAY = 'emptyDay', // Prázdny deň
     CUSTOM_DAY = 'customDay', // Iny deň
-    SICK_DAY = 'sickDay', // Pracovné voľno
+    WORK_FREE_DAY = 'workFreeDay', // Pracovné voľno
 }
 export interface WorkDay {
     month: number, // Mesiac
@@ -25,7 +25,6 @@ export interface WorkDay {
     workFromHome: Decimal, // Praca doma
     vacation: Decimal, // Dovolenka
     compensatoryLeave: Decimal, // Náhradné voľno
-    sickDay?: Decimal, // Pracovné voľno
     dayType: DayType,
     dayWorked: Decimal, // Odpracovane za den
     interruptions: InterruptionTimeProps[], // Prerusenia
@@ -39,7 +38,7 @@ export enum InterruptionWithTimeType {
     // COMPENSATORY_LEAVE = 'compensatoryLeave',
     SICK_LEAVE = 'sickLeave',
     SICK_LEAVE_FAMILY = 'sickLeaveFamily',
-    SICK_DAY = 'sickDay',
+    WORK_FREE_DAY = 'workFreeDay',
 }
 
 export interface InterruptionTimeProps {

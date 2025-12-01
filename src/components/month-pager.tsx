@@ -28,7 +28,7 @@ const MonthPager = ({ update }: MonthPagerProps) => {
   }, [activeMonth, setActiveMonth, setActiveYear, update, activeYear])
 
   return (
-  <div className="flex  w-full">
+  <div className="flex w-full">
     <div className="w-full">
       <Pagination >
         <PaginationContent className="w-full justify-between">

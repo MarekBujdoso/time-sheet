@@ -128,27 +128,27 @@ const WorkDayBoxDesktop = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDay
               {numberToTimeStr(dayWorked.toDecimalPlaces(3))}
             </span>
           )}
-          {compensatoryLeave.greaterThan(0) && (
+          {hasDisturb &&compensatoryLeave.greaterThan(0) && (
             <InterruptionItem hours={compensatoryLeave} name='NV'>
               <Pickaxe className='mr-[10px]' />
             </InterruptionItem>
           )}
-          {vacation.greaterThan(0) && (
+          {hasDisturb && vacation.greaterThan(0) && (
             <InterruptionItem hours={vacation} name='Dovolenka'>
               <TreePalm className='mr-[10px]' />
             </InterruptionItem>
           )}
-          {doctorsLeaveTime.greaterThan(0) && (
+          {hasDisturb && doctorsLeaveTime.greaterThan(0) && (
             <InterruptionItem hours={doctorsLeaveTime} name='P-čko'>
               <Cross className='mr-[10px]' />
             </InterruptionItem>
           )}
-          {doctorsLeaveFamilyTime.greaterThan(0) && (
+          {hasDisturb && doctorsLeaveFamilyTime.greaterThan(0) && (
             <InterruptionItem hours={doctorsLeaveFamilyTime} name='Doprovod'>
               <UserRoundPlus className='mr-[10px]' />
             </InterruptionItem>
           )}
-          {workFromHome.greaterThan(0) && (
+          {hasDisturb && workFromHome.greaterThan(0) && (
             <InterruptionItem hours={workFromHome} name='Doma'>
               <House className='mr-[10px]' />
             </InterruptionItem>

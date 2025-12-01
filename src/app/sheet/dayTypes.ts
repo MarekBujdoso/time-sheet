@@ -203,7 +203,7 @@ export const customDay = (startTime: Date, endTime: Date, workTime: Decimal): Wo
   typeIcon: TriangleAlert
 });
 
-export const sickDay = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
+export const workFreeDay = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
   year: 0,
   startTime,
@@ -213,11 +213,11 @@ export const sickDay = (startTime: Date, endTime: Date, workTime: Decimal): Work
   workFromHome: new Decimal(0),
   vacation: new Decimal(0),
   compensatoryLeave: new Decimal(0),
-  dayType: DayType.SICK_DAY,
+  dayType: DayType.WORK_FREE_DAY,
   dayWorked: new Decimal(0),
   interruptions: [{
     id: uuidv4(),
-    type: InterruptionWithTimeType.SICK_DAY,
+    type: InterruptionWithTimeType.WORK_FREE_DAY,
     startTime,
     endTime,
     time: workTime,
@@ -237,7 +237,7 @@ export const DAY_TYPES = {
   weekend,
   emptyDay,
   customDay,
-  sickDay,
+  workFreeDay,
 };
 
 export enum DAY_TYPES_KEYS {
@@ -248,7 +248,7 @@ export enum DAY_TYPES_KEYS {
   sickLeave = 'PN',
   sickLeaveFamily = 'OČR',
   compensatoryLeave = 'Náhradné voľno',
-  sickDay = 'Pracovné voľno',
+  workFreeDay = 'Pracovné voľno',
   weekend = 'Víkend',
   holiday = 'Štátny sviatok',
   emptyDay = 'Prázdny deň',
@@ -262,7 +262,7 @@ export enum DAY_INTERRUPTIONS_KEYS {
   // vacation = 'Dovolenka',
   sickLeave = 'PN',
   sickLeaveFamily = 'OČR',
-  sickDay = 'PV',
+  workFreeDay = 'PV',
 };
 
 // export const getIconByDayType = (dayType: DAY_TYPES_KEYS): LucideIcon | undefined => {

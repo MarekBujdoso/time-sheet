@@ -101,10 +101,10 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   row.eachCell((cell) => {
     cell.font = { size: 10, name: 'Calibri', bold: true };
   });
-  row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
-  row.eachCell((cell) => {
-    cell.font = { size: 10, name: 'Calibri' };
-  });
+  // row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+  // row.eachCell((cell) => {
+  //   cell.font = { size: 10, name: 'Calibri' };
+  // });
   //                    A        B                    C    D           E   F  G     H               I              J               K                   L                                  M
   row = sheet.addRow([
     'dni',
@@ -177,17 +177,17 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     fillCell(cell, GREEN_COLOR);
     borderCell(cell);
   });
-  sheet.mergeCells('A5:A7'); //dni
-  sheet.mergeCells('B5:C6'); //Základný pracovný čas
-  sheet.mergeCells('D5:G5'); //Prerušenie
-  sheet.mergeCells('E6:G6');
-  sheet.mergeCells('H5:H6'); //Nadčasové práca
-  sheet.mergeCells('I5:I6'); //Čerpanie NV
-  sheet.mergeCells('J5:J6'); //Prac. voľno (PV)
-  sheet.mergeCells('K5:K6'); //Dovolenka DOV
-  sheet.mergeCells('L5:L6'); //práca doma (PZ)
-  sheet.mergeCells('M5:M7'); //celkom odpracovaný pracovný čas
-  sheet.mergeCells('N5:N7'); //podpis zamestnanca
+  sheet.mergeCells('A4:A6'); //dni
+  sheet.mergeCells('B4:C5'); //Základný pracovný čas
+  sheet.mergeCells('D4:G4'); //Prerušenie
+  sheet.mergeCells('E5:G5');
+  sheet.mergeCells('H4:H5'); //Nadčasové práca
+  sheet.mergeCells('I4:I5'); //Čerpanie NV
+  sheet.mergeCells('J4:J5'); //Prac. voľno (PV)
+  sheet.mergeCells('K4:K5'); //Dovolenka DOV
+  sheet.mergeCells('L4:L5'); //práca doma (PZ)
+  sheet.mergeCells('M4:M6'); //celkom odpracovaný pracovný čas
+  sheet.mergeCells('N4:N6'); //podpis zamestnanca
 
   monthData.forEach((data) => {
     const title = getTitle(data);
@@ -242,7 +242,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
         .toNumber(),
       signature: '',
     });
-    row.height = 10; //* (data.interruptions?.length ?? 1);
+    // row.height = 10; //* (data.interruptions?.length ?? 1);
     // row.getCell('intFrom').alignment = { wrapText: true };
     // row.getCell('intTo').alignment = { wrapText: true };
     row.eachCell((cell, colNumber) => {

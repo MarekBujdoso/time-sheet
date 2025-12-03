@@ -16,6 +16,7 @@ import { getMonthName } from './skUtils';
 const BLACK_COLOR = 'FF000000';
 const GREEN_COLOR = 'FFDDE5C3';
 const GRAY_COLOR = 'FFD9D9D9';
+const WORK_TIME_FOND_CELL = 'H1';
 
 const fillCell = (cell: ExcelJS.Cell, color: string) => {
   cell.fill = {
@@ -59,11 +60,11 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     { key: 'workTime', width: 7 },
     { key: 'signature', width: 9 },
   ];
-  let row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
-  row.eachCell((cell) => {
-    cell.font = { size: 10, name: 'Calibri' };
-  });
-  row = sheet.addRow([
+  // let row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+  // row.eachCell((cell) => {
+  //   cell.font = { size: 10, name: 'Calibri' };
+  // });
+  let row = sheet.addRow([
     '',
     '',
     '',
@@ -90,21 +91,17 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    '',
+    null,
     '',
     'zamestnanec:',
     null,
-    userName,
+    userName ?? null,
     null,
     null,
   ]);
   row.eachCell((cell) => {
     cell.font = { size: 10, name: 'Calibri', bold: true };
-  });
-  // row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
-  // row.eachCell((cell) => {
-  //   cell.font = { size: 10, name: 'Calibri' };
-  // });
+  });                 
   //                    A        B                    C    D           E   F  G     H               I              J               K                   L                                  M
   row = sheet.addRow([
     'dni',
@@ -172,22 +169,22 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     '',
   ]);
   row.eachCell((cell) => {
-    cell.font = { bold: true, size: 10, name: 'Calibri' };
+    cell.font = { bold: true, size: 9, name: 'Calibri' };
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
     fillCell(cell, GREEN_COLOR);
     borderCell(cell);
   });
-  sheet.mergeCells('A4:A6'); //dni
-  sheet.mergeCells('B4:C5'); //Základný pracovný čas
-  sheet.mergeCells('D4:G4'); //Prerušenie
-  sheet.mergeCells('E5:G5');
-  sheet.mergeCells('H4:H5'); //Nadčasové práca
-  sheet.mergeCells('I4:I5'); //Čerpanie NV
-  sheet.mergeCells('J4:J5'); //Prac. voľno (PV)
-  sheet.mergeCells('K4:K5'); //Dovolenka DOV
-  sheet.mergeCells('L4:L5'); //práca doma (PZ)
-  sheet.mergeCells('M4:M6'); //celkom odpracovaný pracovný čas
-  sheet.mergeCells('N4:N6'); //podpis zamestnanca
+  sheet.mergeCells('A3:A5'); //dni
+  sheet.mergeCells('B3:C4'); //Základný pracovný čas
+  sheet.mergeCells('D3:G3'); //Prerušenie
+  sheet.mergeCells('E4:G4');
+  sheet.mergeCells('H3:H4'); //Nadčasové práca
+  sheet.mergeCells('I3:I4'); //Čerpanie NV
+  sheet.mergeCells('J3:J4'); //Prac. voľno (PV)
+  sheet.mergeCells('K3:K4'); //Dovolenka DOV
+  sheet.mergeCells('L3:L4'); //práca doma (PZ)
+  sheet.mergeCells('M3:M5'); //celkom odpracovaný pracovný čas
+  sheet.mergeCells('N3:N5'); //podpis zamestnanca
 
   monthData.forEach((data) => {
     const title = getTitle(data);
@@ -327,7 +324,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    { formula: `N${sheet.rowCount + 1}/H2` },
+    { formula: `N${sheet.rowCount + 1}/${WORK_TIME_FOND_CELL}` },
     { formula: `M${sheet.rowCount - 2}-J${sheet.rowCount - 2}` },
   ]);
   row.eachCell((cell, collNumber) => {
@@ -351,7 +348,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    { formula: `N${sheet.rowCount + 1}/H2` },
+    { formula: `N${sheet.rowCount + 1}/${WORK_TIME_FOND_CELL}` },
     { formula: `H${sheet.rowCount - 3}` },
   ]);
   row.eachCell((cell, collNumber) => {
@@ -375,7 +372,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    { formula: `N${sheet.rowCount + 1}/H2` },
+    { formula: `N${sheet.rowCount + 1}/${WORK_TIME_FOND_CELL}` },
     { formula: `K${sheet.rowCount - 4}` },
   ]);
   row.eachCell((cell, collNumber) => {
@@ -399,7 +396,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    { formula: `N${sheet.rowCount + 1}/H2` },
+    { formula: `N${sheet.rowCount + 1}/${WORK_TIME_FOND_CELL}` },
     sickLeave.plus(sickLeaveFamily).toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
@@ -423,7 +420,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    { formula: `N${sheet.rowCount + 1}/H2` },
+    { formula: `N${sheet.rowCount + 1}/${WORK_TIME_FOND_CELL}` },
     doctorsLeaveFamily.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
@@ -447,7 +444,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    { formula: `N${sheet.rowCount + 1}/H2` },
+    { formula: `N${sheet.rowCount + 1}/${WORK_TIME_FOND_CELL}` },
     workFreeDay.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
@@ -471,7 +468,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     null,
     null,
-    { formula: `N${sheet.rowCount + 1}/H2` },
+    { formula: `N${sheet.rowCount + 1}/${WORK_TIME_FOND_CELL}` },
     doctorsLeave.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {

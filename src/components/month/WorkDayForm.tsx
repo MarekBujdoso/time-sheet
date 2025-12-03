@@ -44,7 +44,10 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
         if ((key === 'startTime' || key === 'endTime') && typeof value === 'string') {
           const timeArray = value.split(':');
           value = new Date(day[key].setHours(Number(timeArray[0]), Number(timeArray[1])));
-          dayWorked = key === 'startTime' ? new Decimal(differenceInMinutes(day.endTime, value) / 60) : new Decimal(differenceInMinutes(value, day.startTime) / 60);
+          dayWorked =
+            key === 'startTime'
+              ? new Decimal(differenceInMinutes(day.endTime, value) / 60)
+              : new Decimal(differenceInMinutes(value, day.startTime) / 60);
         }
         return recalculateWorkDay({ ...day, [key]: value, dayWorked }, config);
       });
@@ -56,6 +59,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     e.preventDefault();
     const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
     const buttonName = submitter?.name || 'default';
+    console.log('buttonName', buttonName);
     if (buttonName === 'SaveToEndOfMonth') {
       saveTillEndOfMonth(oneDay);
     } else {
@@ -173,7 +177,9 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
             </span>
           </div>
         </div>
-        <div className={`grid ${isCustomDay ? 'grid-cols-[3fr_3fr_1fr]' : 'grid-cols-2'} gap-2 items-left p-2`}>
+        <div
+          className={`grid ${isCustomDay ? 'grid-cols-[3fr_3fr_1fr]' : 'grid-cols-2'} gap-2 items-left p-2`}
+        >
           <div>
             <Label htmlFor='startTime'>Začiatok</Label>
             <Input
@@ -182,7 +188,17 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               type='time'
               step='300'
               value={format(oneDay.startTime, 'HH:mm')}
-              onChange={(e) => changeDay('startTime', e.target.value)}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (newValue == null || newValue === '') {
+                  changeDay(
+                    'startTime',
+                    `${config.officialStartTime.hours}:${config.officialStartTime.minutes}`,
+                  );
+                  return;
+                }
+                changeDay('startTime', newValue);
+              }}
               disabled={!isCustomDay || oneDay.noWorkTime}
             />
           </div>
@@ -194,13 +210,29 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               step='300'
               name='endTime'
               value={format(oneDay.endTime, 'HH:mm')}
-              onChange={(e) => changeDay('endTime', e.target.value)}
+              onChange={(e) => {
+                const newValue = e.target.value;
+                if (newValue == null || newValue === '') {
+                  changeDay(
+                    'endTime',
+                    `${config.officialEndTime.hours}:${config.officialEndTime.minutes}`,
+                  );
+                  return;
+                }
+                changeDay('endTime', e.target.value)
+              }}
               disabled={!isCustomDay || oneDay.noWorkTime}
             />
           </div>
-          {isCustomDay && <div className='flex justify-center items-end space-x-1'>
-            <Checkbox className='bg-secondary' checked={!oneDay.noWorkTime} onCheckedChange={clearWorkingTime}/>
-          </div>}
+          {isCustomDay && (
+            <div className='flex justify-center items-end space-x-1'>
+              <Checkbox
+                className='bg-secondary'
+                checked={!oneDay.noWorkTime}
+                onCheckedChange={clearWorkingTime}
+              />
+            </div>
+          )}
         </div>
         <div className='grid grid-cols-3 gap-2 items-left p-2'>
           {/* <div className='flex items-center space-x-2 justify-between'> */}
@@ -218,7 +250,12 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               disabled={!isCustomDay}
               value={decimalToTimeStr(oneDay.workFromHome)}
               onChange={(e) => {
-                const [hours, minutes] = e.target.value.split(':').map(Number);
+                const newValue = e.target.value;
+                if (newValue == null || newValue === '') {
+                  changeDay('workFromHome', new Decimal(0));
+                  return;
+                }
+                const [hours, minutes] = newValue.split(':').map(Number);
                 changeDay('workFromHome', new Decimal(hours).plus(minutes / 60));
               }}
             />
@@ -245,7 +282,12 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               value={decimalToTimeStr(oneDay.vacation)}
               disabled={!isCustomDay}
               onChange={(e) => {
-                const [hours, minutes] = e.target.value.split(':').map(Number);
+                const newValue = e.target.value;
+                if (newValue == null || newValue === '') {
+                  changeDay('vacation', new Decimal(0));
+                  return;
+                }
+                const [hours, minutes] = newValue.split(':').map(Number);
                 changeDay('vacation', new Decimal(hours).plus(minutes / 60));
               }}
             />
@@ -270,7 +312,12 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               value={decimalToTimeStr(oneDay.compensatoryLeave)}
               disabled={!isCustomDay}
               onChange={(e) => {
-                const [hours, minutes] = e.target.value.split(':').map(Number);
+                const newValue = e.target.value;
+                if (newValue == null || newValue === '') {
+                  changeDay('compensatoryLeave', new Decimal(0));
+                  return;
+                }
+                const [hours, minutes] = newValue.split(':').map(Number);
                 changeDay('compensatoryLeave', new Decimal(hours).plus(minutes / 60));
               }}
             />
@@ -315,8 +362,14 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
       <DrawerFooter>
         <DrawerClose asChild>
           <div className='flex justify-center space-x-2'>
-            <Button name='SaveToEndOfMonth'>Uložiť do konca mesiaca</Button>
-            <Button variant='outline' type='button'>
+            <Button
+              name='SaveToEndOfMonth'
+              type='button'
+              onClick={() => saveTillEndOfMonth(oneDay)}
+            >
+              Uložiť do konca mesiaca
+            </Button>
+            <Button variant='outline' type='reset'>
               Zrušiť
             </Button>
             <Button name='Save'>Uložiť</Button>

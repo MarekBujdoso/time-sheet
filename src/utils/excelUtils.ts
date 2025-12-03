@@ -61,7 +61,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   ];
   let row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
   row.eachCell((cell) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
   });
   row = sheet.addRow([
     '',
@@ -80,7 +80,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { size: 10, bold: [6, 10].includes(collNumber) };
+    cell.font = { size: 10, name: 'Calibri', bold: [6, 10].includes(collNumber) };
   });
   row = sheet.addRow([
     'Evidencia pracovné času v zmysle § 99 Zákonníka práce',
@@ -99,11 +99,11 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
   ]);
   row.eachCell((cell) => {
-    cell.font = { size: 10, bold: true };
+    cell.font = { size: 10, name: 'Calibri', bold: true };
   });
   row = sheet.addRow(['', '', '', '', '', '', '', '', '', '', '', '', '', '']);
   row.eachCell((cell) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
   });
   //                    A        B                    C    D           E   F  G     H               I              J               K                   L                                  M
   row = sheet.addRow([
@@ -123,7 +123,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'podpis zamestnanca',
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { bold: true, size: 10 };
+    cell.font = { bold: true, size: 10, name: 'Calibri' };
     cell.alignment = {
       vertical: 'middle',
       horizontal: 'center',
@@ -150,7 +150,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     '',
   ]);
   row.eachCell((cell, colNumber) => {
-    cell.font = { bold: true, size: colNumber === 4 ? 7.5 : 10 };
+    cell.font = { bold: true, size: colNumber === 4 ? 7.5 : 10, name: 'Calibri' };
     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
     fillCell(cell, GREEN_COLOR);
     borderCell(cell);
@@ -172,7 +172,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     '',
   ]);
   row.eachCell((cell) => {
-    cell.font = { bold: true, size: 10 };
+    cell.font = { bold: true, size: 10, name: 'Calibri' };
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
     fillCell(cell, GREEN_COLOR);
     borderCell(cell);
@@ -190,7 +190,6 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   sheet.mergeCells('N5:N7'); //podpis zamestnanca
 
   monthData.forEach((data) => {
-    console.log(data);
     const title = getTitle(data);
     const isWorkingDay = data.dayType === DayType.WORK_DAY;
     const isCustomDay = data.dayType === DayType.CUSTOM_DAY;
@@ -208,7 +207,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       day: data.startTime.getDate(),
       startTime:
         isWorkingDay || (isCustomDay && !data.noWorkTime)
-          ? format(data.startTime, 'HH: mm')
+          ? format(data.startTime, 'HH:mm')
           : title,
       endTime:
         isWorkingDay || (isCustomDay && !data.noWorkTime) ? format(data.endTime, 'HH:mm') : '',
@@ -216,11 +215,11 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       intFrom:
         negativeInterruptions
           ?.map((interruption) => format(interruption.startTime, 'HH:mm'))
-          .join('\r\n') ?? '',
+          .join('\n') ?? '',
       intTo:
         negativeInterruptions
           ?.map((interruption) => format(interruption.endTime, 'HH:mm'))
-          .join('\r\n') ?? '',
+          .join('\n') ?? '',
       intTime:
         negativeInterruptions?.length > 0
           ? (negativeInterruptions
@@ -247,7 +246,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     // row.getCell('intFrom').alignment = { wrapText: true };
     // row.getCell('intTo').alignment = { wrapText: true };
     row.eachCell((cell, colNumber) => {
-      cell.font = { size: 10 };
+      cell.font = { size: 10, name: 'Calibri' };
       cell.alignment = { horizontal: 'center' };
       borderCell(cell);
       if (title === 'Víkend' || [8, 13].includes(colNumber)) {
@@ -275,7 +274,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     '',
   ]);
   row.eachCell((cell) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
     cell.alignment = { horizontal: 'center' };
     borderCell(cell);
     fillCell(cell, GREEN_COLOR);
@@ -283,7 +282,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   sheet.mergeCells(`A${sheet.rowCount}:D${sheet.rowCount}`); // celkom
   row = sheet.addRow(['', null, null, null, null, null, null, null, null, null, null, null]);
   row.eachCell((cell) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
   });
   const [doctorsLeave] = calcDoctorsLeave(monthData, config);
   const [doctorsLeaveFamily] = calcDoctorsLeaveFamily(monthData, config);
@@ -307,7 +306,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     'hodiny',
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { size: 10, bold: true };
+    cell.font = { size: 10, bold: true, name: 'Calibri' };
     cell.alignment = { horizontal: 'center' };
     if (collNumber > 8) {
       borderCell(cell);
@@ -332,7 +331,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     { formula: `M${sheet.rowCount - 2}-J${sheet.rowCount - 2}` },
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
     if (collNumber > 8) {
       borderCell(cell);
@@ -356,7 +355,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     { formula: `H${sheet.rowCount - 3}` },
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
     if (collNumber > 8) {
       borderCell(cell);
@@ -380,7 +379,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     { formula: `K${sheet.rowCount - 4}` },
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
     if (collNumber > 8) {
       borderCell(cell);
@@ -404,7 +403,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     sickLeave.plus(sickLeaveFamily).toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
     if (collNumber > 8) {
       borderCell(cell);
@@ -428,7 +427,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     doctorsLeaveFamily.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri'  };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
     if (collNumber > 8) {
       borderCell(cell);
@@ -452,7 +451,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     workFreeDay.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
     if (collNumber > 8) {
       borderCell(cell);
@@ -476,7 +475,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     doctorsLeave.toNumber(),
   ]);
   row.eachCell((cell, collNumber) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
     cell.alignment = { horizontal: collNumber > 9 ? 'center' : 'left' };
     if (collNumber === 12) {
       cell.numFmt = '0.0';
@@ -488,7 +487,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
   row = sheet.addRow(['', null, null, null, null, null, null, null, null, null, null, null, null]);
   row.eachCell((cell) => {
-    cell.font = { size: 10 };
+    cell.font = { size: 10, name: 'Calibri' };
   });
   row = sheet.addRow([
     null,
@@ -507,7 +506,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     { formula: `SUM(N${sheet.rowCount - 7}:N${sheet.rowCount - 1})` },
   ]);
   row.eachCell((cell) => {
-    cell.font = { size: 10, bold: true };
+    cell.font = { size: 10, bold: true, name: 'Calibri' };
     borderCell(cell);
     fillCell(cell, GRAY_COLOR);
   });

@@ -143,7 +143,7 @@ const SummaryBoard = ({
     () => calcWorkFromHome(monthData, config),
     [monthData, config],
   );
-  const [workTimeInMonth, workDaysInMonth] = React.useMemo(
+  const [workTimeInMonth] = React.useMemo(
     () => calcMonthWorkTime(monthData, config),
     [monthData, config],
   );

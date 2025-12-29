@@ -8,17 +8,17 @@ import {
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
 import { differenceInMinutes } from 'date-fns/differenceInMinutes';
-import { addHours } from 'date-fns';
+import { addHours, isWeekend } from 'date-fns';
 // import { format } from 'date-fns/format';
 
 const LUNCH_THRESHOLD = 6;
 
 export const calculateLunch = (workedHours: Decimal) => {
-  return workedHours.greaterThan(LUNCH_THRESHOLD) ? new Decimal(0.5) : new Decimal(0);
+  return workedHours.greaterThanOrEqualTo(LUNCH_THRESHOLD) ? new Decimal(0.5) : new Decimal(0);
 };
 
 export const calculateCustomDay = (workDay: WorkDay) => {
-  // const { startTime, endTime } = workDay;
+  const { startTime, endTime } = workDay;
   // const currentDay = new Date(startTime);
   // const { interruptionHours } = updateTimes(
   //   interruptions,
@@ -28,11 +28,12 @@ export const calculateCustomDay = (workDay: WorkDay) => {
   //   endTime,
   // );
 
-  // const dayWorked = new Decimal(differenceInMinutes(endTime, startTime) / 60);
+  const dayWorked = new Decimal(differenceInMinutes(endTime, startTime) / 60);
+  const lunch = calculateLunch(workDay.dayWorked).greaterThan(0);
 
   return {
-    // dayWorked,
-    lunch: calculateLunch(workDay.dayWorked).greaterThan(0),
+    dayWorked: lunch ? dayWorked.minus(0.5) : dayWorked,
+    lunch,
   };
 };
 
@@ -49,9 +50,7 @@ export const calculateWorked = (workDay: WorkDay, config: ConfigContextType) => 
     dayWorked:
       dayType === DayType.EMPTY_DAY
         ? new Decimal(0)
-        : workedHours.greaterThan(0)
-          ? workedHours
-          : new Decimal(0),
+        : workedHours,
     lunch: dayType === DayType.HOLIDAY || dayType === DayType.EMPTY_DAY ? false : lunch,
     endTime,
     startTime,
@@ -412,4 +411,12 @@ export const calcWorkFromHome = (monthData: WorkDay[], config: ConfigContextType
     .reduce((acc, data) => acc.plus(data.workFromHome), new Decimal(0));
   const workFromHomeDays = workFromHome.dividedBy(config.officialWorkTime);
   return [workFromHome, workFromHomeDays];
+};
+
+export const calcMonthWorkTime = (monthData: WorkDay[], config: ConfigContextType) => {
+  const monthWorkDays = monthData
+    .filter((data) => !isWeekend(data.startTime));
+  const monthWorkTime = config.officialWorkTime.mul(monthWorkDays.length);
+  const days = new Decimal(monthWorkDays.length);
+  return [monthWorkTime, days];
 };

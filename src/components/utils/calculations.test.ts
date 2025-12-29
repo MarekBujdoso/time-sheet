@@ -40,7 +40,7 @@ const defaultWorkDay: WorkDay = {
 
 describe('calculateLunch', () => {
   it('should return 0.5 when worked hours > 6', () => {
-    expect(calculateLunch(new Decimal(6)).toNumber()).toBe(0);
+    expect(calculateLunch(new Decimal(6)).toNumber()).toBe(0.5);
     expect(calculateLunch(new Decimal(7)).toNumber()).toBe(0.5);
   });
 

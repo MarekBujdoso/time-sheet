@@ -59,7 +59,6 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     e.preventDefault();
     const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
     const buttonName = submitter?.name || 'default';
-    console.log('buttonName', buttonName);
     if (buttonName === 'SaveToEndOfMonth') {
       saveTillEndOfMonth(oneDay);
     } else {

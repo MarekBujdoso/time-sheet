@@ -191,7 +191,7 @@ export const customDay = (startTime: Date, endTime: Date, workTime: Decimal): Wo
   month: 0,
   year: 0,
   startTime,
-  endTime,
+  endTime: set(endTime, { minutes: 30 }),
   noWorkTime: false,
   lunch: workTime.greaterThan(new Decimal(6)),
   workFromHome: new Decimal(0),

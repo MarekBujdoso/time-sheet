@@ -187,6 +187,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   sheet.mergeCells('N3:N5'); //podpis zamestnanca
 
   monthData.forEach((data) => {
+    // console.log('data', JSON.stringify(data, null, 2));
     const title = getTitle(data);
     const isWorkingDay = data.dayType === DayType.WORK_DAY;
     const isCustomDay = data.dayType === DayType.CUSTOM_DAY;
@@ -250,7 +251,8 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
         fillCell(cell, GREEN_COLOR);
       }
     });
-    if (!isWorkingDay && !isCustomDay) {
+    // nie pracovny den a nie je to custom den s pracovnou dobou
+    if (!isWorkingDay && !isCustomDay || (isCustomDay && data.noWorkTime)) {
       sheet.mergeCells(`B${sheet.rowCount}:C${sheet.rowCount}`); //Základný pracovný čas
     }
   });
@@ -261,13 +263,13 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     null,
     '',
     '',
-    { formula: `SUM(G8:G${sheet.rowCount})` },
-    { formula: `SUM(H8:H${sheet.rowCount})` },
-    { formula: `SUM(I8:I${sheet.rowCount})` },
-    { formula: `SUM(J8:J${sheet.rowCount})` },
-    { formula: `SUM(K8:K${sheet.rowCount})` },
+    { formula: `SUM(G6:G${sheet.rowCount})` },
+    { formula: `SUM(H6:H${sheet.rowCount})` },
+    { formula: `SUM(I6:I${sheet.rowCount})` },
+    { formula: `SUM(J6:J${sheet.rowCount})` },
+    { formula: `SUM(K6:K${sheet.rowCount})` },
     '',
-    { formula: `SUM(M8:M${sheet.rowCount})` },
+    { formula: `SUM(M6:M${sheet.rowCount})` },
     '',
   ]);
   row.eachCell((cell) => {

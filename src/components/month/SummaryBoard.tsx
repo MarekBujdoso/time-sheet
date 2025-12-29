@@ -8,17 +8,18 @@ import {
   calcCompensatoryLeave,
   calcWorkFreeDay,
   calcWorkFromHome,
+  calcMonthWorkTime,
 } from '../../components/utils/calculations';
 import React, { useContext } from 'react';
 import { WorkDay } from '../../app/sheet/types';
 import ConfigContext from '../../app/sheet/ConfigContext';
 import { Input } from '../ui/input';
-import { useMediaQuery } from 'react-responsive';
 import { numberToTimeStr } from './workDayUtils';
 import Decimal from 'decimal.js';
 import { CalendarDays, Timer } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { Progress } from '../ui/progress';
 
 const Hours = ({
   hours,
@@ -101,13 +102,14 @@ const SummaryBoard = ({
   monthData,
   setUserName,
   userName,
+  isDesktop,
 }: {
   monthData: WorkDay[];
   setUserName: (userName: string) => void;
   userName: string;
+  isDesktop: boolean;
 }) => {
   const config = useContext(ConfigContext);
-  const isDesktop = useMediaQuery({ minWidth: 767 });
   const [isOpen, setIsOpen] = React.useState(false);
   const [vacation, vacationDays] = React.useMemo(
     () => calcVacation(monthData, config),
@@ -141,6 +143,10 @@ const SummaryBoard = ({
     () => calcWorkFromHome(monthData, config),
     [monthData, config],
   );
+  const [workTimeInMonth, workDaysInMonth] = React.useMemo(
+    () => calcMonthWorkTime(monthData, config),
+    [monthData, config],
+  );
   const [worked, workedDays] = React.useMemo(() => {
     const [wrk, wrkDays] = calcWorked(monthData, config);
     return [wrk.plus(compensatoryLeave).plus(workFreeDay).plus(workFromHome), wrkDays.plus(compensatoryLeaveDays).plus(workFreeDayDays).plus(workFromHomeDays)];
@@ -148,9 +154,11 @@ const SummaryBoard = ({
 
   const totalHours = worked.plus(doctorsLeave).plus(doctorsLeaveFamily).plus(sickLeave).plus(sickLeaveFamily).plus(vacation);
   const totalDays = workedDays.plus(doctorsLeaveDays).plus(doctorsLeaveFamilyDays).plus(sickLeaveDays).plus(sickLeaveFamilyDays).plus(vacationDays);
+  const progress = totalHours.dividedBy(workTimeInMonth).mul(100).toNumber();
 
   return (
     <div className='border bg-white rounded-2xl shadow-md mt-[5px] text-sm md:text-base py-[15px]'>
+      <Progress className='w-[90%] mx-auto' progressColor={progress >= 100 ? 'bg-green-500' : 'bg-blue-500'} value={progress} />
       {isDesktop ? (
         <Collapsible
           open={isOpen}

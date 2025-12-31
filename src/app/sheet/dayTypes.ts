@@ -1,8 +1,8 @@
 import { set } from 'date-fns/set';
 import Decimal from 'decimal.js';
-import { TriangleAlert, Cross, GraduationCap, Hospital, Pickaxe, Pill, Sun, TentTree, TrafficCone, TreePalm, UserRoundPlus } from 'lucide-react';
+import { Cross, GraduationCap, Hospital, Pickaxe, Pill, Sun, TentTree, TrafficCone, TreePalm, TriangleAlert, UserRoundPlus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { DayType, InterruptionWithTimeType, WorkDay } from './types';
+import { DayType, InterruptionWithTimeType, LUNCH_THRESHOLD, WorkDay } from './types';
 
 export const workDay = (startTime: Date, endTime: Date, workTime: Decimal): WorkDay => ({
   month: 0,
@@ -193,7 +193,7 @@ export const customDay = (startTime: Date, endTime: Date, workTime: Decimal): Wo
   startTime,
   endTime: set(endTime, { minutes: 30 }),
   noWorkTime: false,
-  lunch: workTime.greaterThan(new Decimal(6)),
+  lunch: workTime.greaterThanOrEqualTo(LUNCH_THRESHOLD),
   workFromHome: new Decimal(0),
   vacation: new Decimal(0),
   compensatoryLeave: new Decimal(0),

@@ -1,6 +1,8 @@
 import { Decimal } from 'decimal.js';
 import { LucideIcon } from 'lucide-react';
 
+export const LUNCH_THRESHOLD = 6;
+
 export enum DayType {
     WORK_DAY = 'workDay', // Práca
     HOLIDAY = 'holiday', // Sviatok

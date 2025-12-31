@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import ConfigContext from '../../app/sheet/ConfigContext';
 import { WorkDay } from '../../app/sheet/types';
-import { calcDoctorsLeave, calcDoctorsLeaveFamily } from '../utils/calculations';
+import { calcDoctorsLeave, calcDoctorsLeaveFamily, calcWorkFreeDay } from '../utils/calculations';
 import Decimal from 'decimal.js';
 
 const DayDisturbances = ({
@@ -15,6 +15,7 @@ const DayDisturbances = ({
   const { vacation, compensatoryLeave, workFromHome } = workDay;
   const doctorsLeaveTime = calcDoctorsLeave([workDay], config)[0];
   const doctorsLeaveFamilyTime = calcDoctorsLeaveFamily([workDay], config)[0];
+  const workFreeDayTime = calcWorkFreeDay([workDay], config)[0];
 
   return (
     <div className='grid gap-1 grid-cols-[auto_1fr] gap-y-[0px]'>
@@ -25,6 +26,7 @@ const DayDisturbances = ({
         <ItemComponent name='Doprovod' hours={doctorsLeaveFamilyTime} />
       )}
       {workFromHome.greaterThan(0) && <ItemComponent name='Doma' hours={workFromHome} />}
+      {workFreeDayTime.greaterThan(0) && <ItemComponent name='PV' hours={workFreeDayTime} />}
     </div>
   );
 };

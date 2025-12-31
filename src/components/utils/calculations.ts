@@ -4,14 +4,13 @@ import {
   InterruptionTimeProps,
   InterruptionWithTimeType,
   WorkDay,
+  LUNCH_THRESHOLD,
 } from '../../app/sheet/types';
 import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
 import { differenceInMinutes } from 'date-fns/differenceInMinutes';
 import { addHours, isWeekend } from 'date-fns';
 // import { format } from 'date-fns/format';
-
-const LUNCH_THRESHOLD = 6;
 
 export const calculateLunch = (workedHours: Decimal) => {
   return workedHours.greaterThanOrEqualTo(LUNCH_THRESHOLD) ? new Decimal(0.5) : new Decimal(0);
@@ -189,7 +188,7 @@ export const updateTimes = (
       ? new Decimal(differenceInMinutes(workDayEndTime, workDayStartTime) / 60)
       : config.officialWorkTime;
   const workedHours = workTime.minus(interruptionHours).minus(workDay.vacation).minus(workDay.compensatoryLeave);
-  const lunch = workedHours.greaterThan(LUNCH_THRESHOLD);
+  const lunch = workedHours.greaterThanOrEqualTo(new Decimal(LUNCH_THRESHOLD).minus(0.5));
   endTime =
     endTime.getTime() === set(currentDay, config.officialEndTime).getTime()
       ? addHours(endTime, lunch ? config.lunchBreak : 0)

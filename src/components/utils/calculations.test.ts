@@ -346,8 +346,8 @@ describe('updateTimes with interruptions', () => {
       }, currentDay, config);
       expect(result.interruptionHours.toNumber()).toBe(1.5);
       expect(result.startTime).toEqual(set(currentDay, { hours: 9, minutes: 0 }));
-      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 0 }));
-      expect(result.lunch).toBe(false);
+      expect(result.endTime).toEqual(set(currentDay, { hours: 15, minutes: 30 }));
+      expect(result.lunch).toBe(true);
     });
 
     it('start out of day 2 interruptions', () => {

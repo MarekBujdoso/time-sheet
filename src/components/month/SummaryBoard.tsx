@@ -20,6 +20,7 @@ import { CalendarDays, Timer } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import { Progress } from '../ui/progress';
+import { backgroundColors, progressColors, textColors } from '../../constants/colors';
 
 const Hours = ({
   hours,
@@ -158,7 +159,11 @@ const SummaryBoard = ({
 
   return (
     <div className='border bg-white rounded-2xl shadow-md mt-[5px] text-sm md:text-base py-[15px]'>
-      <Progress className='w-[90%] mx-auto' progressColor={progress >= 100 ? 'bg-green-500' : 'bg-blue-500'} value={progress} />
+      <Progress
+        className='w-[90%] mx-auto'
+        progressColor={progress >= 100 ? progressColors.success : progressColors.info}
+        value={progress}
+      />
       {isDesktop ? (
         <Collapsible
           open={isOpen}
@@ -179,16 +184,16 @@ const SummaryBoard = ({
               title='Spolu:'
               hours={totalHours}
               days={totalDays}
-              textColor='text-stone-700'
-              backgroundColor='bg-stone-100'
+              textColor={textColors.strong}
+              backgroundColor={backgroundColors.panel}
             />
             <div className='flex items-center justify-self-end'>
               <SummaryItem
                 title='Fond:'
                 className='justify-self-end'
                 hours={config.officialWorkTime}
-                textColor='text-stone-700'
-                backgroundColor='bg-stone-50'
+                textColor={textColors.strong}
+                backgroundColor={backgroundColors.secondaryPanel}
               />
               </div>
             <CollapsibleTrigger asChild className='justify-self-center'>
@@ -202,57 +207,57 @@ const SummaryBoard = ({
               title='Práca:'
               hours={worked}
               days={workedDays}
-              textColor='text-blue-700'
-              backgroundColor='bg-blue-50'
+              textColor={textColors.work}
+              backgroundColor={backgroundColors.workInfo}
             />
             <SummaryItem
               title='Nadčasy:'
               hours={new Decimal(0)}
               days={new Decimal(0)}
-              textColor='text-blue-700'
-              backgroundColor='bg-blue-50'
+              textColor={textColors.work}
+              backgroundColor={backgroundColors.workInfo}
             />
             <SummaryItem
               title='Dovolenka:'
               hours={vacation}
               days={vacationDays}
-              textColor='text-green-700'
-              backgroundColor='bg-green-50'
+              textColor={textColors.vacation}
+              backgroundColor={backgroundColors.vacationInfo}
             />
             <SummaryItem
               title='P-čko:'
               hours={doctorsLeave}
               days={doctorsLeaveDays}
-              textColor='text-red-700'
-              backgroundColor='bg-red-50'
+              textColor={textColors.warning}
+              backgroundColor={backgroundColors.warningInfo}
             />
             {/* <SummaryItem
               title='Prac. volno:'
               hours={workFreeDay}
               days={workFreeDayDays}
-              textColor='text-blue-700'
-              backgroundColor='bg-blue-50'
+              textColor={textColors.work}
+              backgroundColor={backgroundColors.workInfo}
             /> */}
             <SummaryItem
               title='Doprovod:'
               hours={doctorsLeaveFamily}
               days={doctorsLeaveFamilyDays}
-              textColor='text-red-700'
-              backgroundColor='bg-red-50'
+              textColor={textColors.warning}
+              backgroundColor={backgroundColors.warningInfo}
             />
             <SummaryItem
               title='PN, OČR:'
               hours={sickLeaveFamily.plus(sickLeave)}
               days={sickLeaveFamilyDays.plus(sickLeaveDays)}
-              textColor='text-red-700'
-              backgroundColor='bg-red-50'
+              textColor={textColors.warning}
+              backgroundColor={backgroundColors.warningInfo}
             />
             {/* <SummaryItem
               title='Náhradné voľno:'
               hours={compensatoryLeave}
               days={compensatoryLeaveDays}
-              textColor='text-blue-700'
-              backgroundColor='bg-blue-50'
+              textColor={textColors.work}
+              backgroundColor={backgroundColors.workInfo}
             /> */}
           </CollapsibleContent>
         </Collapsible>
@@ -271,7 +276,7 @@ const SummaryBoard = ({
             <SummaryItem
               title='Fond:'
               hours={config.officialWorkTime}
-              textColor='text-stone-700'
+              textColor={textColors.strong}
               noBackground
             />
           </div>
@@ -280,56 +285,56 @@ const SummaryBoard = ({
               title='P-čko:'
               hours={doctorsLeave}
               days={doctorsLeaveDays}
-              textColor='text-red-700'
+              textColor={textColors.warning}
               noBackground
             />
             <SummaryItem
               title='Spolu:'
               hours={totalHours}
               days={totalDays}
-              textColor='text-blue-700'
+              textColor={textColors.work}
               noBackground
             />
             <SummaryItem
               title='Doprovod:'
               hours={doctorsLeaveFamily}
               days={doctorsLeaveFamilyDays}
-              textColor='text-red-700'
+              textColor={textColors.warning}
               noBackground
             />
             <SummaryItem
               title='Odprac.:'
               hours={worked}
               days={workedDays}
-              textColor='text-blue-700'
+              textColor={textColors.work}
               noBackground
             />
             <SummaryItem
               title='PN, OČR:'
               hours={sickLeaveFamily.plus(sickLeave)}
               days={sickLeaveFamilyDays.plus(sickLeaveDays)}
-              textColor='text-red-700'
+              textColor={textColors.warning}
               noBackground
             />
             <SummaryItem
               title='Nadčasy:'
               hours={new Decimal(0)}
               days={new Decimal(0)}
-              textColor='text-blue-700'
+              textColor={textColors.work}
               noBackground
             />
             <SummaryItem
               title='Dovolenka:'
               hours={vacation}
               days={vacationDays}
-              textColor='text-green-700'
+              textColor={textColors.vacation}
               noBackground
             />
             {/* <SummaryItem
               title='Prac. volno:'
               hours={workFreeDay}
               days={workFreeDayDays}
-              textColor='text-blue-700'
+              textColor={textColors.work}
               noBackground
             /> */}
           </div>

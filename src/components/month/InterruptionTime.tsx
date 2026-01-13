@@ -10,6 +10,7 @@ import { Label } from '../ui/label';
 import { useContext } from 'react';
 import ConfigContext from '../../app/sheet/ConfigContext';
 import { DAY_INTERRUPTIONS_KEYS } from '../../app/sheet/dayTypes';
+import { badgeColors } from '../../constants/colors';
 
 const TIME_STEP = 300;
 
@@ -47,7 +48,7 @@ const InterruptionTime = (props: InterruptionTimeCompProps) => {
       </Label>
       <div className='flex items-center space-x-1'>
         <Input
-          className={`w-[100px] ${isInvalid ? 'border-red-500' : ''} ${isDisabled ? 'cursor-not-allowed' : ''}`}
+          className={`w-[100px] ${isInvalid ? badgeColors.outlineInvalid : ''} ${isDisabled ? 'cursor-not-allowed' : ''}`}
           id='interruptionStart'
           name='interruptionStart'
           disabled={isDisabled}
@@ -67,7 +68,7 @@ const InterruptionTime = (props: InterruptionTimeCompProps) => {
           }}
         />
         <Input
-          className={`w-[100px] ${isInvalid ? 'border-red-500' : ''} ${isDisabled ? 'cursor-not-allowed' : ''}`}
+          className={`w-[100px] ${isInvalid ? badgeColors.outlineInvalid : ''} ${isDisabled ? 'cursor-not-allowed' : ''}`}
           id='interruptionEnd'
           name='interruptionEnd'
           disabled={isDisabled}

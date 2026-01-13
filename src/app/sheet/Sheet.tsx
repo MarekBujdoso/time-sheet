@@ -13,6 +13,7 @@ import ConfigContext, { ConfigContextType } from './ConfigContext';
 import { DAY_TYPES } from './dayTypes';
 import { WorkDay } from './types';
 import SummaryBoard from '../../components/month/SummaryBoard';
+import { backgroundColors } from '../../constants/colors';
 
 const addMissingDays = (
   activeYear: number,
@@ -125,7 +126,7 @@ const Sheet = () => {
 
   return (
     <div className='flex flex-col min-w-[320px] w-[98vw] min-h-svh justify-top p-2 rounded-lg'>
-      <div className='sticky top-0 mt-2 z-10 bg-gray-100'>
+      <div className={`sticky top-0 mt-2 z-10 ${backgroundColors.mutedPanel}`}>
         <MonthPager update={updateMonthData} />
         <SummaryBoard monthData={monthData} setUserName={setUserName} userName={userName} isDesktop={isDesktop}/>
       </div>

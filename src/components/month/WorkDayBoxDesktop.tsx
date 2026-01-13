@@ -4,12 +4,13 @@ import { Drawer, DrawerTrigger } from '../ui/drawer';
 import WorkDayBoxDesktopContent from './WorkDayBoxDesktopContent';
 import WorkDayDrawerContent from './WorkDayDrawerContent';
 import { WorkDayBoxProps } from './workDayUtils';
+import { iconColors } from '../../constants/colors';
 
 const WorkDayDrawerTrigger: React.FC = () => {
   return (
     <>
       <svg className='m-[10px]' width='100%' height='2'>
-        <line x1='0' y1='1' x2='100%' y2='1' stroke='lightgrey' strokeWidth='2' />
+        <line x1='0' y1='1' x2='100%' y2='1' stroke={iconColors.grayStroke} strokeWidth='2' />
       </svg>
       <DrawerTrigger asChild>
         <Button variant='outline' size='lg' className='text-lg'>

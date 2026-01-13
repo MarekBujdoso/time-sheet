@@ -1,6 +1,7 @@
 import { isWeekend } from 'date-fns/fp/isWeekend';
 import Decimal from 'decimal.js';
 import { DayType, InterruptionWithTimeType, type WorkDay } from '../../app/sheet/types';
+import { gradients, workDayBackgrounds } from '../../constants/colors';
 
 export const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
   const { dayType, dayWorked } = workDay;
@@ -16,18 +17,19 @@ export const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
   if (isWeekend(workDay.startTime)) return 'bg-emerald-100';
   if (dayWorked.greaterThan(0)) {
     // if (compensatoryLeave?.greaterThan(0)) return 'bg-gradient-to-r from-blue-200 to-rose-200';
-    if (workDay.vacation.greaterThan(0)) return `bg-gradient-to-r from-blue-200 to-emerald-100`;
+    if (workDay.vacation.greaterThan(0)) return gradients.highlight;
     if (
       workDay.interruptions?.some(
         (interruption) =>
           interruption.type === InterruptionWithTimeType.DOCTORS_LEAVE ||
           interruption.type === InterruptionWithTimeType.DOCTORS_LEAVE_FAMILY,
       )
-    )
-      return `bg-gradient-to-r from-blue-200  to-rose-200`;
-    // return `bg-gradient-to-r from-blue-200 from-${calcPercentage(dayWorked, officialWorkTime)}% to-rose-200 to-100%`;
+    ) {
+      return gradients.alert;
+      // return `bg-gradient-to-r from-blue-200 from-${calcPercentage(dayWorked, officialWorkTime)}% to-rose-200 to-100%`;
+    }
   }
-  return 'bg-white';
+  return workDayBackgrounds.default;
 };
 
 export interface WorkDayBoxProps {

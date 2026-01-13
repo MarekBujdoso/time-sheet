@@ -11,10 +11,7 @@ import {
   calcSickLeaveFamily,
 } from '../components/utils/calculations';
 import { getMonthName } from './skUtils';
-
-const BLACK_COLOR = 'FF000000';
-const GREEN_COLOR = 'FFDDE5C3';
-const GRAY_COLOR = 'FFD9D9D9';
+import { excelColors } from '../constants/colors';
 const WORK_TIME_FOND_CELL = 'H1';
 
 const fillCell = (cell: ExcelJS.Cell, color: string) => {
@@ -28,10 +25,10 @@ const fillCell = (cell: ExcelJS.Cell, color: string) => {
 
 const borderCell = (cell: ExcelJS.Cell) => {
   cell.border = {
-    top: { style: 'thin', color: { argb: BLACK_COLOR } },
-    bottom: { style: 'thin', color: { argb: BLACK_COLOR } },
-    left: { style: 'thin', color: { argb: BLACK_COLOR } },
-    right: { style: 'thin', color: { argb: BLACK_COLOR } },
+    top: { style: 'thin', color: { argb: excelColors.black } },
+    bottom: { style: 'thin', color: { argb: excelColors.black } },
+    left: { style: 'thin', color: { argb: excelColors.black } },
+    right: { style: 'thin', color: { argb: excelColors.black } },
   };
 };
 
@@ -126,7 +123,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       wrapText: true,
       textRotation: [1, 8, 9, 10, 11, 12, 13, 14].includes(collNumber) ? 90 : 0,
     };
-    fillCell(cell, GREEN_COLOR);
+    fillCell(cell, excelColors.green);
     borderCell(cell);
   });
   row = sheet.addRow([
@@ -148,7 +145,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   row.eachCell((cell, colNumber) => {
     cell.font = { bold: true, size: colNumber === 4 ? 7.5 : 10, name: 'Calibri' };
     cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
-    fillCell(cell, GREEN_COLOR);
+    fillCell(cell, excelColors.green);
     borderCell(cell);
   });
   row = sheet.addRow([
@@ -170,7 +167,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   row.eachCell((cell) => {
     cell.font = { bold: true, size: 9, name: 'Calibri' };
     cell.alignment = { vertical: 'middle', horizontal: 'center' };
-    fillCell(cell, GREEN_COLOR);
+    fillCell(cell, excelColors.green);
     borderCell(cell);
   });
   sheet.mergeCells('A3:A5'); //dni
@@ -247,7 +244,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
       cell.alignment = { horizontal: 'center' };
       borderCell(cell);
       if (title === 'Víkend' || [8, 13].includes(colNumber)) {
-        fillCell(cell, GREEN_COLOR);
+        fillCell(cell, excelColors.green);
       }
     });
     // nie pracovny den a nie je to custom den s pracovnou dobou
@@ -275,7 +272,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     cell.font = { size: 10, name: 'Calibri' };
     cell.alignment = { horizontal: 'center' };
     borderCell(cell);
-    fillCell(cell, GREEN_COLOR);
+    fillCell(cell, excelColors.green);
   });
   sheet.mergeCells(`A${sheet.rowCount}:D${sheet.rowCount}`); // celkom
   row = sheet.addRow(['', null, null, null, null, null, null, null, null, null, null, null]);
@@ -308,7 +305,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
     cell.alignment = { horizontal: 'center' };
     if (collNumber > 8) {
       borderCell(cell);
-      fillCell(cell, GRAY_COLOR);
+      fillCell(cell, excelColors.gray);
     }
   });
   sheet.mergeCells(`I${sheet.rowCount}:L${sheet.rowCount}`);
@@ -506,7 +503,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
   row.eachCell((cell) => {
     cell.font = { size: 10, bold: true, name: 'Calibri' };
     borderCell(cell);
-    fillCell(cell, GRAY_COLOR);
+    fillCell(cell, excelColors.gray);
   });
   sheet.mergeCells(`I${sheet.rowCount}:M${sheet.rowCount}`); // spolu
 

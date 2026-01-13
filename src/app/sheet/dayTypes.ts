@@ -192,7 +192,7 @@ export const emptyDay = (startTime: Date, endTime: Date): WorkDay => ({
   vacation: new Decimal(0),
   compensatoryLeave: new Decimal(0),
   dayType: DayType.EMPTY_DAY,
-  title: DAY_TYPES_KEYS.emptyDay,
+  title: '',
   dayWorked: new Decimal(0),
   interruptions: [],
 });

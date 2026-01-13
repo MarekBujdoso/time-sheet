@@ -17,11 +17,12 @@ import { DrawerClose, DrawerFooter } from '../ui/drawer';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { calculateLunch, calculateWorked, recalculateWorkDay } from '../utils/calculations';
+import { calculateWorked, recalculateWorkDay } from '../utils/calculations';
 import InterruptionTime from './InterruptionTime';
 import { decimalToTimeStr, numberToTimeStr } from './workDayUtils';
 import { Checkbox } from '../ui/checkbox';
 import { differenceInMinutes } from 'date-fns';
+import { badgeColors } from '../../constants/colors';
 
 interface WorkDayFormProps {
   workDay: WorkDay;
@@ -199,7 +200,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
             <div className='flex justify-center items-end space-x-1'>
               <Soup fill={oneDay.lunch ? 'currentColor' : 'none'}/> {/* asi nie cez fill ale pridat obed text alebo farbu */}
               <Checkbox
-                className='bg-secondary'
+                className={badgeColors.lunchCheckboxBackground}
                 checked={oneDay.lunch}
                 onCheckedChange={(checked) => changeCustomDay('lunch', checked)}
               />
@@ -276,7 +277,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
           {isCustomDay && (
             <div className='flex justify-center items-end space-x-1'>
               <Checkbox
-                className='bg-secondary'
+                className={badgeColors.lunchCheckboxBackground}
                 checked={!oneDay.noWorkTime}
                 onCheckedChange={clearWorkingTime}
               />

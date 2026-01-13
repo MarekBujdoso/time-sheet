@@ -10,7 +10,6 @@ import {
   calcSickLeave,
   calcSickLeaveFamily,
 } from '../components/utils/calculations';
-import { getTitle } from '../components/utils/workDay';
 import { getMonthName } from './skUtils';
 
 const BLACK_COLOR = 'FF000000';
@@ -188,7 +187,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
 
   monthData.forEach((data) => {
     // console.log('data', JSON.stringify(data, null, 2));
-    const title = getTitle(data);
+    const title = data.title;
     const isWorkingDay = data.dayType === DayType.WORK_DAY;
     const isCustomDay = data.dayType === DayType.CUSTOM_DAY;
     const negativeInterruptions =

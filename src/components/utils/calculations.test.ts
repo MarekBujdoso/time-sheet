@@ -5,6 +5,7 @@ import { ConfigContextType } from '../../app/sheet/ConfigContext';
 import { set } from 'date-fns/set';
 import { toDate } from 'date-fns/toDate';
 import Decimal from 'decimal.js';
+import { DAY_TYPES_KEYS } from '../../app/sheet/dayTypes';
 
 
 const defaultConfig: ConfigContextType = {
@@ -29,6 +30,7 @@ const defaultWorkDay: WorkDay = {
   dayWorked: new Decimal(7.5),
   interruptions: [],
   dayType: DayType.WORK_DAY,
+  title: DAY_TYPES_KEYS.workDay,
   vacation: new Decimal(0),
   compensatoryLeave: new Decimal(0),
   month: 0,
@@ -416,6 +418,7 @@ describe('recalculateWorkDay', () => {
       endTime: currentDay,
       interruptions: [],
       dayType: DayType.WORK_DAY,
+      title: DAY_TYPES_KEYS.workDay,
       workFromHome: new Decimal(0),
       dayWorked: new Decimal(0),
       lunch: false,
@@ -452,6 +455,7 @@ describe('recalculateWorkDay', () => {
         }
       ],
       dayType: DayType.WORK_DAY,
+      title: DAY_TYPES_KEYS.workDay,
       workFromHome: new Decimal(0),
       dayWorked: new Decimal(0),
       lunch: false,
@@ -490,6 +494,7 @@ describe('recalculateWorkDay', () => {
         }
       ],
       dayType: DayType.WORK_DAY,
+      title: DAY_TYPES_KEYS.workDay,
       workFromHome: new Decimal(0),
       dayWorked: new Decimal(0),
       lunch: false,

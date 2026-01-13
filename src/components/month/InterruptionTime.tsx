@@ -9,7 +9,6 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { useContext } from 'react';
 import ConfigContext from '../../app/sheet/ConfigContext';
-// import { checkTheEndingTime } from "../utils/workDay";
 import { DAY_INTERRUPTIONS_KEYS } from '../../app/sheet/dayTypes';
 
 const TIME_STEP = 300;
@@ -86,12 +85,6 @@ const InterruptionTime = (props: InterruptionTimeCompProps) => {
               time: new Decimal(differenceInMinutes(newEndTime, startTime) / 60),
             });
           }}
-          // onBlur={() => {
-          //   const [hours, minutes] = format(endTime, 'HH:mm').split(':').map(Number)
-          //   const isEnding = checkTheEndingTime(hours, minutes)
-          //   const newEndTime = set(endTime, { hours: isEnding ? config.officialEndTime.hours : hours, minutes: isEnding ? config.officialEndTime.minutes : minutes })
-          //   update({...interruption, endTime: newEndTime, time: new Decimal(differenceInMinutes(newEndTime, startTime) / 60)})
-          // }}
         />
       </div>
       <div className='flex items-center space-x-1'>

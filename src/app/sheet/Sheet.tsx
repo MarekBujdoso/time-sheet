@@ -29,7 +29,13 @@ const addMissingDays = (
   for (let i = 1; i <= daysInMonth; i++) {
     if (!days.includes(i)) {
       const currentDay = new Date(activeYear, activeMonth, i);
-      if (isBefore(currentDay, new Date()) && !isWeekend(currentDay)) {
+      if (isWeekend(currentDay)) {
+        data.push({
+          ...DAY_TYPES.weekend(currentDay, currentDay),
+          month: activeMonth,
+          year: activeYear,
+        });
+      } else if (isBefore(currentDay, new Date())) {
         data.push({
           ...DAY_TYPES.workDay(
             set(currentDay, config.defaultStartTime),

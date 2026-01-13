@@ -6,7 +6,6 @@ import ConfigContext, { ConfigContextType } from '../../app/sheet/ConfigContext'
 import { hasDisturbance } from '../../app/sheet/dayTypes';
 import { WorkDay } from '../../app/sheet/types';
 import { getDayNameFromDate } from '../../utils/skUtils';
-import { getTitle } from '../utils/workDay';
 import DayDisturbances from './DayDisturbances';
 import { getBaseColor, numberToTimeStr } from './workDayUtils';
 
@@ -71,7 +70,7 @@ const TopMainIcon: React.FC<{ workDay: WorkDay; config: ConfigContextType }> = (
 };
 
 const MainTitle: React.FC<{ workDay: WorkDay }> = ({ workDay }) => {
-  const title = getTitle(workDay);
+  const title = workDay.title;
   const Icon = workDay.typeIcon;
   const hasDisturb = hasDisturbance(workDay);
   return (

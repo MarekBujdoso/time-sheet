@@ -37,6 +37,9 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     ...calculateWorked(workDay, config),
   });
 
+  const isCustomDay = React.useMemo(() => oneDay.dayType === DayType.CUSTOM_DAY, [oneDay]);
+  const isWorkDay = React.useMemo(() => oneDay.dayType === DayType.WORK_DAY, [oneDay]);
+
   const changeDay = React.useCallback(
     (key: string, value: string | Decimal | boolean | Date | InterruptionTimeProps[]) => {
       setOneDay((day) => {
@@ -54,6 +57,18 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     },
     [config],
   );
+  
+  const changeCustomDay = (key: string, value: string | Decimal | boolean | Date | InterruptionTimeProps[]) => {
+    setOneDay((day) => {
+      if ((key === 'startTime' || key === 'endTime') && typeof value === 'string') {
+        const timeArray = value.split(':');
+        value = new Date(day[key].setHours(Number(timeArray[0]), Number(timeArray[1])));
+      }
+      return { ...day, [key]: value };
+    });
+  };
+
+  const changeDayValues = isCustomDay ? changeCustomDay : changeDay;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -69,7 +84,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
   const addInterruption = (e: React.FormEvent, type: InterruptionWithTimeType) => {
     e.preventDefault();
     if (oneDay.interruptions.length >= 1) return;
-    changeDay('interruptions', [
+    changeDayValues('interruptions', [
       ...oneDay.interruptions,
       {
         id: uuidv4(),
@@ -82,14 +97,14 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
   };
 
   const removeInterruption = (id: string) => {
-    changeDay(
+    changeDayValues(
       'interruptions',
       oneDay.interruptions.filter((interruption) => interruption.id !== id),
     );
   };
 
   const updateInterruption = (newInterruption: InterruptionTimeProps) => {
-    changeDay(
+    changeDayValues(
       'interruptions',
       oneDay.interruptions.map((interruption) =>
         interruption.id === newInterruption.id ? newInterruption : interruption,
@@ -109,19 +124,17 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
 
   const clearWorkingTime = () => {
     setOneDay((day) => {
-      const workedTime = new Decimal(differenceInMinutes(day.endTime, day.startTime) / 60);
+      // const workedTime = new Decimal(differenceInMinutes(day.endTime, day.startTime) / 60);
       const noWorkTime = !day.noWorkTime;
       return {
         ...day,
-        dayWorked: noWorkTime ? new Decimal(0) : workedTime,
-        lunch: noWorkTime ? false : calculateLunch(workedTime).greaterThan(0),
+        // dayWorked: noWorkTime ? new Decimal(0) : workedTime,
+        // lunch: noWorkTime ? false : calculateLunch(workedTime).greaterThan(0),
         noWorkTime,
       };
     });
   };
 
-  const isCustomDay = React.useMemo(() => oneDay.dayType === DayType.CUSTOM_DAY, [oneDay]);
-  const isWorkDay = React.useMemo(() => oneDay.dayType === DayType.WORK_DAY, [oneDay]);
 
   return (
     <form onSubmit={handleSubmit} name='workDayForm'>
@@ -152,9 +165,46 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
         <div className='flex p-2 justify-between'>
           <div className='flex items-center space-x-2'>
             <div className='text-sm font-medium leading-none'>Odpracované</div>
-            <span className='text-lg font-semibold'>{numberToTimeStr(oneDay.dayWorked)}</span>
+            {isCustomDay ? (
+              <Input
+                type='number'
+                step={0.5}
+                min={0}
+                max={12}
+                value={oneDay.dayWorked.toNumber()}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  if (newValue == null || newValue === '' || Number(newValue) < 0) {
+                    changeCustomDay('dayWorked', new Decimal(0));
+                    return;
+                  }
+                  if (Number(newValue) > 12) {
+                    changeCustomDay('dayWorked', new Decimal(12));
+                    return;
+                  }
+                  changeCustomDay('dayWorked', new Decimal(newValue));
+                }}
+              />
+            ) : (
+              <span className='text-lg font-semibold'>{numberToTimeStr(oneDay.dayWorked)}</span>
+            )}
           </div>
-          {oneDay.lunch && (
+          {/* {oneDay.lunch && (
+            <div className='flex items-center space-x-2 justify-self-end'>
+              <Soup />
+            </div>
+          )} */}
+           {/* TODOMB este opravit aby po otvoreni sa vsetko neprepocitalo, lebo to prepise niektore hodnoty ktore su v inputoch */}
+          {isCustomDay ? (
+            <div className='flex justify-center items-end space-x-1'>
+              <Soup fill={oneDay.lunch ? 'currentColor' : 'none'}/> {/* asi nie cez fill ale pridat obed text alebo farbu */}
+              <Checkbox
+                className='bg-secondary'
+                checked={oneDay.lunch}
+                onCheckedChange={(checked) => changeCustomDay('lunch', checked)}
+              />
+            </div>
+          ) : oneDay.lunch && (
             <div className='flex items-center space-x-2 justify-self-end'>
               <Soup />
             </div>
@@ -190,13 +240,13 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               onChange={(e) => {
                 const newValue = e.target.value;
                 if (newValue == null || newValue === '') {
-                  changeDay(
+                  changeDayValues(
                     'startTime',
                     `${config.officialStartTime.hours}:${config.officialStartTime.minutes}`,
                   );
                   return;
                 }
-                changeDay('startTime', newValue);
+                changeDayValues('startTime', newValue);
               }}
               disabled={!isCustomDay || oneDay.noWorkTime}
             />
@@ -212,13 +262,13 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               onChange={(e) => {
                 const newValue = e.target.value;
                 if (newValue == null || newValue === '') {
-                  changeDay(
+                  changeDayValues(
                     'endTime',
                     `${config.officialEndTime.hours}:${config.officialEndTime.minutes}`,
                   );
                   return;
                 }
-                changeDay('endTime', e.target.value)
+                changeDayValues('endTime', e.target.value);
               }}
               disabled={!isCustomDay || oneDay.noWorkTime}
             />
@@ -232,6 +282,15 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               />
             </div>
           )}
+        </div>
+        <div>
+          <Label htmlFor='title'>Názov</Label>
+          <Input
+            id='title'
+            name='title'
+            value={oneDay.title}
+            onChange={(e) => changeDayValues('title', e.target.value)}
+          />
         </div>
         <div className='grid grid-cols-3 gap-2 items-left p-2'>
           {/* <div className='flex items-center space-x-2 justify-between'> */}
@@ -251,11 +310,11 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               onChange={(e) => {
                 const newValue = e.target.value;
                 if (newValue == null || newValue === '') {
-                  changeDay('workFromHome', new Decimal(0));
+                  changeDayValues('workFromHome', new Decimal(0));
                   return;
                 }
                 const [hours, minutes] = newValue.split(':').map(Number);
-                changeDay('workFromHome', new Decimal(hours).plus(minutes / 60));
+                changeDayValues('workFromHome', new Decimal(hours).plus(minutes / 60));
               }}
             />
             {/* ) : (
@@ -283,11 +342,11 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               onChange={(e) => {
                 const newValue = e.target.value;
                 if (newValue == null || newValue === '') {
-                  changeDay('vacation', new Decimal(0));
+                  changeDayValues('vacation', new Decimal(0));
                   return;
                 }
                 const [hours, minutes] = newValue.split(':').map(Number);
-                changeDay('vacation', new Decimal(hours).plus(minutes / 60));
+                changeDayValues('vacation', new Decimal(hours).plus(minutes / 60));
               }}
             />
             {/* //{' '}
@@ -313,11 +372,11 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               onChange={(e) => {
                 const newValue = e.target.value;
                 if (newValue == null || newValue === '') {
-                  changeDay('compensatoryLeave', new Decimal(0));
+                  changeDayValues('compensatoryLeave', new Decimal(0));
                   return;
                 }
                 const [hours, minutes] = newValue.split(':').map(Number);
-                changeDay('compensatoryLeave', new Decimal(hours).plus(minutes / 60));
+                changeDayValues('compensatoryLeave', new Decimal(hours).plus(minutes / 60));
               }}
             />
             {/* <span className='text-lg font-semibold'>

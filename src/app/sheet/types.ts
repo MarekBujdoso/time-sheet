@@ -28,6 +28,7 @@ export interface WorkDay {
     vacation: Decimal, // Dovolenka
     compensatoryLeave: Decimal, // Náhradné voľno
     dayType: DayType,
+    title: string,
     dayWorked: Decimal, // Odpracovane za den
     interruptions: InterruptionTimeProps[], // Prerusenia
     typeIcon?: LucideIcon,

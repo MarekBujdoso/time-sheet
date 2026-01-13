@@ -2,7 +2,6 @@ import { format } from 'date-fns';
 import { Soup } from 'lucide-react';
 import { hasDisturbance } from '../../app/sheet/dayTypes';
 import { getDayNameFromDate } from '../../utils/skUtils';
-import { getTitle } from '../utils/workDay';
 import { numberToTimeStr } from './workDayUtils';
 import DayDisturbances from './DayDisturbances';
 import { WorkDay } from '../../app/sheet/types';
@@ -18,7 +17,7 @@ const BaseDayDisturbanceItem = ({ name, hours }: { name: string; hours: Decimal 
 
 const WorkDayBoxContent = ({ workDay }: { workDay: WorkDay }) => {
   const { startTime, lunch = false, dayWorked } = workDay;
-  const title = getTitle(workDay);
+  const title = workDay.title;
   const hasDisturb = hasDisturbance(workDay);
 
   return (

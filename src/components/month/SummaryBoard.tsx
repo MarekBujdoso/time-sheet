@@ -243,7 +243,7 @@ const SummaryBoard = ({
   const progress = totalHours.dividedBy(workTimeInMonth).mul(100).toNumber();
 
   return (
-    <div className='border bg-white rounded-2xl shadow-md mt-[5px] text-sm md:text-base py-[15px]'>
+    <div className='border bg-white rounded-2xl shadow-md mt-[5px] text-sm md:text-base py-[15px] min-w-[340px]'>
       {isDesktop ? (
         <Collapsible
           open={isOpen}
@@ -352,11 +352,11 @@ const SummaryBoard = ({
           onOpenChange={setIsOpen}
           // className="flex w-[350px] flex-col gap-2"
         >
-          <div className='flex items-center px-[10px] justify-between'>
+          <div className='flex items-center px-[10px] justify-between gap-[10px]'>
             <div className='flex flex-col items-start'>
               <span className={`font-semibold text-xs ${textColors.label}`}>Meno:</span>
               <Input
-                className='max-w-[300px] text-sm'
+                className='text-sm'
                 id='user-name'
                 name='userName'
                 value={userName}
@@ -364,23 +364,32 @@ const SummaryBoard = ({
                 onChange={(e) => setUserName(e.target.value)}
               />
             </div>
-            <div className='flex flex-col justify-between items-end'>
-              <DayFromDaysItem
-                day={totalDays}
-                fromDays={workTimeInMonthDays}
-                textColor={textColors.strong}
-              />
-              <span
-                className={`mx-[5px] text-base font-bold ${progress >= 100 ? textColors.complete : textColors.progress}`}
-              >
-                {progress.toPrecision(3)}%
-              </span>
+            <div className='flex gap-[10px] items-center flex-grow'>
+              <div className='flex flex-col justify-between items-end flex-grow'>
+                <DayFromDaysItem
+                  day={totalDays}
+                  fromDays={workTimeInMonthDays}
+                  textColor={textColors.strong}
+                />
+                <div className='flex w-full items-center'>
+                  <Progress
+                    className='min-w-[45px] flex-grow'
+                    progressColor={progress >= 100 ? progressColors.success : progressColors.info}
+                    value={progress}
+                  />
+                  <span
+                    className={`mx-[5px] text-base font-bold ${progress >= 100 ? textColors.complete : textColors.progress}`}
+                  >
+                    {progress.toPrecision(3)}%
+                  </span>
+                </div>
+              </div>
+              <CollapsibleTrigger asChild className='justify-self-center'>
+                <Button variant='outline' size='sm'>
+                  <PanelTopOpen />
+                </Button>
+              </CollapsibleTrigger>
             </div>
-            <CollapsibleTrigger asChild className='justify-self-center'>
-              <Button variant='outline' size='sm'>
-                <PanelTopOpen />
-              </Button>
-            </CollapsibleTrigger>
           </div>
           <CollapsibleContent className='flex justify-between gap-[10px] px-[10px] mt-[5px]'>
             <div
@@ -395,9 +404,7 @@ const SummaryBoard = ({
                 hours={config.officialWorkTime}
                 textColor={textColors.strong}
               />
-              <div
-                className={`rounded-md border border-dashed ${backgroundColors.vacationInfo}`}
-              >
+              <div className={`rounded-md border border-dashed ${backgroundColors.vacationInfo}`}>
                 <SimpleDayItem
                   title='Dovolenka'
                   days={vacationDays}
@@ -408,11 +415,7 @@ const SummaryBoard = ({
             <div
               className={`flex flex-col gap-[3px] flex-grow rounded-md border border-dashed flex-wrap h-[115px] ${backgroundColors.warningInfo}`}
             >
-              <SimpleDayItem
-                title='P-čko'
-                days={doctorsLeaveDays}
-                textColor={textColors.warning}
-              />
+              <SimpleDayItem title='P-čko' days={doctorsLeaveDays} textColor={textColors.warning} />
               <SimpleDayItem title='PN' days={sickLeaveDays} textColor={textColors.warning} />
               <SimpleDayItem
                 title='Doprovod'

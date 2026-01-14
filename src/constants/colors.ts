@@ -18,11 +18,14 @@ export const badgeColors = {
 };
 
 export const textColors = {
+  label: 'text-stone-600',
   strong: 'text-stone-700',
   work: 'text-blue-700',
   vacation: 'text-green-700',
   warning: 'text-red-700',
   muted: 'text-gray-400',
+  progress: 'text-blue-400',
+  complete: 'text-green-400',
 };
 
 export const backgroundColors = {

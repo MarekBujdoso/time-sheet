@@ -130,7 +130,7 @@ const Sheet = () => {
         <MonthPager update={updateMonthData} />
         <SummaryBoard monthData={monthData} setUserName={setUserName} userName={userName} isDesktop={isDesktop}/>
       </div>
-      <div>
+      <div className='mt-[5px]'>
         <div className='grid auto-rows-min gap-1 md:grid-cols-[repeat(auto-fit,_minmax(260px,_1fr))] md:gap-y-11 md:my-[30px] md:justify-items-center'>
           {monthData.map((data) => {
             return isDesktop ? (

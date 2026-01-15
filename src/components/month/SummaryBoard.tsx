@@ -243,7 +243,7 @@ const SummaryBoard = ({
   const progress = totalHours.dividedBy(workTimeInMonth).mul(100).toNumber();
 
   return (
-    <div className='border bg-white rounded-2xl shadow-md mt-[5px] text-sm md:text-base py-[15px] min-w-[340px]'>
+    <div className='border bg-white rounded-2xl shadow-md mt-[5px] text-sm md:text-base py-[5px] min-w-[340px]'>
       {isDesktop ? (
         <Collapsible
           open={isOpen}
@@ -385,7 +385,7 @@ const SummaryBoard = ({
                 </div>
               </div>
               <CollapsibleTrigger asChild className='justify-self-center'>
-                <Button variant='outline' size='sm'>
+                <Button variant='outline' className='h-[50px]'>
                   <PanelTopOpen />
                 </Button>
               </CollapsibleTrigger>

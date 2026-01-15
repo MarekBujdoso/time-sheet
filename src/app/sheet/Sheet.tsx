@@ -12,7 +12,7 @@ import { generateEPC } from '../../utils/excelUtils';
 import ConfigContext, { ConfigContextType } from './ConfigContext';
 import { DAY_TYPES } from './dayTypes';
 import { WorkDay } from './types';
-import SummaryBoard from '../../components/month/SummaryBoard';
+import SummaryBoard from '../../components/SummaryBoard';
 import { backgroundColors } from '../../constants/colors';
 
 const addMissingDays = (

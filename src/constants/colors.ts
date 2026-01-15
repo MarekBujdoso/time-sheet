@@ -18,6 +18,7 @@ export const badgeColors = {
 };
 
 export const textColors = {
+  text: 'text-stone-400',
   label: 'text-stone-600',
   strong: 'text-stone-700',
   work: 'text-blue-700',

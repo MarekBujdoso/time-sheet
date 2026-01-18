@@ -1,12 +1,12 @@
 import Decimal from 'decimal.js';
-import { CalendarDays, PanelTopOpen, Timer } from 'lucide-react';
+import { CalendarDays, Timer } from 'lucide-react';
 import React, { useContext } from 'react';
 import ConfigContext from '../../../app/sheet/ConfigContext';
 import { backgroundColors, progressColors, textColors } from '../../../constants/colors';
 import { Button } from '../../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../ui/collapsible';
-import { Input } from '../../ui/input';
 import { Progress } from '../../ui/progress';
+import EmployeeName from './EmployeeName';
 
 const DayFromDaysItem = ({
   day,
@@ -18,8 +18,8 @@ const DayFromDaysItem = ({
   textColor: string;
 }) => {
   return (
-    <div className={`flex font-semibold ${textColor} items-baseline mx-[10px]`}>
-      <CalendarDays size={12} color='gray' />
+    <div className={`flex font-semibold ${textColor} items-baseline`}>
+      <CalendarDays size={14} color='gray' />
       <span className='pl-[3px] text-lg font-bold'>{day.toFixed(1)}</span>
       <span>/</span>
       <span className=''>{fromDays.toFixed(1)}d</span>
@@ -106,43 +106,33 @@ const SummaryMobile = ({
       // className="flex w-[350px] flex-col gap-2"
     >
       <div className='flex items-center px-[10px] justify-between gap-[10px]'>
-        <div className='flex flex-col items-start'>
-          <span className={`font-semibold text-xs ${textColors.label}`}>Meno:</span>
-          <Input
-            className='text-sm'
-            id='user-name'
-            name='userName'
-            value={userName}
-            autoComplete='off'
-            onChange={(e) => setUserName(e.target.value)}
-          />
-        </div>
-        <div className='flex gap-[10px] items-center flex-grow'>
-          <div className='flex flex-col justify-between items-end flex-grow'>
-            <DayFromDaysItem
-              day={totalDays}
-              fromDays={workTimeInMonthDays}
-              textColor={textColors.strong}
+        <DayFromDaysItem
+          day={totalDays}
+          fromDays={workTimeInMonthDays}
+          textColor={textColors.strong}
+        />
+        <EmployeeName userName={userName} setUserName={setUserName} />
+      </div>
+      <div className='flex mx-[10px] gap-[10px] items-center flex-grow'>
+        <div className='flex flex-col justify-between items-end flex-grow'>
+          <div className='flex w-full items-center'>
+            <Progress
+              className='min-w-[45px] flex-grow'
+              progressColor={progress >= 100 ? progressColors.success : progressColors.info}
+              value={progress}
             />
-            <div className='flex w-full items-center'>
-              <Progress
-                className='min-w-[45px] flex-grow'
-                progressColor={progress >= 100 ? progressColors.success : progressColors.info}
-                value={progress}
-              />
-              <span
-                className={`mx-[5px] text-base font-bold ${progress >= 100 ? textColors.complete : textColors.progress}`}
-              >
-                {progress.toPrecision(3)}%
-              </span>
-            </div>
+            <span
+              className={`mx-[5px] text-base font-bold ${progress >= 100 ? textColors.complete : textColors.progress}`}
+            >
+              {progress.toPrecision(3)}%
+            </span>
           </div>
-          <CollapsibleTrigger asChild className='justify-self-center'>
-            <Button variant='outline' className='h-[50px]'>
-              <PanelTopOpen />
-            </Button>
-          </CollapsibleTrigger>
         </div>
+        <CollapsibleTrigger asChild className='justify-self-center'>
+          <Button variant='outline'>
+            Detaily
+          </Button>
+        </CollapsibleTrigger>
       </div>
       <CollapsibleContent className='flex justify-between gap-[10px] px-[10px] mt-[5px]'>
         <div

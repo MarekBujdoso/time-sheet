@@ -5,7 +5,6 @@ import SummaryMobile from './components/SummaryMobile';
 import SummaryDesktop from './components/SummaryDesktop';
 import useMonthSummary from './hooks/useMonthSummary';
 
-
 const SummaryBoard = ({
   monthData,
   setUserName,
@@ -71,7 +70,7 @@ const SummaryBoard = ({
           sickLeaveFamily={sickLeaveFamily}
           sickLeaveFamilyDays={sickLeaveFamilyDays}
           progress={progress}
-          />
+        />
       ) : (
         <SummaryMobile
           userName={userName}

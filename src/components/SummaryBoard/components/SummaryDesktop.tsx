@@ -6,8 +6,8 @@ import { backgroundColors, progressColors, textColors } from '../../../constants
 import { numberToTimeStr } from '../../month/workDayUtils';
 import { Button } from '../../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../ui/collapsible';
-import { Input } from '../../ui/input';
 import { Progress } from '../../ui/progress';
+import EmployeeName from './EmployeeName';
 
 const Hours = ({ hours, textColor }: { hours: Decimal; textColor: string }) => {
   return (
@@ -132,17 +132,7 @@ const SummaryDesktop = ({
       // className="flex w-[350px] flex-col gap-2"
     >
       <div className='flex items-center mx-auto max-w-[600px] justify-between gap-2 mx-[10px]'>
-        <div className='flex flex-col items-start'>
-          <span className={`font-semibold ${textColors.label}`}>Meno:</span>
-          <Input
-            className='min-w-[260px]'
-            id='user-name'
-            name='userName'
-            value={userName}
-            autoComplete='off'
-            onChange={(e) => setUserName(e.target.value)}
-          />
-        </div>
+        <EmployeeName userName={userName} setUserName={setUserName} />
         <div className='flex flex-col items-end flex-grow'>
           <DayFromDaysItem
             hours={totalHours}

@@ -131,8 +131,8 @@ const SummaryDesktop = ({
       onOpenChange={setIsOpen}
       // className="flex w-[350px] flex-col gap-2"
     >
-      <div className='flex items-center mx-auto max-w-[600px] justify-between gap-2 mx-[10px]'>
-        <EmployeeName userName={userName} setUserName={setUserName} />
+      <div className='flex items-center mx-auto max-w-[700px] justify-between gap-2 mx-[10px]'>
+        <EmployeeName userName={userName} setUserName={setUserName} isDesktop={true} />
         <div className='flex flex-col items-end flex-grow'>
           <DayFromDaysItem
             hours={totalHours}
@@ -154,13 +154,13 @@ const SummaryDesktop = ({
           </div>
         </div>
         <CollapsibleTrigger asChild className='justify-self-center'>
-          <Button variant='outline' size='sm'>
+          <Button variant='outline' className="h-[50px] w-[85px] text-wrap">
             Detaily
           </Button>
         </CollapsibleTrigger>
       </div>
-      <CollapsibleContent className={`flex mx-auto max-w-[600px] gap-2 m-2`}>
-        <div className='flex flex-col flex-grow justify-between items-center'>
+      <CollapsibleContent className={`flex mx-auto max-w-[600px] gap-2`}>
+        <div className='flex flex-col mt-[10px] flex-grow justify-between items-center'>
           <div
             className={`flex flex-col w-full border border-dashed rounded-md px-[15px] ${backgroundColors.workInfo}`}
           >
@@ -195,7 +195,7 @@ const SummaryDesktop = ({
           </div>
         </div>
         <div
-          className={`flex flex-col flex-grow justify-between border border-dashed rounded-md px-[15px] ${backgroundColors.warningInfo}`}
+          className={`flex flex-col flex-grow mt-[10px] justify-between border border-dashed rounded-md px-[15px] ${backgroundColors.warningInfo}`}
         >
           <SummaryItem
             title='P-čko:'

@@ -49,7 +49,7 @@ const SummaryBoard = ({
   const progress = totalHours.dividedBy(workTimeInMonth).mul(100).toNumber();
 
   return (
-    <div className='border bg-white rounded-2xl shadow-md mt-[5px] text-sm md:text-base py-[5px] min-w-[340px]'>
+    <div className='border bg-white rounded-2xl shadow-md mt-[5px] text-sm md:text-base py-[5px] min-w-[350px]'>
       {isDesktop ? (
         <SummaryDesktop
           userName={userName}

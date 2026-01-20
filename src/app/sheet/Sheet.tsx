@@ -125,7 +125,7 @@ const Sheet = () => {
   );
 
   return (
-    <div className='flex flex-col min-w-[320px] w-[98vw] min-h-svh justify-top p-2 rounded-lg'>
+    <div className='flex flex-col min-w-[350px] w-[98vw] min-h-svh justify-top p-1 rounded-lg'>
       <div className={`sticky top-0 mt-2 z-10 ${backgroundColors.mutedPanel}`}>
         <MonthPager update={updateMonthData} />
         <SummaryBoard monthData={monthData} setUserName={setUserName} userName={userName} isDesktop={isDesktop}/>

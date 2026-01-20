@@ -103,18 +103,17 @@ const SummaryMobile = ({
     <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
-      // className="flex w-[350px] flex-col gap-2"
+    // className="flex w-[350px] flex-col gap-2"
     >
-      <div className='flex items-center px-[10px] justify-between gap-[10px]'>
-        <DayFromDaysItem
-          day={totalDays}
-          fromDays={workTimeInMonthDays}
-          textColor={textColors.strong}
-        />
+
+      <div className='flex mx-[10px] gap-[5px] items-center flex-grow'>
         <EmployeeName userName={userName} setUserName={setUserName} />
-      </div>
-      <div className='flex mx-[10px] gap-[10px] items-center flex-grow'>
         <div className='flex flex-col justify-between items-end flex-grow'>
+          <DayFromDaysItem
+            day={totalDays}
+            fromDays={workTimeInMonthDays}
+            textColor={textColors.strong}
+          />
           <div className='flex w-full items-center'>
             <Progress
               className='min-w-[45px] flex-grow'
@@ -129,12 +128,12 @@ const SummaryMobile = ({
           </div>
         </div>
         <CollapsibleTrigger asChild className='justify-self-center'>
-          <Button variant='outline'>
+          <Button variant='outline' className="h-[50px] text-wrap" size="sm">
             Detaily
           </Button>
         </CollapsibleTrigger>
       </div>
-      <CollapsibleContent className='flex justify-between gap-[10px] px-[10px] mt-[5px]'>
+      <CollapsibleContent className='flex justify-between gap-[10px] px-[10px]'>
         <div
           className={`flex flex-col flex-grow gap-[3px] rounded-md border border-dashed ${backgroundColors.workInfo}`}
         >

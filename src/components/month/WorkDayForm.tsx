@@ -1,7 +1,8 @@
 import { format } from 'date-fns/format';
 import { set } from 'date-fns/set';
 import Decimal from 'decimal.js';
-import { Cross, Soup, UserRoundPlus, TreePalm, Pickaxe, House } from 'lucide-react';
+import { Cross, Soup, UserRoundPlus } from 'lucide-react';
+  // TreePalm, Pickaxe, House } from 'lucide-react';
 import React, { useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ConfigContext from '../../app/sheet/ConfigContext';
@@ -124,18 +125,18 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     }));
   };
 
-  const clearWorkingTime = () => {
-    setOneDay((day) => {
-      // const workedTime = new Decimal(differenceInMinutes(day.endTime, day.startTime) / 60);
-      const noWorkTime = !day.noWorkTime;
-      return {
-        ...day,
-        // dayWorked: noWorkTime ? new Decimal(0) : workedTime,
-        // lunch: noWorkTime ? false : calculateLunch(workedTime).greaterThan(0),
-        noWorkTime,
-      };
-    });
-  };
+  // const clearWorkingTime = () => {
+  //   setOneDay((day) => {
+  //     // const workedTime = new Decimal(differenceInMinutes(day.endTime, day.startTime) / 60);
+  //     const noWorkTime = !day.noWorkTime;
+  //     return {
+  //       ...day,
+  //       // dayWorked: noWorkTime ? new Decimal(0) : workedTime,
+  //       // lunch: noWorkTime ? false : calculateLunch(workedTime).greaterThan(0),
+  //       noWorkTime,
+  //     };
+  //   });
+  // };
 
 
   return (

@@ -23,6 +23,7 @@ import { decimalToTimeStr, numberToTimeStr } from './workDayUtils';
 import { Checkbox } from '../ui/checkbox';
 import { differenceInMinutes } from 'date-fns';
 import { badgeColors } from '../../constants/colors';
+import { Switch } from '../ui/switch';
 
 interface WorkDayFormProps {
   workDay: WorkDay;
@@ -37,7 +38,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     ...workDay,
     ...calculateWorked(workDay, config),
   });
-
+  const [otherActivity, setOtherActivity] = React.useState(false);
   const isCustomDay = React.useMemo(() => oneDay.dayType === DayType.CUSTOM_DAY, [oneDay]);
   const isWorkDay = React.useMemo(() => oneDay.dayType === DayType.WORK_DAY, [oneDay]);
 
@@ -58,7 +59,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     },
     [config],
   );
-  
+
   const changeCustomDay = (key: string, value: string | Decimal | boolean | Date | InterruptionTimeProps[]) => {
     setOneDay((day) => {
       if ((key === 'startTime' || key === 'endTime') && typeof value === 'string') {
@@ -192,13 +193,13 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
           </div>
           {/* {oneDay.lunch && (
             <div className='flex items-center space-x-2 justify-self-end'>
-              <Soup />
+            <Soup />
             </div>
-          )} */}
-           {/* TODOMB este opravit aby po otvoreni sa vsetko neprepocitalo, lebo to prepise niektore hodnoty ktore su v inputoch */}
+            )} */}
+          {/* TODOMB este opravit aby po otvoreni sa vsetko neprepocitalo, lebo to prepise niektore hodnoty ktore su v inputoch */}
           {isCustomDay ? (
             <div className='flex justify-center items-end space-x-1'>
-              <Soup fill={oneDay.lunch ? 'currentColor' : 'none'}/> {/* asi nie cez fill ale pridat obed text alebo farbu */}
+              <Soup fill={oneDay.lunch ? 'currentColor' : 'none'} /> {/* asi nie cez fill ale pridat obed text alebo farbu */}
               <Checkbox
                 className={badgeColors.lunchCheckboxBackground}
                 checked={oneDay.lunch}
@@ -211,7 +212,12 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
             </div>
           )}
         </div>
-        <div className='flex p-2 justify-between'>
+        {isCustomDay && (<div className='flex items-center space-x-2 p-2'>
+
+          <Switch id='otherActivity' className='pl-[0px]' checked={otherActivity} onCheckedChange={setOtherActivity} />
+          <label htmlFor='otherActivity'>Iná činnosť</label>
+        </div>)}
+        {/* <div className='flex p-2 justify-between'>
           <div className='flex items-center space-x-2'>
             <House />
             <span className='text-lg font-semibold'>{numberToTimeStr(oneDay.workFromHome)}</span>
@@ -226,9 +232,19 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               {numberToTimeStr(oneDay.compensatoryLeave)}
             </span>
           </div>
-        </div>
-        <div
-          className={`grid ${isCustomDay ? 'grid-cols-[3fr_3fr_1fr]' : 'grid-cols-2'} gap-2 items-left p-2`}
+        </div> */}
+        {otherActivity ? (
+          <div className='p-2'>
+            <Label htmlFor='title'>Názov</Label>
+            <Input
+              id='title'
+              name='title'
+              value={oneDay.title}
+              onChange={(e) => changeDayValues('title', e.target.value)}
+            />
+          </div>
+        ) : (<div
+          className={`grid grid-cols-2 gap-2 items-left p-2`}
         >
           <div>
             <Label htmlFor='startTime'>Začiatok</Label>
@@ -274,7 +290,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               disabled={!isCustomDay || oneDay.noWorkTime}
             />
           </div>
-          {isCustomDay && (
+          {/* {isCustomDay && (
             <div className='flex justify-center items-end space-x-1'>
               <Checkbox
                 className={badgeColors.lunchCheckboxBackground}
@@ -282,17 +298,9 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
                 onCheckedChange={clearWorkingTime}
               />
             </div>
-          )}
-        </div>
-        <div>
-          <Label htmlFor='title'>Názov</Label>
-          <Input
-            id='title'
-            name='title'
-            value={oneDay.title}
-            onChange={(e) => changeDayValues('title', e.target.value)}
-          />
-        </div>
+          )} */}
+        </div>)
+        }
         <div className='grid grid-cols-3 gap-2 items-left p-2'>
           {/* <div className='flex items-center space-x-2 justify-between'> */}
           <div className='flex justify-items-start flex-col'>

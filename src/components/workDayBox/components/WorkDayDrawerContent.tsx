@@ -1,11 +1,11 @@
-import { WorkDay } from "../../app/sheet/types";
+import { WorkDay } from "../../../app/sheet/types";
 import {
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-} from '../ui/drawer';
-import WorkDayForm from './WorkDayForm';
+} from '../../ui/drawer';
+import WorkDayForm from '../../WorkDayForm';
 import { format } from 'date-fns';
 
 const WorkDayDrawerContent: React.FC<{

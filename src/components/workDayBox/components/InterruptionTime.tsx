@@ -3,14 +3,14 @@ import { format } from 'date-fns/format';
 import { set } from 'date-fns/set';
 import Decimal from 'decimal.js';
 import { X } from 'lucide-react';
-import { InterruptionTimeProps } from '../../app/sheet/types';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { InterruptionTimeProps } from '../../../app/sheet/types';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
 import { useContext } from 'react';
-import ConfigContext from '../../app/sheet/ConfigContext';
-import { DAY_INTERRUPTIONS_KEYS } from '../../app/sheet/dayTypes';
-import { badgeColors } from '../../constants/colors';
+import ConfigContext from '../../../app/sheet/ConfigContext';
+import { DAY_INTERRUPTIONS_KEYS } from '../../../app/sheet/dayTypes';
+import { badgeColors } from '../../../constants/colors';
 
 const TIME_STEP = 300;
 

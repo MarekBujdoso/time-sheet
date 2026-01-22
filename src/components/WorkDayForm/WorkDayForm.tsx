@@ -19,8 +19,8 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { calculateWorked, recalculateWorkDay } from '../utils/calculations';
-import InterruptionTime from './InterruptionTime';
-import { decimalToTimeStr, numberToTimeStr } from './workDayUtils';
+import InterruptionTime from '../workDayBox/components/InterruptionTime';
+import { decimalToTimeStr, numberToTimeStr } from '../workDayBox/utils/workDayUtils';
 import { Checkbox } from '../ui/checkbox';
 import { differenceInMinutes } from 'date-fns';
 import { badgeColors } from '../../constants/colors';
@@ -153,7 +153,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               <SelectTrigger id='dayType' className='w-full' autoFocus>
                 <SelectValue placeholder='Vyber si deň' />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className='max-h-[200px] overflow-y-auto'>
                 {Object.entries(DAY_TYPES_KEYS)
                   .filter(([key]) => key !== 'weekend')
                   .map(([key, value]) => (

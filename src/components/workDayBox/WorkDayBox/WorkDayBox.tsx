@@ -1,11 +1,11 @@
 import { isWeekend } from 'date-fns/fp/isWeekend';
 import { useContext } from 'react';
-import ConfigContext from '../../app/sheet/ConfigContext';
-import { Button } from '../ui/button';
-import { Drawer, DrawerTrigger } from '../ui/drawer';
-import { getBaseColor, WorkDayBoxProps } from './workDayUtils';
-import WorkDayDrawerContent from './WorkDayDrawerContent';
-import WorkDayBoxContent from './WorkDayBoxContent';
+import ConfigContext from '../../../app/sheet/ConfigContext';
+import { Button } from '../../ui/button';
+import { Drawer, DrawerTrigger } from '../../ui/drawer';
+import { getBaseColor, WorkDayBoxProps } from '../utils/workDayUtils';
+import WorkDayDrawerContent from '../components/WorkDayDrawerContent';
+import WorkDayBoxContent from './components/WorkDayBoxContent';
 
 const WorkDayBox = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayBoxProps) => {
   const config = useContext(ConfigContext);

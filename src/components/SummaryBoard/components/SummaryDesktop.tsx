@@ -3,7 +3,7 @@ import { CalendarDays, Timer } from 'lucide-react';
 import React, { useContext } from 'react';
 import ConfigContext from '../../../app/sheet/ConfigContext';
 import { backgroundColors, progressColors, textColors } from '../../../constants/colors';
-import { numberToTimeStr } from '../../month/workDayUtils';
+import { numberToTimeStr } from '../../workDayBox/utils/workDayUtils';
 import { Button } from '../../ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../ui/collapsible';
 import { Progress } from '../../ui/progress';

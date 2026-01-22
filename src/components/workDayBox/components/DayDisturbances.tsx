@@ -1,7 +1,7 @@
 import { useContext } from 'react';
-import ConfigContext from '../../app/sheet/ConfigContext';
-import { WorkDay } from '../../app/sheet/types';
-import { calcDoctorsLeave, calcDoctorsLeaveFamily, calcWorkFreeDay } from '../utils/calculations';
+import ConfigContext from '../../../app/sheet/ConfigContext';
+import { WorkDay } from '../../../app/sheet/types';
+import { calcDoctorsLeave, calcDoctorsLeaveFamily, calcWorkFreeDay } from '../../utils/calculations';
 import Decimal from 'decimal.js';
 
 const DayDisturbances = ({

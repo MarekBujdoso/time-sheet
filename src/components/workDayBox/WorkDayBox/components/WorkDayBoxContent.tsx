@@ -1,10 +1,10 @@
 import { format } from 'date-fns';
 import { Soup } from 'lucide-react';
-import { hasDisturbance } from '../../app/sheet/dayTypes';
-import { getDayNameFromDate } from '../../utils/skUtils';
-import { numberToTimeStr } from './workDayUtils';
-import DayDisturbances from './DayDisturbances';
-import { WorkDay } from '../../app/sheet/types';
+import { hasDisturbance } from '../../../../app/sheet/dayTypes';
+import { getDayNameFromDate } from '../../../../utils/skUtils';
+import { numberToTimeStr } from '../../utils/workDayUtils';
+import DayDisturbances from '../../components/DayDisturbances';
+import { WorkDay } from '../../../../app/sheet/types';
 import Decimal from 'decimal.js';
 
 const BaseDayDisturbanceItem = ({ name, hours }: { name: string; hours: Decimal }) => { 

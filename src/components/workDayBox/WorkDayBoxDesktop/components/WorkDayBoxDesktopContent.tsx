@@ -2,12 +2,12 @@ import { format } from 'date-fns';
 import Decimal from 'decimal.js';
 import { Soup } from 'lucide-react';
 import { useContext } from 'react';
-import ConfigContext, { ConfigContextType } from '../../app/sheet/ConfigContext';
-import { hasDisturbance } from '../../app/sheet/dayTypes';
-import { WorkDay } from '../../app/sheet/types';
-import { getDayNameFromDate } from '../../utils/skUtils';
-import DayDisturbances from './DayDisturbances';
-import { getBaseColor, numberToTimeStr } from './workDayUtils';
+import ConfigContext, { ConfigContextType } from '../../../../app/sheet/ConfigContext';
+import { hasDisturbance } from '../../../../app/sheet/dayTypes';
+import { WorkDay } from '../../../../app/sheet/types';
+import { getDayNameFromDate } from '../../../../utils/skUtils';
+import DayDisturbances from '../../components/DayDisturbances';
+import { getBaseColor, numberToTimeStr } from '../../utils/workDayUtils';
 
 export const InterruptionItem = ({
   hours,

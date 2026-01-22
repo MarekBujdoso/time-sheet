@@ -1,7 +1,7 @@
 import { isWeekend } from 'date-fns/fp/isWeekend';
 import Decimal from 'decimal.js';
-import { DayType, InterruptionWithTimeType, type WorkDay } from '../../app/sheet/types';
-import { gradients, workDayBackgrounds } from '../../constants/colors';
+import { DayType, InterruptionWithTimeType, type WorkDay } from '../../../app/sheet/types';
+import { gradients, workDayBackgrounds } from '../../../constants/colors';
 
 export const getBaseColor = (workDay: WorkDay, officialWorkTime: Decimal) => {
   const { dayType, dayWorked } = workDay;

@@ -1,10 +1,10 @@
 import { isWeekend } from 'date-fns';
-import { Button } from '../ui/button';
-import { Drawer, DrawerTrigger } from '../ui/drawer';
-import WorkDayBoxDesktopContent from './WorkDayBoxDesktopContent';
-import WorkDayDrawerContent from './WorkDayDrawerContent';
-import { WorkDayBoxProps } from './workDayUtils';
-import { iconColors } from '../../constants/colors';
+import { Button } from '../../ui/button';
+import { Drawer, DrawerTrigger } from '../../ui/drawer';
+import WorkDayBoxDesktopContent from './components/WorkDayBoxDesktopContent';
+import WorkDayDrawerContent from '../components/WorkDayDrawerContent';
+import { WorkDayBoxProps } from '../utils/workDayUtils';
+import { iconColors } from '../../../constants/colors';
 
 const WorkDayDrawerTrigger: React.FC = () => {
   return (

@@ -257,14 +257,14 @@ export enum DAY_TYPES_KEYS {
   vacation = 'Dovolenka',
   doctorsLeave = 'P-čko celý deň',
   doctorsLeaveFamily = 'Doprovod celý deň',
+  customDay = 'Iný deň',
+  compensatoryLeave = 'Náhradné voľno',
   sickLeave = 'PN',
   sickLeaveFamily = 'OČR',
-  compensatoryLeave = 'Náhradné voľno',
   workFreeDay = 'Pracovné voľno',
   weekend = 'Víkend',
   holiday = 'Štátny sviatok',
   emptyDay = 'Prázdny deň',
-  customDay = 'Iný deň',
 };
 
 export enum DAY_INTERRUPTIONS_KEYS {

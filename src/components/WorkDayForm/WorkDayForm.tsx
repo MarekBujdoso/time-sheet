@@ -19,7 +19,7 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { calculateWorked, recalculateWorkDay } from '../utils/calculations';
 import InterruptionTime from '../workDayBox/components/InterruptionTime';
-import { decimalToTimeStr, numberToTimeStr } from '../workDayBox/utils/workDayUtils';
+import { numberToTimeStr } from '../workDayBox/utils/workDayUtils';
 import { Checkbox } from '../ui/checkbox';
 import { differenceInMinutes } from 'date-fns';
 import { badgeColors } from '../../constants/colors';

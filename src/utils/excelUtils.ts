@@ -220,7 +220,7 @@ export const generateEPC = (config: ConfigContextType, monthData: WorkDay[], use
               ?.reduce((acc, interruption) => acc.plus(interruption.time), new Decimal(0))
               .toNumber() ?? '')
           : '',
-      overtime: '',
+      overtime: data.overtime.greaterThan(0) ? data.overtime.toNumber() : '',
       compensatory:
         data.compensatoryLeave && data.compensatoryLeave.greaterThan(0)
           ? data.compensatoryLeave.toNumber()

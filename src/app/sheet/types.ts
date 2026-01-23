@@ -27,6 +27,7 @@ export interface WorkDay {
     workFromHome: Decimal, // Praca doma
     vacation: Decimal, // Dovolenka
     compensatoryLeave: Decimal, // Náhradné voľno
+    overtime: Decimal, // Nadčasová práca
     dayType: DayType,
     title: string,
     dayWorked: Decimal, // Odpracovane za den

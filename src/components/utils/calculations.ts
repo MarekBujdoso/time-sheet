@@ -419,3 +419,11 @@ export const calcMonthWorkTime = (monthData: WorkDay[], config: ConfigContextTyp
   const days = new Decimal(monthWorkDays.length);
   return [monthWorkTime, days];
 };
+
+export const calcOvertime = (monthData: WorkDay[], config: ConfigContextType) => {
+  const overtime = monthData
+    .filter((data) => data.overtime.greaterThan(0))
+    .reduce((acc, data) => acc.plus(data.overtime), new Decimal(0));
+  const overtimeDays = overtime.dividedBy(config.officialWorkTime);
+  return [overtime, overtimeDays];
+};

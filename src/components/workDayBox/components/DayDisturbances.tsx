@@ -3,6 +3,7 @@ import ConfigContext from '../../../app/sheet/ConfigContext';
 import { WorkDay } from '../../../app/sheet/types';
 import { calcDoctorsLeave, calcDoctorsLeaveFamily, calcWorkFreeDay } from '../../utils/calculations';
 import Decimal from 'decimal.js';
+import { DAY_INTERRUPTIONS_KEYS, TIME_TYPES_KEYS } from '../../../app/sheet/dayTypes';
 
 const DayDisturbances = ({
   workDay,
@@ -19,14 +20,14 @@ const DayDisturbances = ({
 
   return (
     <div className='grid gap-1 grid-cols-[auto_1fr] gap-y-[0px]'>
-      {compensatoryLeave.greaterThan(0) && <ItemComponent name='NV' hours={compensatoryLeave} />}
-      {vacation.greaterThan(0) && <ItemComponent name='Dovolenka' hours={vacation} />}
-      {doctorsLeaveTime.greaterThan(0) && <ItemComponent name='P-čko' hours={doctorsLeaveTime} />}
+      {compensatoryLeave.greaterThan(0) && <ItemComponent name={TIME_TYPES_KEYS.compensatoryLeave} hours={compensatoryLeave} />}
+      {vacation.greaterThan(0) && <ItemComponent name={TIME_TYPES_KEYS.vacation} hours={vacation} />}
+      {doctorsLeaveTime.greaterThan(0) && <ItemComponent name={DAY_INTERRUPTIONS_KEYS.doctorsLeave} hours={doctorsLeaveTime} />}
       {doctorsLeaveFamilyTime.greaterThan(0) && (
-        <ItemComponent name='Doprovod' hours={doctorsLeaveFamilyTime} />
+        <ItemComponent name={DAY_INTERRUPTIONS_KEYS.doctorsLeaveFamily} hours={doctorsLeaveFamilyTime} />
       )}
-      {workFromHome.greaterThan(0) && <ItemComponent name='Doma' hours={workFromHome} />}
-      {workFreeDayTime.greaterThan(0) && <ItemComponent name='PV' hours={workFreeDayTime} />}
+      {workFromHome.greaterThan(0) && <ItemComponent name={TIME_TYPES_KEYS.workFromHome} hours={workFromHome} />}
+      {workFreeDayTime.greaterThan(0) && <ItemComponent name={DAY_INTERRUPTIONS_KEYS.workFreeDay} hours={workFreeDayTime} />}
     </div>
   );
 };

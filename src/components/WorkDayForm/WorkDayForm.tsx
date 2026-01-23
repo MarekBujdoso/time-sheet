@@ -1,12 +1,11 @@
 import { format } from 'date-fns/format';
 import { set } from 'date-fns/set';
 import Decimal from 'decimal.js';
-import { Cross, Soup, UserRoundPlus } from 'lucide-react';
-  // TreePalm, Pickaxe, House } from 'lucide-react';
+import { Cross, Soup, UserRoundPlus, TreePalm, Pickaxe, House, Clock } from 'lucide-react';
 import React, { useContext } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import ConfigContext from '../../app/sheet/ConfigContext';
-import { DAY_TYPES, DAY_TYPES_KEYS } from '../../app/sheet/dayTypes';
+import { DAY_TYPES, DAY_TYPES_KEYS, TIME_TYPES_KEYS } from '../../app/sheet/dayTypes';
 import {
   DayType,
   InterruptionTimeProps,
@@ -25,6 +24,7 @@ import { Checkbox } from '../ui/checkbox';
 import { differenceInMinutes } from 'date-fns';
 import { badgeColors } from '../../constants/colors';
 import { Switch } from '../ui/switch';
+import WorkDayFormInputItem from './components/WorkDayFormInputItem';
 
 interface WorkDayFormProps {
   workDay: WorkDay;
@@ -61,7 +61,10 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
     [config],
   );
 
-  const changeCustomDay = (key: string, value: string | Decimal | boolean | Date | InterruptionTimeProps[]) => {
+  const changeCustomDay = (
+    key: string,
+    value: string | Decimal | boolean | Date | InterruptionTimeProps[],
+  ) => {
     setOneDay((day) => {
       if ((key === 'startTime' || key === 'endTime') && typeof value === 'string') {
         const timeArray = value.split(':');
@@ -138,7 +141,6 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
   //   });
   // };
 
-
   return (
     <form onSubmit={handleSubmit} name='workDayForm'>
       <div className='rounded-md border p-2 text-sm shadow-sm'>
@@ -200,24 +202,33 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
           {/* TODOMB este opravit aby po otvoreni sa vsetko neprepocitalo, lebo to prepise niektore hodnoty ktore su v inputoch */}
           {isCustomDay ? (
             <div className='flex justify-center items-end space-x-1'>
-              <Soup fill={oneDay.lunch ? 'currentColor' : 'none'} /> {/* asi nie cez fill ale pridat obed text alebo farbu */}
+              <Soup fill={oneDay.lunch ? 'currentColor' : 'none'} />{' '}
+              {/* asi nie cez fill ale pridat obed text alebo farbu */}
               <Checkbox
                 className={badgeColors.lunchCheckboxBackground}
                 checked={oneDay.lunch}
                 onCheckedChange={(checked) => changeCustomDay('lunch', checked)}
               />
             </div>
-          ) : oneDay.lunch && (
-            <div className='flex items-center space-x-2 justify-self-end'>
-              <Soup />
-            </div>
+          ) : (
+            oneDay.lunch && (
+              <div className='flex items-center space-x-2 justify-self-end'>
+                <Soup />
+              </div>
+            )
           )}
         </div>
-        {isCustomDay && (<div className='flex items-center space-x-2 p-2'>
-
-          <Switch id='otherActivity' className='pl-[0px]' checked={otherActivity} onCheckedChange={setOtherActivity} />
-          <label htmlFor='otherActivity'>Iná činnosť</label>
-        </div>)}
+        {isCustomDay && (
+          <div className='flex items-center space-x-2 p-2'>
+            <Switch
+              id='otherActivity'
+              className='pl-[0px]'
+              checked={otherActivity}
+              onCheckedChange={setOtherActivity}
+            />
+            <label htmlFor='otherActivity'>Iná činnosť</label>
+          </div>
+        )}
         {/* <div className='flex p-2 justify-between'>
           <div className='flex items-center space-x-2'>
             <House />
@@ -244,54 +255,53 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               onChange={(e) => changeDayValues('title', e.target.value)}
             />
           </div>
-        ) : (<div
-          className={`grid grid-cols-2 gap-2 items-left p-2`}
-        >
-          <div>
-            <Label htmlFor='startTime'>Začiatok</Label>
-            <Input
-              id='startTime'
-              name='startTime'
-              type='time'
-              step='300'
-              value={format(oneDay.startTime, 'HH:mm')}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                if (newValue == null || newValue === '') {
-                  changeDayValues(
-                    'startTime',
-                    `${config.officialStartTime.hours}:${config.officialStartTime.minutes}`,
-                  );
-                  return;
-                }
-                changeDayValues('startTime', newValue);
-              }}
-              disabled={!isCustomDay || oneDay.noWorkTime}
-            />
-          </div>
-          <div>
-            <Label htmlFor='endTime'>Koniec</Label>
-            <Input
-              id='endTime'
-              type='time'
-              step='300'
-              name='endTime'
-              value={format(oneDay.endTime, 'HH:mm')}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                if (newValue == null || newValue === '') {
-                  changeDayValues(
-                    'endTime',
-                    `${config.officialEndTime.hours}:${config.officialEndTime.minutes}`,
-                  );
-                  return;
-                }
-                changeDayValues('endTime', e.target.value);
-              }}
-              disabled={!isCustomDay || oneDay.noWorkTime}
-            />
-          </div>
-          {/* {isCustomDay && (
+        ) : (
+          <div className={`grid grid-cols-2 gap-2 items-left p-2`}>
+            <div>
+              <Label htmlFor='startTime'>Začiatok</Label>
+              <Input
+                id='startTime'
+                name='startTime'
+                type='time'
+                step='300'
+                value={format(oneDay.startTime, 'HH:mm')}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  if (newValue == null || newValue === '') {
+                    changeDayValues(
+                      'startTime',
+                      `${config.officialStartTime.hours}:${config.officialStartTime.minutes}`,
+                    );
+                    return;
+                  }
+                  changeDayValues('startTime', newValue);
+                }}
+                disabled={!isCustomDay || oneDay.noWorkTime}
+              />
+            </div>
+            <div>
+              <Label htmlFor='endTime'>Koniec</Label>
+              <Input
+                id='endTime'
+                type='time'
+                step='300'
+                name='endTime'
+                value={format(oneDay.endTime, 'HH:mm')}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  if (newValue == null || newValue === '') {
+                    changeDayValues(
+                      'endTime',
+                      `${config.officialEndTime.hours}:${config.officialEndTime.minutes}`,
+                    );
+                    return;
+                  }
+                  changeDayValues('endTime', e.target.value);
+                }}
+                disabled={!isCustomDay || oneDay.noWorkTime}
+              />
+            </div>
+            {/* {isCustomDay && (
             <div className='flex justify-center items-end space-x-1'>
               <Checkbox
                 className={badgeColors.lunchCheckboxBackground}
@@ -300,99 +310,45 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
               />
             </div>
           )} */}
-        </div>)
-        }
-        <div className='grid grid-cols-3 gap-2 items-left p-2'>
-          {/* <div className='flex items-center space-x-2 justify-between'> */}
-          <div className='flex justify-items-start flex-col'>
-            {/* <div className='text-sm font-medium leading-none'>Doma</div> */}
-            {/* {isCustomDay ? ( */}
-            <Label htmlFor='workFromHome'>Doma</Label>
-            <Input
-              id='workFromHome'
-              name='workFromHome'
-              type='time'
-              min='00:00'
-              max='08:00'
-              step={300}
-              disabled={!isCustomDay}
-              value={decimalToTimeStr(oneDay.workFromHome)}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                if (newValue == null || newValue === '') {
-                  changeDayValues('workFromHome', new Decimal(0));
-                  return;
-                }
-                const [hours, minutes] = newValue.split(':').map(Number);
-                changeDayValues('workFromHome', new Decimal(hours).plus(minutes / 60));
-              }}
-            />
-            {/* ) : (
-                <span className='text-lg font-semibold'>
-                  {numberToTimeStr(oneDay.workFromHome.toDecimalPlaces(3))}
-                </span>
-              )} */}
           </div>
-          {/* </div> */}
-          {/* <div className='flex items-center space-x-2 col-span-2 justify-between'> */}
-          <div className='flex justify-items-start flex-col'>
-            {/* <TreePalm /> */}
-            {/* <div className='text-sm font-medium leading-none'>Dovolenka</div> */}
-            <Label htmlFor='vacation'>Dovolenka</Label>
-            <Input
-              className='p-2 m-0'
-              id='vacation'
-              name='vacation'
-              type='time'
-              min='00:00'
-              max='08:00'
-              step={3600}
-              value={decimalToTimeStr(oneDay.vacation)}
-              disabled={!isCustomDay}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                if (newValue == null || newValue === '') {
-                  changeDayValues('vacation', new Decimal(0));
-                  return;
-                }
-                const [hours, minutes] = newValue.split(':').map(Number);
-                changeDayValues('vacation', new Decimal(hours).plus(minutes / 60));
-              }}
-            />
-            {/* //{' '}
-              <span className='text-lg font-semibold'>
-                // {numberToTimeStr(calcVacationOneDay(oneDay, config)[0].toDecimalPlaces(3))}
-                //{' '}
-              </span> */}
-          </div>
-          <div className='flex justify-items-start flex-col'>
-            {/* <Pickaxe /> */}
-            {/* <div className='text-sm font-medium leading-none'>NV</div> */}
-            <Label htmlFor='compensatoryLeave'>Náhradné voľno</Label>
-            <Input
-              className=''
-              id='compensatoryLeave'
-              name='compensatoryLeave'
-              type='time'
-              min='00:00'
-              max='08:00'
-              step={900}
-              value={decimalToTimeStr(oneDay.compensatoryLeave)}
-              disabled={!isCustomDay}
-              onChange={(e) => {
-                const newValue = e.target.value;
-                if (newValue == null || newValue === '') {
-                  changeDayValues('compensatoryLeave', new Decimal(0));
-                  return;
-                }
-                const [hours, minutes] = newValue.split(':').map(Number);
-                changeDayValues('compensatoryLeave', new Decimal(hours).plus(minutes / 60));
-              }}
-            />
-            {/* <span className='text-lg font-semibold'>
-                {numberToTimeStr(calcCompensatoryLeave([oneDay], config)[0].toDecimalPlaces(3))}
-              </span> */}
-          </div>
+        )}
+        <div className='grid grid-cols-2 gap-2 items-left p-2'>
+          <WorkDayFormInputItem
+            dayType='workFromHome'
+            value={oneDay.workFromHome}
+            changeDayValues={changeDayValues}
+            label={TIME_TYPES_KEYS.workFromHome}
+            disabled={!isCustomDay}
+            step={300}
+            icon={<House />}
+          />
+          <WorkDayFormInputItem
+            dayType='vacation'
+            value={oneDay.vacation}
+            changeDayValues={changeDayValues}
+            label={TIME_TYPES_KEYS.vacation}
+            disabled={!isCustomDay}
+            step={3600}
+            icon={<TreePalm />}
+          />
+          <WorkDayFormInputItem
+            dayType='compensatoryLeave'
+            value={oneDay.compensatoryLeave}
+            changeDayValues={changeDayValues}
+            label={TIME_TYPES_KEYS.compensatoryLeave}
+            disabled={!isCustomDay}
+            step={900}
+            icon={<Pickaxe />}
+          />
+          <WorkDayFormInputItem
+            dayType='overtime'
+            value={oneDay.overtime}
+            changeDayValues={changeDayValues}
+            label={TIME_TYPES_KEYS.overtime}
+            disabled={!isCustomDay}
+            step={300}
+            icon={<Clock />}
+          />
         </div>
         <div className='grid grid-cols-2 gap-2 items-left p-2'>
           {/* </div> */}

@@ -289,6 +289,13 @@ export enum DAY_INTERRUPTIONS_KEYS {
   workFreeDay = 'PV',
 };
 
+export enum TIME_TYPES_KEYS {
+  workFromHome = 'Doma',
+  vacation = 'Dovolenka',
+  compensatoryLeave = 'Náhradné voľno',
+  overtime = 'Práca nadčas',
+};
+
 // export const getIconByDayType = (dayType: DAY_TYPES_KEYS): LucideIcon | undefined => {
 //   switch (dayType) {
 //     case DAY_TYPES_KEYS.holiday:

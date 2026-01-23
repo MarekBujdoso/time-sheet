@@ -314,15 +314,6 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
         )}
         <div className='grid grid-cols-2 gap-2 items-left p-2'>
           <WorkDayFormInputItem
-            dayType='workFromHome'
-            value={oneDay.workFromHome}
-            changeDayValues={changeDayValues}
-            label={TIME_TYPES_KEYS.workFromHome}
-            disabled={!isCustomDay}
-            step={300}
-            icon={<House />}
-          />
-          <WorkDayFormInputItem
             dayType='vacation'
             value={oneDay.vacation}
             changeDayValues={changeDayValues}
@@ -340,15 +331,28 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
             step={900}
             icon={<Pickaxe />}
           />
-          <WorkDayFormInputItem
-            dayType='overtime'
-            value={oneDay.overtime}
-            changeDayValues={changeDayValues}
-            label={TIME_TYPES_KEYS.overtime}
-            disabled={!isCustomDay}
-            step={300}
-            icon={<Clock />}
-          />
+          {isCustomDay && (
+            <>
+              <WorkDayFormInputItem
+                dayType='overtime'
+                value={oneDay.overtime}
+                changeDayValues={changeDayValues}
+                label={TIME_TYPES_KEYS.overtime}
+                disabled={!isCustomDay}
+                step={300}
+                icon={<Clock />}
+              />
+              <WorkDayFormInputItem
+                dayType='workFromHome'
+                value={oneDay.workFromHome}
+                changeDayValues={changeDayValues}
+                label={TIME_TYPES_KEYS.workFromHome}
+                disabled={!isCustomDay}
+                step={300}
+                icon={<House />}
+              />
+            </>
+          )}
         </div>
         <div className='grid grid-cols-2 gap-2 items-left p-2'>
           {/* </div> */}

@@ -40,7 +40,8 @@ export const calculateWorked = (workDay: WorkDay, config: ConfigContextType) => 
   // TODO: NV is not calculated correctly, maybe it is calculated twice... change it to day and interruption type
   const { startTime: workDayStartTime, dayType } = workDay;
   if (dayType === DayType.CUSTOM_DAY) {
-    return calculateCustomDay(workDay);
+    // do not recalculate custom day
+    return null; // calculateCustomDay(workDay);
   }
   const currentDay = new Date(workDayStartTime);
   const { lunch, startTime, endTime, workedHours } = updateTimes(workDay, currentDay, config);
@@ -328,6 +329,8 @@ export const calcWorked = (monthData: WorkDay[], config: ConfigContextType) => {
     .filter((data) => data.dayWorked)
     .reduce((acc, data) => acc.plus(data.dayWorked.toNumber()), new Decimal(0));
   const workedDays = worked.dividedBy(config.officialWorkTime);
+  console.log('worked', worked.toNumber());
+  console.log('workedDays', workedDays.toNumber());
   return [worked, workedDays];
 };
 

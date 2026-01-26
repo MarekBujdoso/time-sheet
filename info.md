@@ -21,3 +21,6 @@
 
 
 - TODOMB este opravit WorkDayForm.tsx aby po otvoreni sa vsetko neprepocitalo, lebo to prepise niektore hodnoty ktore su v inputoch 
+
+- spolu tlaci na dalsiu stranu
+- 

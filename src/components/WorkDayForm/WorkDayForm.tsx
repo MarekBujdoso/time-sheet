@@ -173,7 +173,7 @@ const WorkDayForm = ({ workDay, saveWorkDay, saveTillEndOfMonth }: WorkDayFormPr
             {isCustomDay ? (
               <Input
                 type='number'
-                step={0.5}
+                step={0.25}
                 min={0}
                 max={12}
                 value={oneDay.dayWorked.toNumber()}
